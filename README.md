@@ -4,7 +4,7 @@
 
 The Ophidia Terminal is an advanced bash-like interpreter through which it is possible to submit arbitrary requests to an Ophidia Server.
 
-A user can submit simple commands in an interactive and sequential manner as well as complex workflows, described by JSON files structured according to the Ophidia Workflow JSON Schema (look at the Ophidia Server for a complete syntax definition).
+A user can submit simple commands in an interactive and sequential manner as well as complex workflows, described by JSON files structured according to the Ophidia Workflow [JSON Schema](http://ophidia.cmcc.it/documentation/users/appendix/json_request.html).
 
 It provides the possibility to use environment variables and aliases, keyboard shortcuts, recursive history search, coloured outputs, implicit session management etc.
 
@@ -41,7 +41,7 @@ $ ./bootstrap
 The source code has been packaged with GNU Autotools, so to install simply type:
 
 ```
-$ ./configure
+$ ./configure --prefix=prefix
 $ make
 $ make install
 ```
@@ -52,7 +52,7 @@ Type:
 $ ./configure --help
 ```
 
-to see all available options, like *--prefix* for explicitly specifying the installation base directory.
+to see all available options.
 
 If you want to use the program system-wide, remember to add its installation directory to your PATH.
 
