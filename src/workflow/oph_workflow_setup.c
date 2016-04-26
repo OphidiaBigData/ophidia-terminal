@@ -670,7 +670,7 @@ int oph_workflow_print_status(oph_workflow *workflow, int save_img, int open_img
 		free(subgraphs_string);
 		subgraphs_string = NULL;
 
-		cc += snprintf(dot_string+cc,OPH_WORKFLOW_DOT_MAX_LEN-cc,"}");
+		cc += snprintf(dot_string+cc,OPH_WORKFLOW_DOT_MAX_LEN-cc,"}\n");
 
 
 	    GVC_t *gvc;
@@ -835,7 +835,11 @@ void *main_loop(void *ptr) {
 				if (z==0 && !strcmp((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_IMGS),"open")) {
 					start_gtk = 1;
 					get_term_size(&(term_size.rows),&(term_size.cols));
+#ifndef GLIB_VERSION_2_32
 					if( (Thread1 = g_thread_create((GThreadFunc)gtk_main_thread, &term_size, TRUE, &err1)) == NULL)
+#else
+					if( (Thread1 = g_thread_try_new(NULL, (GThreadFunc)gtk_main_thread, &term_size, &err1)) == NULL)
+#endif
 					{
 						//printf("Thread create failed: %s!!\n", err1->message );
 						if (response_for_viewer) free(response_for_viewer);
@@ -975,12 +979,18 @@ int view_status(int iterations_num, char *command_line, char *tmp_submission_str
 
 	if( !g_thread_supported() )
 	{
+#ifndef GLIB_VERSION_2_32
 		g_type_init();
 		g_thread_init(NULL);
+#endif
 		gdk_threads_init();                   // Called to initialize internal mutex "gdk_threads_mutex".
 	}
 
+#ifndef GLIB_VERSION_2_32
 	if( (Thread2 = g_thread_create((GThreadFunc)main_loop, &container, TRUE, &err2)) == NULL)
+#else
+	if( (Thread2 = g_thread_try_new(NULL, (GThreadFunc)main_loop, &container, &err2)) == NULL)
+#endif
 	{
 		//printf("Thread create failed: %s!!\n", err2->message );
 		g_error_free(err2);
