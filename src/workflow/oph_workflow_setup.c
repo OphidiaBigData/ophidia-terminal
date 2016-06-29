@@ -339,7 +339,7 @@ int oph_workflow_get_subgraphs_string(oph_workflow *workflow, char **subgraphs_s
 	if (k==-1) {
 		int i,res;
 		for (i = 0; i < workflow->tasks_num; i++) {
-			if (!strcasecmp(workflow->tasks[i].operator,OPH_OPERATOR_FOR) && !visited[i]) {
+			if ((!strcasecmp(workflow->tasks[i].operator,OPH_OPERATOR_FOR) || !strcasecmp(workflow->tasks[i].operator,OPH_OPERATOR_IF)) && !visited[i]) {
 				if (!oph_workflow_get_subgraphs_string(workflow,subgraphs_string,cc,i,subgraphs,visited,2,openfor)) {
 					res = oph_workflow_get_subgraphs_string(workflow,subgraphs_string,cc,i,subgraphs,visited,0,openfor);
 					if (res) {
@@ -365,7 +365,7 @@ int oph_workflow_get_subgraphs_string(oph_workflow *workflow, char **subgraphs_s
 		int i,kk,res;
 		for (i = 0; i < workflow->tasks[k].dependents_indexes_num; i++) {
 			kk = workflow->tasks[k].dependents_indexes[i];
-			if (!strcasecmp(workflow->tasks[kk].operator,OPH_OPERATOR_FOR)) {
+			if (!strcasecmp(workflow->tasks[kk].operator,OPH_OPERATOR_FOR) || !strcasecmp(workflow->tasks[kk].operator,OPH_OPERATOR_IF)) {
 				res = oph_workflow_get_subgraphs_string(workflow,subgraphs_string,cc,kk,subgraphs,visited,0,openfor-1);
 				if (res) {
 					if (visited) {
@@ -382,7 +382,7 @@ int oph_workflow_get_subgraphs_string(oph_workflow *workflow, char **subgraphs_s
 			}
 			snprintf((*subgraphs_string)+strlen(*subgraphs_string),(workflow->tasks_num * OPH_WORKFLOW_RANK_SIZE)-strlen(*subgraphs_string)," %d",kk);
 			cc = strlen(*subgraphs_string);
-			if (strcasecmp(workflow->tasks[kk].operator,OPH_OPERATOR_ENDFOR)) {
+			if (strcasecmp(workflow->tasks[kk].operator,OPH_OPERATOR_ENDFOR) && strcasecmp(workflow->tasks[kk].operator,OPH_OPERATOR_ENDIF)) {
 				res = oph_workflow_get_subgraphs_string(workflow,subgraphs_string,cc,kk,subgraphs,visited,1,openf);
 				if (res) {
 					if (visited) {
@@ -418,7 +418,7 @@ int oph_workflow_get_subgraphs_string(oph_workflow *workflow, char **subgraphs_s
 		int nested;
 		for (i = 0; i < workflow->tasks[k].deps_num; i++) {
 			kk = workflow->tasks[k].deps[i].task_index;
-			if (!strcasecmp(workflow->tasks[kk].operator,OPH_OPERATOR_FOR)) {
+			if (!strcasecmp(workflow->tasks[kk].operator,OPH_OPERATOR_FOR) || !strcasecmp(workflow->tasks[kk].operator,OPH_OPERATOR_IF)) {
 				return 1;
 			} else {
 				nested = oph_workflow_get_subgraphs_string(workflow,subgraphs_string,cc,kk,subgraphs,visited,2,openfor);
@@ -465,14 +465,16 @@ int oph_workflow_print(oph_workflow *workflow, int save_img, int open_img, char 
 
 	    // nodes
 	    for (i = 0; i < (size_t) workflow->tasks_num; i++) {
-	    	cc += snprintf(dot_string+cc,OPH_WORKFLOW_DOT_MAX_LEN-cc,"%d [label=\"",(int)i);
-	    	cc += snprintf(dot_string+cc,OPH_WORKFLOW_DOT_MAX_LEN-cc,"%.20s\\n%.20s",workflow->tasks[i].name,workflow->tasks[i].operator);
-	    	if (!strcasecmp(workflow->tasks[i].operator,OPH_OPERATOR_FOR) || !strcasecmp(workflow->tasks[i].operator,OPH_OPERATOR_ENDFOR)) {
-	    		cc += snprintf(dot_string+cc,OPH_WORKFLOW_DOT_MAX_LEN-cc,"\",shape=hexagon] ");
-			} else {
-				cc += snprintf(dot_string+cc,OPH_WORKFLOW_DOT_MAX_LEN-cc,"\"] ");
-			}
+		cc += snprintf(dot_string+cc,OPH_WORKFLOW_DOT_MAX_LEN-cc,"%d [label=\"",(int)i);
+		cc += snprintf(dot_string+cc,OPH_WORKFLOW_DOT_MAX_LEN-cc,"%.20s\\n%.20s",workflow->tasks[i].name,workflow->tasks[i].operator);
+		if (!strcasecmp(workflow->tasks[i].operator,OPH_OPERATOR_FOR) || !strcasecmp(workflow->tasks[i].operator,OPH_OPERATOR_ENDFOR)) {
+			cc += snprintf(dot_string+cc,OPH_WORKFLOW_DOT_MAX_LEN-cc,"\",shape=hexagon] ");
+		} else if (!strcasecmp(workflow->tasks[i].operator,OPH_OPERATOR_IF) || !strcasecmp(workflow->tasks[i].operator,OPH_OPERATOR_ELSEIF) || !strcasecmp(workflow->tasks[i].operator,OPH_OPERATOR_ELSE) || !strcasecmp(workflow->tasks[i].operator,OPH_OPERATOR_ENDIF)) {
+			cc += snprintf(dot_string+cc,OPH_WORKFLOW_DOT_MAX_LEN-cc,"\",shape=diamond] ");
+		} else {
+			cc += snprintf(dot_string+cc,OPH_WORKFLOW_DOT_MAX_LEN-cc,"\"] ");
 		}
+	    }
 
 	    // edges
 		char buffer[OPH_WORKFLOW_RANK_SIZE];
@@ -621,6 +623,8 @@ int oph_workflow_print_status(oph_workflow *workflow, int save_img, int open_img
 	    	else {
 	    		if (!strcasecmp(workflow->tasks[i].operator,OPH_OPERATOR_FOR) || !strcasecmp(workflow->tasks[i].operator,OPH_OPERATOR_ENDFOR)) {
 	    			cc += snprintf(dot_string+cc,OPH_WORKFLOW_DOT_MAX_LEN-cc," shape=hexagon");
+			} else if (!strcasecmp(workflow->tasks[i].operator,OPH_OPERATOR_IF) || !strcasecmp(workflow->tasks[i].operator,OPH_OPERATOR_ELSEIF) || !strcasecmp(workflow->tasks[i].operator,OPH_OPERATOR_ELSE) || !strcasecmp(workflow->tasks[i].operator,OPH_OPERATOR_ENDIF)) {
+	    			cc += snprintf(dot_string+cc,OPH_WORKFLOW_DOT_MAX_LEN-cc," shape=diamond");
 	    		} else {
 	    			cc += snprintf(dot_string+cc,OPH_WORKFLOW_DOT_MAX_LEN-cc," shape=circle");
 	    		}
