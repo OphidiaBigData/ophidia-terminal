@@ -955,7 +955,7 @@ int oph_term_read_file(char *filename, char **buffer) {
 		return OPH_TERM_MEMORY_ERROR;
 	}
 
-	fread(*buffer,buffer_len, 1, file);
+	if (fread(*buffer,buffer_len, 1, file)) (print_json)?my_fprintf(stderr, "Error reading buffer\\n"):fprintf(stderr, "Error reading buffer\n");
 	fclose(file);
 
 	return OPH_TERM_SUCCESS;
@@ -986,7 +986,7 @@ int oph_term_read_file_with_len(char *filename, char **buffer, long *alloc_size)
 	}
 	*alloc_size = buffer_len+1;
 
-	fread(*buffer,buffer_len, 1, file);
+	if (fread(*buffer,buffer_len, 1, file)) (print_json)?my_fprintf(stderr, "Error reading buffer\\n"):fprintf(stderr, "Error reading buffer\n");
 	fclose(file);
 
 	return OPH_TERM_SUCCESS;

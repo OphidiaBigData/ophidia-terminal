@@ -799,11 +799,10 @@ char *oph_term_oph_prefix_generator(const char *text, int state) {
 
 /* Oph_Term massive generator */
 char *oph_term_massive_generator(const char *text, int state) {
-  static int list_index, len;
+  static int list_index;
 
   if (!state){
       list_index = 0;
-      len = strlen (text);
   }
 
   /* Return the next name which partially matches from the command list. */
@@ -3381,11 +3380,10 @@ int main(int argc, char **argv, char **envp) {
         else if (!strcmp(cursor,OPH_TERM_CMD_CLEAR))
         { // CLEAR
         	alias_substitutions = 0;
-            system("clear");
-            if (print_json) print_oph_term_output_json(hashtbl);
-        	if (exec_one_statement)
-        		break;
-            continue;
+		if (system("clear")) fprintf(stderr,"Error in executing command 'clear'\n");
+		if (print_json) print_oph_term_output_json(hashtbl);
+        	if (exec_one_statement) break;
+		continue;
         }
         else if (!strcmp(cursor,OPH_TERM_CMD_UPDATE))
         { // UPDATE

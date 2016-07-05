@@ -548,7 +548,7 @@ int oph_workflow_print(oph_workflow *workflow, int save_img, int open_img, char 
 			char command[OPH_WORKFLOW_BASIC_SIZE];
 			snprintf(command,OPH_WORKFLOW_BASIC_SIZE,"xdg-open %s",filename);
 			// open image file
-			system(command);
+			if (system(command)) fprintf(stderr,"Error in executing command '%s'\n",command);
 		}
 	}
 
