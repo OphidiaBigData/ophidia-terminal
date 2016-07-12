@@ -1099,7 +1099,7 @@ void print_tree(oph_json_obj_tree *obj, const char *color_string, int save_img, 
 			char command[280];
 			snprintf(command,280,"xdg-open %s",filename);
 			// open image file
-			system(command);
+			if (system(command)) fprintf(stderr,"Error in executing command '%s'\n",command);
 		}
 	}
 
@@ -1208,7 +1208,7 @@ void print_digraph(oph_json_obj_graph *obj, const char *color_string, int save_i
 			char command[280];
 			snprintf(command,280,"xdg-open %s",filename);
 			// open image file
-			system(command);
+			if (system(command)) fprintf(stderr,"Error in executing command '%s'\n",command);
 		}
 	}
 
@@ -1317,7 +1317,7 @@ void print_graph(oph_json_obj_graph *obj, const char *color_string, int save_img
 			char command[280];
 			snprintf(command,280,"xdg-open %s",filename);
 			// open image file
-			system(command);
+			if (system(command)) fprintf(stderr,"Error in executing command '%s'\n",command);
 		}
 	}
 

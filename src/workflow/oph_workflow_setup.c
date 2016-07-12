@@ -550,7 +550,7 @@ int oph_workflow_print(oph_workflow *workflow, int save_img, int open_img, char 
 			char command[OPH_WORKFLOW_BASIC_SIZE];
 			snprintf(command,OPH_WORKFLOW_BASIC_SIZE,"xdg-open %s",filename);
 			// open image file
-			system(command);
+			if (system(command)) fprintf(stderr,"Error in executing command '%s'\n",command);
 		}
 	}
 
@@ -600,6 +600,9 @@ int oph_workflow_print_status(oph_workflow *workflow, int save_img, int open_img
 							if (!strcmp(((oph_json_obj_grid *) json->response[j].objcontent)[0].values[z][7],"OPH_STATUS_COMPLETED")) {
 							    memset(color,0,OPH_WORKFLOW_RANK_SIZE);
 							    snprintf(color,OPH_WORKFLOW_RANK_SIZE,"%s","palegreen");
+							} else if (!strcmp(((oph_json_obj_grid *) json->response[j].objcontent)[0].values[z][7],"OPH_STATUS_RUNNING")) {
+							    memset(color,0,OPH_WORKFLOW_RANK_SIZE);
+							    snprintf(color,OPH_WORKFLOW_RANK_SIZE,"%s","orange");
 							} else if (strstr(((oph_json_obj_grid *) json->response[j].objcontent)[0].values[z][7],"ERROR")) {
 								if (workflow->tasks[i].retry_num!=-1) {
 								    memset(color,0,OPH_WORKFLOW_RANK_SIZE);
@@ -610,7 +613,7 @@ int oph_workflow_print_status(oph_workflow *workflow, int save_img, int open_img
 								}
 							} else {
 							    memset(color,0,OPH_WORKFLOW_RANK_SIZE);
-							    snprintf(color,OPH_WORKFLOW_RANK_SIZE,"%s","orange");
+							    snprintf(color,OPH_WORKFLOW_RANK_SIZE,"%s","peachpuff");
 							}
 							break;
 						}
