@@ -860,8 +860,8 @@ int oph_term_help(const char *cmd);
 \t(<wid> is the related workflow identifier).\n\
 \tThis enables the workflow to be automatically shown graphically, provided that \e[1mOPH_TERM_IMGS\e[0m is set to \"open\".\n\
 \tIn case of synchronous execution mode (\"exec_mode\" set to \"sync\") only the final representation is shown.\n\
-\tOtherwise, in case of asynchronous execution mode (\"exec_mode\" set to \"async\") the workflow is shown even\n\
-\tduring the execution; the image is periodically updated until the final representation.\n\
+\tOtherwise, in case of asynchronous execution mode (\"exec_mode\" set to \"async\"), the workflow is shown even\n\
+\tduring the execution; then, the image is periodically updated until the final representation.\n\
 \tIf set to \"on_X_Y\" Oph_Term will call the command \"view <wid> <X> <Y>\", using\n\
 \t\"X\" as the number of iterations and \"Y\" as the time interval [in seconds].\n\
 \tThe default value \"off\" prevents this behaviour from happening.\n"
@@ -871,11 +871,11 @@ int oph_term_help(const char *cmd);
 \\t(<wid> is the related workflow identifier).\\n\
 \\tThis enables the workflow to be automatically shown graphically, provided that \\e[1mOPH_TERM_IMGS\\e[0m is set to \\\"open\\\".\\n\
 \\tIn case of synchronous execution mode (\\\"exec_mode\\\" set to \\\"sync\\\") only the final representation is shown.\\n\
-\\tOtherwise, in case of asynchronous execution mode (\\\"exec_mode\\\" set to \\\"async\\\") the workflow is shown even\\n\
-\\tduring the execution; the image is periodically updated until the final representation.\\n\
+\\tOtherwise, in case of asynchronous execution mode (\\\"exec_mode\\\" set to \\\"async\\\"), the workflow is shown even\\n\
+\\tduring the execution; then, the image is periodically updated until the final representation.\\n\
 \\tIf set to \\\"on_X_Y\\\" Oph_Term will call the command \\\"view <wid> <X> <Y>\\\", using\\n\
 \\t\\\"X\\\" as the number of iterations and \\\"Y\\\" as the time interval [in seconds].\\n\
-\tThe default value \\\"off\\\" prevents this behaviour from happening.\\n"
+\\tThe default value \\\"off\\\" prevents this behaviour from happening.\\n"
 
 #ifdef WITH_IM_SUPPORT
 #define OPH_TERM_HELP_OPH_INFRASTRUCTURE_URL_SHORT "\"URL for IM instances\"\n"
