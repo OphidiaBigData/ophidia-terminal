@@ -33,6 +33,7 @@
 
 /* OPH_JSON TYPES */
 #define OPH_JSON_INT	"int"
+#define OPH_JSON_SHORT	"short"
 #define OPH_JSON_LONG	"long"
 #define OPH_JSON_FLOAT 	"float"
 #define OPH_JSON_DOUBLE	"double"
