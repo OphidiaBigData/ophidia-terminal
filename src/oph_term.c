@@ -1768,7 +1768,7 @@ int main(int argc, char **argv, char **envp) {
 
     //Auto-completion
     if (!exec_statement) {
-    	rl_attempted_completion_function = (CPPFunction *)oph_term_completion;
+    	rl_attempted_completion_function = (rl_completion_func_t *)oph_term_completion;
     }
 
     /* MAIN LOOP */
