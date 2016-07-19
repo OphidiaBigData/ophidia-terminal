@@ -45,9 +45,17 @@ int oph_json_is_measuretype_correct(const char *measuretype) {
 		res = 1;
 	else if (!strcmp(measuretype,OPH_JSON_LONG))
 		res = 1;
+	else if (!strcmp(measuretype,OPH_JSON_SHORT))
+		res = 1;
+	else if (!strcmp(measuretype,OPH_JSON_BYTE))
+		res = 1;
 	else if (!strcmp(measuretype,OPH_JSON_FLOAT))
 		res = 1;
 	else if (!strcmp(measuretype,OPH_JSON_DOUBLE))
+		res = 1;
+	else if (!strcmp(measuretype,OPH_JSON_STRING))
+		res = 1;
+	else if (!strcmp(measuretype,OPH_JSON_BLOB))
 		res = 1;
 	else
 		res = 0;
@@ -60,6 +68,10 @@ int oph_json_is_type_correct(const char *type) {
 	if (!strcmp(type,OPH_JSON_INT))
 		res = 1;
 	else if (!strcmp(type,OPH_JSON_LONG))
+		res = 1;
+	else if (!strcmp(type,OPH_JSON_SHORT))
+		res = 1;
+	else if (!strcmp(type,OPH_JSON_BYTE))
 		res = 1;
 	else if (!strcmp(type,OPH_JSON_FLOAT))
 		res = 1;
