@@ -604,13 +604,11 @@ int oph_workflow_print_status(oph_workflow *workflow, int save_img, int open_img
 							    memset(color,0,OPH_WORKFLOW_RANK_SIZE);
 							    snprintf(color,OPH_WORKFLOW_RANK_SIZE,"%s","orange");
 							} else if (strstr(((oph_json_obj_grid *) json->response[j].objcontent)[0].values[z][7],"ERROR")) {
-								if (workflow->tasks[i].retry_num!=-1) {
-								    memset(color,0,OPH_WORKFLOW_RANK_SIZE);
-								    snprintf(color,OPH_WORKFLOW_RANK_SIZE,"%s","brown1");
-								} else {
-								    memset(color,0,OPH_WORKFLOW_RANK_SIZE);
-								    snprintf(color,OPH_WORKFLOW_RANK_SIZE,"%s","khaki1");
-								}
+							    memset(color,0,OPH_WORKFLOW_RANK_SIZE);
+							    snprintf(color,OPH_WORKFLOW_RANK_SIZE,"%s","brown1");
+							} else if (strstr(((oph_json_obj_grid *) json->response[j].objcontent)[0].values[z][7],"SKIPPED")) {
+							    memset(color,0,OPH_WORKFLOW_RANK_SIZE);
+							    snprintf(color,OPH_WORKFLOW_RANK_SIZE,"%s","khaki1");
 							} else {
 							    memset(color,0,OPH_WORKFLOW_RANK_SIZE);
 							    snprintf(color,OPH_WORKFLOW_RANK_SIZE,"%s","peachpuff");
