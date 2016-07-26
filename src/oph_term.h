@@ -232,10 +232,10 @@ static const int pre_defined_aliases_num = OPH_TERM_DEFAULT_ALIAS_NUM;
 extern pthread_t tid;
 
 #define OPH_TERM_VERSION \
-"Oph_Term - the Ophidia shell, version 0.10.2\n\
+"Oph_Term - the Ophidia shell, version 0.10.3\n\
 Copyright (C) 2012-2016 CMCC Foundation - www.cmcc.it\n"
 #define OPH_TERM_VERSION2 \
-"Oph_Term - the Ophidia shell, version 0.10.2\\n\
+"Oph_Term - the Ophidia shell, version 0.10.3\\n\
 Copyright (C) 2012-2016 CMCC Foundation - www.cmcc.it\\n"
 
 #define OPH_TERM_DISCLAIMER "This program comes with ABSOLUTELY NO WARRANTY; for details type `oph_term -x'.\nThis is free software, and you are welcome to redistribute it\nunder certain conditions; type `oph_term -z' for details.\n"
