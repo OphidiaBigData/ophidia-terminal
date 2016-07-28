@@ -340,7 +340,7 @@ int oph_workflow_get_subgraphs_string(oph_workflow *workflow, char **subgraphs_s
 		int i,res;
 		for (i = 0; i < workflow->tasks_num; i++) {
 			if (!strcasecmp(workflow->tasks[i].operator,OPH_OPERATOR_FOR) && !visited[i]) {
-				if (!oph_workflow_get_subgraphs_string(workflow,subgraphs_string,cc,i,subgraphs,visited,2,openfor)) {
+				// if (!oph_workflow_get_subgraphs_string(workflow,subgraphs_string,cc,i,subgraphs,visited,2,openfor)) {
 					res = oph_workflow_get_subgraphs_string(workflow,subgraphs_string,cc,i,subgraphs,visited,0,openfor);
 					if (res) {
 						if (visited) {
@@ -353,7 +353,7 @@ int oph_workflow_get_subgraphs_string(oph_workflow *workflow, char **subgraphs_s
 						}
 						return res;
 					}
-				}
+				// }
 			}
 		}
 		if (visited) {
@@ -427,7 +427,8 @@ int oph_workflow_get_subgraphs_string(oph_workflow *workflow, char **subgraphs_s
 		}
 		return 0;
 	} else {
-		cc += snprintf((*subgraphs_string)+cc,(workflow->tasks_num * OPH_WORKFLOW_RANK_SIZE)-cc," subgraph cluster_%d { %d ",*subgraphs,k);
+		cc = strlen(*subgraphs_string);
+		cc += snprintf((*subgraphs_string)+cc,(workflow->tasks_num * OPH_WORKFLOW_RANK_SIZE)-cc," subgraph cluster_%d {%d",*subgraphs,k);
 		(*subgraphs)++;
 		visited[k] = 1;
 		int res;
@@ -443,7 +444,7 @@ int oph_workflow_get_subgraphs_string(oph_workflow *workflow, char **subgraphs_s
 			}
 			return res;
 		}
-		snprintf((*subgraphs_string)+strlen(*subgraphs_string),(workflow->tasks_num * OPH_WORKFLOW_RANK_SIZE)-strlen(*subgraphs_string)," } ");
+		snprintf((*subgraphs_string)+strlen(*subgraphs_string),(workflow->tasks_num * OPH_WORKFLOW_RANK_SIZE)-strlen(*subgraphs_string),"} ");
 		return OPH_WORKFLOW_EXIT_SUCCESS;
 	}
 }
@@ -516,7 +517,7 @@ int oph_workflow_print(oph_workflow *workflow, int save_img, int open_img, char 
 		free(subgraphs_string);
 		subgraphs_string = NULL;
 
-		cc += snprintf(dot_string+cc,OPH_WORKFLOW_DOT_MAX_LEN-cc,"}");
+		cc += snprintf(dot_string+cc,OPH_WORKFLOW_DOT_MAX_LEN-cc,"} ");
 
 
 	    GVC_t *gvc = NULL;
@@ -673,10 +674,10 @@ int oph_workflow_print_status(oph_workflow *workflow, int save_img, int open_img
 		free(subgraphs_string);
 		subgraphs_string = NULL;
 
-		cc += snprintf(dot_string+cc,OPH_WORKFLOW_DOT_MAX_LEN-cc,"}\n");
+		cc += snprintf(dot_string+cc,OPH_WORKFLOW_DOT_MAX_LEN-cc,"} \n");
 
 
-	    GVC_t *gvc;
+	    GVC_t *gvc = NULL;
 	    Agraph_t *g;
 	    FILE *fp;
 	    memset(filename,0,OPH_WORKFLOW_BASIC_SIZE);
