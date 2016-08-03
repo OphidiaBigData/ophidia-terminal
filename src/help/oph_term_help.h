@@ -858,9 +858,9 @@ int oph_term_help(const char *cmd);
 "\e[1mOPH_WORKFLOW_AUTOVIEW\e[0m\n\
 \tIf set to \"on\" Oph_Term will automatically call the command \"view <wid> 0 5\" after a workflow submission\n\
 \t(<wid> is the related workflow identifier).\n\
-\tThis enables the workflow to be automatically shown graphically, provided that \e[1mOPH_TERM_IMGS\e[0m is set to \"open\".\n\
-\tIn case of synchronous execution mode (\"exec_mode\" set to \"sync\") only the final representation is shown.\n\
-\tOtherwise, in case of asynchronous execution mode (\"exec_mode\" set to \"async\"), the workflow is shown even\n\
+\tThis option enables the workflow to be automatically shown graphically, provided that \e[1mOPH_TERM_IMGS\e[0m is set to \"open\".\n\
+\tIn case of synchronous execution mode (\"\e[1mexec_mode\e[0m\" set to \"sync\") only the final representation is shown.\n\
+\tOtherwise, in case of asynchronous execution mode (\"\e[1mexec_mode\e[0m\" set to \"async\"), the workflow is shown even\n\
 \tduring the execution; then, the image is periodically updated until the final representation.\n\
 \tIf set to \"on_X_Y\" Oph_Term will call the command \"view <wid> <X> <Y>\", using\n\
 \t\"X\" as the number of iterations and \"Y\" as the time interval [in seconds].\n\
@@ -869,9 +869,9 @@ int oph_term_help(const char *cmd);
 "OPH_WORKFLOW_AUTOVIEW\\n\
 \\tIf set to \\\"on\\\" Oph_Term will automatically call the command \\\"view <wid> 0 5\\\" after a workflow submission\\n\
 \\t(<wid> is the related workflow identifier).\\n\
-\\tThis enables the workflow to be automatically shown graphically, provided that \\e[1mOPH_TERM_IMGS\\e[0m is set to \\\"open\\\".\\n\
-\\tIn case of synchronous execution mode (\\\"exec_mode\\\" set to \\\"sync\\\") only the final representation is shown.\\n\
-\\tOtherwise, in case of asynchronous execution mode (\\\"exec_mode\\\" set to \\\"async\\\"), the workflow is shown even\\n\
+\\tThis option enables the workflow to be automatically shown graphically, provided that \\e[1mOPH_TERM_IMGS\\e[0m is set to \\\"open\\\".\\n\
+\\tIn case of synchronous execution mode (\\\"\\e[1mexec_mode\\e[0m\\\" set to \\\"sync\\\") only the final representation is shown.\\n\
+\\tOtherwise, in case of asynchronous execution mode (\\\"\\e[1mexec_mode\\e[0m\\\" set to \\\"async\\\"), the workflow is shown even\\n\
 \\tduring the execution; then, the image is periodically updated until the final representation.\\n\
 \\tIf set to \\\"on_X_Y\\\" Oph_Term will call the command \\\"view <wid> <X> <Y>\\\", using\\n\
 \\t\\\"X\\\" as the number of iterations and \\\"Y\\\" as the time interval [in seconds].\\n\
