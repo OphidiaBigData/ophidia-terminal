@@ -1,4 +1,10 @@
 
+## v0.10.4 - 2016-08-22
+
+### Fixed:
+
+- Plotting (nested) rectangles in case of OPH_FOR
+
 ## v0.10.3 - 2016-07-26
 
 ### Fixed:
