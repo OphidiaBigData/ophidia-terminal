@@ -1,30 +1,21 @@
 
-## v0.10.4 - 2016-08-22
+## v0.10.5 - 2016-08-24
 
 ### Fixed:
 
-- Plotting (nested) rectangles in case of OPH_FOR
-
-## v0.10.3 - 2016-07-26
-
-### Fixed:
-
+- Plotting (nested) rectangles in case of OPH_FOR (INDIGO-DataCloud Project)
 - Bug in color of skipped tasks
-
-## v0.10.2 - 2016-07-19
-
-### Fixed:
-
 - Several warnings when building
 
 ### Added:
 
 - Support for data types 'short' and 'bytes' in JSON Responses
-- Graphical support for OPH_IF
-- Support for OPH_IF in workflow check
+- Graphical support for OPH_IF (INDIGO-DataCloud Project)
+- Support for OPH_IF in workflow check (INDIGO-DataCloud Project)
 
 ### Changed:
 
+- Help description for OPH_WORKFLOW_AUTOVIEW
 - Colors of pending tasks
 
 ## v0.10.1 - 2016-06-27
