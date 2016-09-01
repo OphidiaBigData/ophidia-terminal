@@ -24,6 +24,7 @@
 #include <signal.h>
 #include <pthread.h>
 extern int errno;
+extern int abort_view;
 
 int print_json = 0;
 #ifdef DEBUG_LEVEL
@@ -1115,6 +1116,7 @@ pthread_t tid;
 
 void siginthandler(int signum) {
 	(void)signum;
+	abort_view = 1;
 	if (pthread_cancel(tid)) {
 		(print_json)?my_fprintf(stderr,"Use 'quit' or 'exit' to terminate Oph_Term! Use 'kill' to cancel jobs!\\n"):fprintf(stderr,"\e[1;31m Use 'quit' or 'exit' to terminate Oph_Term! Use 'kill' to cancel jobs!\e[0m\n");
 		rl_replace_line("",0);

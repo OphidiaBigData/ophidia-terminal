@@ -39,6 +39,7 @@
 GtkWidget *window;
 GtkWidget *image;
 char filename[OPH_WORKFLOW_BASIC_SIZE];
+int abort_view;
 
 typedef struct _gtkstruct {
 	int iterations_num;
@@ -610,6 +611,9 @@ int oph_workflow_print_status(oph_workflow *workflow, int save_img, int open_img
 							} else if (strstr(((oph_json_obj_grid *) json->response[j].objcontent)[0].values[z][7],"SKIPPED")) {
 							    memset(color,0,OPH_WORKFLOW_RANK_SIZE);
 							    snprintf(color,OPH_WORKFLOW_RANK_SIZE,"%s","khaki1");
+							} else if (strstr(((oph_json_obj_grid *) json->response[j].objcontent)[0].values[z][7],"WAIT")) {
+							    memset(color,0,OPH_WORKFLOW_RANK_SIZE);
+							    snprintf(color,OPH_WORKFLOW_RANK_SIZE,"%s","white");
 							} else {
 							    memset(color,0,OPH_WORKFLOW_RANK_SIZE);
 							    snprintf(color,OPH_WORKFLOW_RANK_SIZE,"%s","peachpuff");
@@ -822,6 +826,7 @@ void *main_loop(void *ptr) {
 		oph_workflow_print(wf,save_img,open_img,(char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_GRAPH_LAYOUT));
 		oph_workflow_free(wf);
 	} else {
+		abort_view = 0;
 		for (z = 0; z < iterations_num || iterations_num==0; z++) {
 			// SUBMISSION
 			char *response_for_viewer = NULL;
@@ -830,7 +835,7 @@ void *main_loop(void *ptr) {
 			if (!response_for_viewer) {
 				(print_json)?my_fprintf(stderr,"Could not get response from server [CODE %d]\\n",OPH_TERM_GENERIC_ERROR):fprintf(stderr,"\e[1;31mCould not get response from server [CODE %d]\e[0m\n",OPH_TERM_GENERIC_ERROR);
 				if (start_gtk) {
-					(print_json)?my_printf("Close image to continue...\\n"):printf("Close image to continue...\n");
+					if (!abort_view) (print_json)?my_printf("Close image to continue...\\n"):printf("Close image to continue...\n");
 					g_thread_join(Thread1);
 				}
 				return NULL;
@@ -944,6 +949,7 @@ void *main_loop(void *ptr) {
 			}
 
 			if (iterations_num==0 || z != iterations_num-1) sleep(time_interval);
+			if (abort_view) break;
 		}
 	}
 
