@@ -613,7 +613,7 @@ int oph_workflow_print_status(oph_workflow *workflow, int save_img, int open_img
 							    snprintf(color,OPH_WORKFLOW_RANK_SIZE,"%s","khaki1");
 							} else if (strstr(((oph_json_obj_grid *) json->response[j].objcontent)[0].values[z][7],"WAIT")) {
 							    memset(color,0,OPH_WORKFLOW_RANK_SIZE);
-							    snprintf(color,OPH_WORKFLOW_RANK_SIZE,"%s","white");
+							    snprintf(color,OPH_WORKFLOW_RANK_SIZE,"%s","cyan");
 							} else {
 							    memset(color,0,OPH_WORKFLOW_RANK_SIZE);
 							    snprintf(color,OPH_WORKFLOW_RANK_SIZE,"%s","peachpuff");
