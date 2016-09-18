@@ -2028,7 +2028,7 @@ int oph_term_viewer_retrieve_command_jobid(char *json_string, char **command, ch
 	return OPH_TERM_SUCCESS;
 }
 
-int oph_term_viewer_retrieve_session_size(char *json_string, int *session_size) {
+int oph_term_viewer_retrieve_session_size(char *json_string, int *session_size, char*** exit_status) {
 	if (!json_string || !session_size)
 		return OPH_TERM_INVALID_PARAM_VALUE;
 
@@ -2045,12 +2045,20 @@ int oph_term_viewer_retrieve_session_size(char *json_string, int *session_size) 
 	int found = 0;
 	if (json->response_num >= 1) {
 		size_t i;
+		oph_json_obj_grid *grid = (oph_json_obj_grid *) json->response[i].objcontent;
 		for (i = 0; i < json->response_num; i++) {
 			if (!strcmp(json->response[i].objkey,"resume")) {
 				if (json->response[i].objcontent_num >= 1) {
-						*session_size = (((oph_json_obj_grid *) json->response[i].objcontent)[0]).values_num1;
-						found = 1;
-						break;
+					grid = (oph_json_obj_grid *) json->response[i].objcontent;
+					*session_size = grid->values_num1;
+					if (exit_status) {
+						int j;
+						*exit_status = (char**)calloc(*session_size, sizeof(char*));
+						for (j = 0; j < *session_size; j++)
+							(*exit_status)[j] = strdup(grid->values[j][OPH_TERM_VIEWER_EXIT_STATUS_INDEX]);
+					}
+					found = 1;
+					break;
 				}
 			}
 		}

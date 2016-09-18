@@ -3096,9 +3096,17 @@ int main(int argc, char **argv, char **envp) {
 
             if (last_njobs > 0) {
             	int end = 0;
+		char **exit_status = NULL;
 
             	//retrieve number of jobs of new session from server
-            	if (oph_term_get_session_size(tmp_session,(char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_USER),(char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_PASSWD),(char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_SERVER_HOST),(char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_SERVER_PORT),&oph_term_return,&end,1,hashtbl)) {
+            	if (oph_term_get_session_size(tmp_session,(char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_USER),(char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_PASSWD),(char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_SERVER_HOST),(char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_SERVER_PORT),&oph_term_return,&end,1,hashtbl,&exit_status)) {
+			if (exit_status) {
+				int jj;
+				for (jj = 0; jj < end; ++jj)
+					if (exit_status[jj])
+						free(exit_status[jj]);
+				free(exit_status);
+			}
             		if (print_json) print_oph_term_output_json(hashtbl);
             		if (exec_one_statement) {
             			oph_term_return = OPH_TERM_GENERIC_ERROR;
@@ -3108,9 +3116,10 @@ int main(int argc, char **argv, char **envp) {
             	}
 
             	last_njobs = (last_njobs > end)?end:last_njobs;
-            	int i,stop=0;
+            	int i, stop=0, format;
             	char *tmp_command = NULL;
             	char *tmp_jobid = NULL;
+		char *tmp_status = NULL;
             	char buf[OPH_TERM_MAX_LEN];
             	for (i = last_njobs-1; i >= 0; i--) {
             		memset(buf,0,OPH_TERM_MAX_LEN);
@@ -3120,8 +3129,19 @@ int main(int argc, char **argv, char **envp) {
             			break;
             		}
 
-            		if (is_verbose) (print_json)?my_printf("[%s] %s\\n%*s[%s]\\n",buf,(tmp_command)?tmp_command:"",(int) (strlen(buf)+3)," ",(tmp_jobid)?tmp_jobid:""):printf("\e[1;34m[%s]\e[0m %s\n%*s\e[1;34m[%s]\e[0m\n",buf,(tmp_command)?tmp_command:"",(int)(strlen(buf)+3)," ",(tmp_jobid)?tmp_jobid:"");
-					else (print_json)?my_printf("[%s] %s\\n",buf,(tmp_command)?tmp_command:""):printf("\e[1;34m[%s]\e[0m %s\n",buf,(tmp_command)?tmp_command:"");
+			format = 1;
+			tmp_status = NULL;
+			if (exit_status) {
+				tmp_status = exit_status[end-i-1];
+				if (!strcmp(tmp_status,"OPH_STATUS_COMPLETED")) format = 2;
+				else if (!strcmp(tmp_status,"OPH_STATUS_RUNNING")) format = 3;
+				else if (!strcmp(tmp_status,"OPH_STATUS_WAITING")) format = 4;
+			}
+
+			if (is_verbose)
+				(print_json)?my_printf("[%s] [%s]\t%s\\n%*s[%s]\\n",buf,tmp_status?tmp_status:"",(tmp_command)?tmp_command:"",(int) (strlen(buf)+3)," ",(tmp_jobid)?tmp_jobid:""):printf("\e[1;34m[%s]\e[0m \e[1;3%dm[%s]\e[0m\t%s\n%*s\e[1;34m[%s]\e[0m\n",buf,format,tmp_status?tmp_status:"",(tmp_command)?tmp_command:"",(int)(strlen(buf)+3)," ",(tmp_jobid)?tmp_jobid:"");
+			else
+				(print_json)?my_printf("[%s] [%s]\t%s\\n",buf,tmp_status?tmp_status:"",(tmp_command)?tmp_command:""):printf("\e[1;34m[%s]\e[0m \e[1;3%dm[%s]\e[0m\t%s\n",buf,format,tmp_status?tmp_status:"",(tmp_command)?tmp_command:"");
 
             		if (tmp_command) {
             			free(tmp_command);
@@ -3132,6 +3152,13 @@ int main(int argc, char **argv, char **envp) {
             			tmp_jobid = NULL;
             		}
             	}
+		if (exit_status) {
+			int jj;
+			for (jj = 0; jj < end; ++jj)
+				if (exit_status[jj])
+					free(exit_status[jj]);
+			free(exit_status);
+		}
             	if (stop) {
             		stop = 0;
             		if (print_json) print_oph_term_output_json(hashtbl);

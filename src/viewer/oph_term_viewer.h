@@ -42,24 +42,25 @@ extern int oph_term_error_cur;
 //Status codes
 #include "../env/oph_term_status.h"
 
-#define OPH_TERM_VIEWER_TYPE_DUMP 				"dump"
-#define OPH_TERM_VIEWER_TYPE_BASIC 				"basic"
-#define OPH_TERM_VIEWER_TYPE_COLOURED 			"coloured"
-#define OPH_TERM_VIEWER_TYPE_EXTENDED 			"extended"
-#define OPH_TERM_VIEWER_TYPE_EXTENDED_COLOURED 	"extended_coloured"
+#define OPH_TERM_VIEWER_TYPE_DUMP		"dump"
+#define OPH_TERM_VIEWER_TYPE_BASIC		"basic"
+#define OPH_TERM_VIEWER_TYPE_COLOURED		"coloured"
+#define OPH_TERM_VIEWER_TYPE_EXTENDED		"extended"
+#define OPH_TERM_VIEWER_TYPE_EXTENDED_COLOURED	"extended_coloured"
 
-#define OPH_TERM_VIEWER_NO_COLOR_STRING "%s"
+#define OPH_TERM_VIEWER_NO_COLOR_STRING		"%s"
 
-#define OPH_TERM_VIEWER_BLACK_STRING 	"\033[1;30m%s\033[0m"
-#define OPH_TERM_VIEWER_RED_STRING 		"\033[1;31m%s\033[0m"
-#define OPH_TERM_VIEWER_GREEN_STRING 	"\033[1;32m%s\033[0m"
-#define OPH_TERM_VIEWER_YELLOW_STRING 	"\033[1;33m%s\033[0m"
-#define OPH_TERM_VIEWER_BLUE_STRING 	"\033[1;34m%s\033[0m"
-#define OPH_TERM_VIEWER_PURPLE_STRING 	"\033[1;35m%s\033[0m"
-#define OPH_TERM_VIEWER_CYAN_STRING 	"\033[1;36m%s\033[0m"
-#define OPH_TERM_VIEWER_WHITE_STRING 	"\033[1;37m%s\033[0m"
+#define OPH_TERM_VIEWER_BLACK_STRING		"\033[1;30m%s\033[0m"
+#define OPH_TERM_VIEWER_RED_STRING		"\033[1;31m%s\033[0m"
+#define OPH_TERM_VIEWER_GREEN_STRING		"\033[1;32m%s\033[0m"
+#define OPH_TERM_VIEWER_YELLOW_STRING		"\033[1;33m%s\033[0m"
+#define OPH_TERM_VIEWER_BLUE_STRING		"\033[1;34m%s\033[0m"
+#define OPH_TERM_VIEWER_PURPLE_STRING		"\033[1;35m%s\033[0m"
+#define OPH_TERM_VIEWER_CYAN_STRING		"\033[1;36m%s\033[0m"
+#define OPH_TERM_VIEWER_WHITE_STRING		"\033[1;37m%s\033[0m"
 
-#define OPH_TERM_VIEWER_COLOR_STRING_SURPLUS 11
+#define OPH_TERM_VIEWER_COLOR_STRING_SURPLUS	11
+#define OPH_TERM_VIEWER_EXIT_STATUS_INDEX	5
 
 //Render OPH_JSON string into console
 // viewer_type : dump (for plain json), basic (for a pretty output), coloured (basic+colors), extended (basic+source+consumers), extended_coloured (extended+colors)
@@ -76,7 +77,7 @@ int oph_term_viewer(const char *viewer_type, char **json_string, const char *col
 int oph_term_viewer_retrieve_command_jobid(char *json_string, char **command, char **jobid);
 
 //Retrieve number of jobs in session after a call to oph_resume
-int oph_term_viewer_retrieve_session_size(char *json_string, int *session_size);
+int oph_term_viewer_retrieve_session_size(char *json_string, int *session_size, char*** exit_status);
 
 //Check if session has been saved by server after a call to oph_resume with save=yes
 int oph_term_viewer_is_session_switched(char *json_string);

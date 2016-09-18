@@ -1117,7 +1117,7 @@ int oph_term_view_filters_parsing(char *filters,int end, int **jobs, int *jobs_n
 	return OPH_TERM_SUCCESS;
 }
 
-int oph_term_get_session_size(char *session, char *user, char *passwd, char *host, char *port, int *return_value, int *size, int workflow_wrap, HASHTBL *hashtbl) {
+int oph_term_get_session_size(char *session, char *user, char *passwd, char *host, char *port, int *return_value, int *size, int workflow_wrap, HASHTBL *hashtbl, char*** exit_status) {
 	if (!session || !host || !port || !return_value || !size) {
 		(print_json)?my_fprintf(stderr, "NULL parameters.\\n"):fprintf(stderr, "\e[1;31mNULL parameters.\e[0m\n");
 		*return_value = OPH_TERM_GENERIC_ERROR;
@@ -1141,7 +1141,7 @@ int oph_term_get_session_size(char *session, char *user, char *passwd, char *hos
 		return OPH_TERM_GENERIC_ERROR;
 	}
 
-	if (oph_term_viewer_retrieve_session_size(value,size)) {
+	if (oph_term_viewer_retrieve_session_size(value, size, exit_status)) {
 		(print_json)?my_fprintf(stderr, "Unable to get session size from json.\\n"):fprintf(stderr, "\e[1;31mUnable to get session size from json.\e[0m\n");
 		if (value) free(value);
 		*return_value = OPH_TERM_GENERIC_ERROR;
