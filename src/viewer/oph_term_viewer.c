@@ -315,9 +315,14 @@ void print_text(oph_json_obj_text *obj, const char *color_string) {
 	return;
 }
 
-void print_grid(oph_json_obj_grid *obj, const char *color_string) {
+void print_grid(oph_json_obj_grid *obj, const char *color_string, int show_list) {
+
 	// print title
 	if (obj->title && strlen(obj->title)) {
+
+		if (!show_list && !strcasecmp(obj->title, OPH_TERM_VIEWER_WORKFLOW_TASK_LIST))
+			return;
+
 		printf(color_string,obj->title);
 		printf("\n");
 		char buf[OPH_TERM_VIEWER_SIGN_LEN];
@@ -1486,7 +1491,7 @@ int oph_term_viewer_dump(char **json_string, char **newdatacube, char **newcwd) 
 }
 
 /* BASIC VIEWER */
-int oph_term_viewer_basic(char **json_string, const char *color, int save_img, int open_img, char **newdatacube, char **newcwd, char *layout) {
+int oph_term_viewer_basic(char **json_string, const char *color, int save_img, int open_img, int show_list, char **newdatacube, char **newcwd, char *layout) {
 	if (!json_string || !*json_string) {
 		oph_term_viewer_retrieve_info(NULL,NULL,newdatacube,newcwd);
 		return OPH_TERM_INVALID_PARAM_VALUE;
@@ -1595,7 +1600,7 @@ int oph_term_viewer_basic(char **json_string, const char *color, int save_img, i
 			if (!strcmp(response_i->objclass,OPH_JSON_TEXT))
 				print_text(&(((oph_json_obj_text *)(response_i->objcontent))[0]),(const char *)color_string);
 			else if (!strcmp(response_i->objclass,OPH_JSON_GRID))
-				print_grid(&(((oph_json_obj_grid *)(response_i->objcontent))[0]),(const char *)color_string);
+				print_grid(&(((oph_json_obj_grid *)(response_i->objcontent))[0]),(const char *)color_string,show_list);
 			else if (!strcmp(response_i->objclass,OPH_JSON_MULTIGRID))
 				print_multigrid(&(((oph_json_obj_multigrid *)(response_i->objcontent))[0]),(const char *)color_string);
 			else if (!strcmp(response_i->objclass,OPH_JSON_TREE))
@@ -1618,7 +1623,7 @@ int oph_term_viewer_basic(char **json_string, const char *color, int save_img, i
 				for (j = 0; j < response_i->objcontent_num; j++) {
 					objcontent_j = &(((oph_json_obj_grid *)(response_i->objcontent))[j]);
 					//printf("\n--- Part %d of %d ---\n",j+1,response_i->objcontent_num);
-					print_grid(objcontent_j,(const char *)color_string);
+					print_grid(objcontent_j,(const char *)color_string,show_list);
 				}
 			} else if (!strcmp(response_i->objclass,OPH_JSON_MULTIGRID)){
 				oph_json_obj_multigrid *objcontent_j = NULL;
@@ -1661,7 +1666,7 @@ int oph_term_viewer_basic(char **json_string, const char *color, int save_img, i
 }
 
 /* EXTENDED VIEWER */
-int oph_term_viewer_extended(char **json_string, const char *color, int save_img, int open_img, char **newdatacube, char **newcwd, char *layout) {
+int oph_term_viewer_extended(char **json_string, const char *color, int save_img, int open_img, int show_list, char **newdatacube, char **newcwd, char *layout) {
 	if (!json_string || !*json_string) {
 		oph_term_viewer_retrieve_info(NULL,NULL,newdatacube,newcwd);
 		return OPH_TERM_INVALID_PARAM_VALUE;
@@ -1792,7 +1797,7 @@ int oph_term_viewer_extended(char **json_string, const char *color, int save_img
 			if (!strcmp(response_i->objclass,OPH_JSON_TEXT))
 				print_text(&(((oph_json_obj_text *)(response_i->objcontent))[0]),(const char *)color_string);
 			else if (!strcmp(response_i->objclass,OPH_JSON_GRID))
-				print_grid(&(((oph_json_obj_grid *)(response_i->objcontent))[0]),(const char *)color_string);
+				print_grid(&(((oph_json_obj_grid *)(response_i->objcontent))[0]),(const char *)color_string,show_list);
 			else if (!strcmp(response_i->objclass,OPH_JSON_MULTIGRID))
 				print_multigrid(&(((oph_json_obj_multigrid *)(response_i->objcontent))[0]),(const char *)color_string);
 			else if (!strcmp(response_i->objclass,OPH_JSON_TREE))
@@ -1815,7 +1820,7 @@ int oph_term_viewer_extended(char **json_string, const char *color, int save_img
 				for (j = 0; j < response_i->objcontent_num; j++) {
 					objcontent_j = &(((oph_json_obj_grid *)(response_i->objcontent))[j]);
 					printf("--- Part %d of %d ---\n",(int)j+1,response_i->objcontent_num);
-					print_grid(objcontent_j,(const char *)color_string);
+					print_grid(objcontent_j,(const char *)color_string,show_list);
 				}
 			} else if (!strcmp(response_i->objclass,OPH_JSON_MULTIGRID)){
 				oph_json_obj_multigrid *objcontent_j = NULL;
@@ -1931,7 +1936,7 @@ int oph_term_viewer_extended(char **json_string, const char *color, int save_img
 }
 
 /* VIEWER CONTROLLER */
-int oph_term_viewer(const char *viewer_type, char **json_string, const char *color, int save_img, int open_img, char **newdatacube, char **newcwd, char *layout) {
+int oph_term_viewer(const char *viewer_type, char **json_string, const char *color, int save_img, int open_img, int show_list, char **newdatacube, char **newcwd, char *layout) {
 	if (!viewer_type || !json_string || !*json_string || !color) {
 		if (json_string && *json_string) {
 			free(*json_string);
@@ -1944,13 +1949,13 @@ int oph_term_viewer(const char *viewer_type, char **json_string, const char *col
 	if (!strcmp(viewer_type,OPH_TERM_VIEWER_TYPE_DUMP) || print_json) {
 		return oph_term_viewer_dump(json_string,newdatacube,newcwd);
 	} else if (!strcmp(viewer_type,OPH_TERM_VIEWER_TYPE_BASIC)) {
-		return oph_term_viewer_basic(json_string,NULL,save_img,open_img,newdatacube,newcwd,layout);
+		return oph_term_viewer_basic(json_string,NULL,save_img,open_img,show_list,newdatacube,newcwd,layout);
 	} else if (!strcmp(viewer_type,OPH_TERM_VIEWER_TYPE_COLOURED)) {
-		return oph_term_viewer_basic(json_string,color,save_img,open_img,newdatacube,newcwd,layout);
+		return oph_term_viewer_basic(json_string,color,save_img,open_img,show_list,newdatacube,newcwd,layout);
 	} else if (!strcmp(viewer_type,OPH_TERM_VIEWER_TYPE_EXTENDED)) {
-		return oph_term_viewer_extended(json_string,NULL,save_img,open_img,newdatacube,newcwd,layout);
+		return oph_term_viewer_extended(json_string,NULL,save_img,open_img,show_list,newdatacube,newcwd,layout);
 	} else if (!strcmp(viewer_type,OPH_TERM_VIEWER_TYPE_EXTENDED_COLOURED)) {
-		return oph_term_viewer_extended(json_string,color,save_img,open_img,newdatacube,newcwd,layout);
+		return oph_term_viewer_extended(json_string,color,save_img,open_img,show_list,newdatacube,newcwd,layout);
 	} else {
 		free(*json_string);
 		*json_string = NULL;

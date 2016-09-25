@@ -797,6 +797,20 @@ int oph_term_help(const char *cmd);
 \\t\\t- extended : the same as basic with other information regarding data sources, producers, consumers etc.;\\n\
 \\t\\t- extended_coloured : the same as extended but with colors (same color as prompt).\\n"
 
+#define OPH_TERM_HELP_OPH_TERM_FORMAT_SHORT "\"output format of command 'view'\"\n"
+#define OPH_TERM_HELP_OPH_TERM_FORMAT_LONG \
+"\e[1mOPH_TERM_FORMAT\e[0m\n\
+\tOutput format of the command 'view'.\n\
+\tPossible values are:\n\
+\t\t- classic : print all the data in JSON Response;\n\
+\t\t- compact : print the JSON Response without the Workflow Task List.\n"
+#define OPH_TERM_HELP_OPH_TERM_FORMAT_LONG2 \
+"OPH_TERM_FORMAT\\n\
+\\tOutput format of the command 'view'.\\n\
+\\tPossible values are:\\n\
+\\t\\t- classic : print all the data in JSON Response;\\n\
+\\t\\t- compact : print the JSON Response without the Workflow Task List.\\n"
+
 #ifndef NO_WORKFLOW
 #define OPH_TERM_HELP_OPH_TERM_IMGS_SHORT "\"save and/or auto-open images\"\n"
 #define OPH_TERM_HELP_OPH_TERM_IMGS_LONG \

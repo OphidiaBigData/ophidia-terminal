@@ -155,6 +155,10 @@ int startup_opt_setup(int argc, char *argv[], char *envp[], HASHTBL *hashtbl, ch
         (print_json)?my_fprintf(stderr,"Could not set variable %s [CODE %d]\\n",OPH_TERM_ENV_OPH_TERM_VIEWER,OPH_TERM_MEMORY_ERROR):fprintf(stderr,"\e[1;31mCould not set variable %s [CODE %d]\e[0m\n",OPH_TERM_ENV_OPH_TERM_VIEWER,OPH_TERM_MEMORY_ERROR);
         return OPH_TERM_MEMORY_ERROR;
     }
+    if (oph_term_setenv(hashtbl,OPH_TERM_ENV_OPH_TERM_FORMAT,"classic")) {
+        (print_json)?my_fprintf(stderr,"Could not set variable %s [CODE %d]\\n",OPH_TERM_ENV_OPH_TERM_FORMAT,OPH_TERM_MEMORY_ERROR):fprintf(stderr,"\e[1;31mCould not set variable %s [CODE %d]\e[0m\n",OPH_TERM_ENV_OPH_TERM_FORMAT,OPH_TERM_MEMORY_ERROR);
+        return OPH_TERM_MEMORY_ERROR;
+    }
     if (oph_term_setenv(hashtbl,OPH_TERM_ENV_OPH_TERM_IMGS,"no_op")) {
         (print_json)?my_fprintf(stderr,"Could not set variable %s [CODE %d]\\n",OPH_TERM_ENV_OPH_TERM_IMGS,OPH_TERM_MEMORY_ERROR):fprintf(stderr,"\e[1;31mCould not set variable %s [CODE %d]\e[0m\n",OPH_TERM_ENV_OPH_TERM_IMGS,OPH_TERM_MEMORY_ERROR);
         return OPH_TERM_MEMORY_ERROR;
@@ -1518,7 +1522,7 @@ int main(int argc, char **argv, char **envp) {
         // VISUALIZATION
         if (response_for_viewer) {
         	int viewer_res = oph_term_viewer((const char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_VIEWER),&response_for_viewer,
-        			(hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_PS1))?((const char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_PS1)):"red",0,0,NULL,NULL,(char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_GRAPH_LAYOUT));
+        			(hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_PS1))?((const char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_PS1)):"red",0,0,1,NULL,NULL,(char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_GRAPH_LAYOUT));
         	if (viewer_res!=0 && viewer_res!=OPH_TERM_ERROR_WITHIN_JSON) {
         		(print_json)?my_fprintf(stderr,"Could not render result [CODE %d]\\n",OPH_TERM_GENERIC_ERROR):fprintf(stderr,"\e[1;31mCould not render result [CODE %d]\e[0m\n",OPH_TERM_GENERIC_ERROR);
                 oph_term_env_clear(hashtbl);
@@ -2068,6 +2072,17 @@ int main(int argc, char **argv, char **envp) {
             	}
                 continue;
             }
+            if (!hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_FORMAT) ||
+            		(strcmp((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_FORMAT),"classic") &&
+            		 strcmp((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_FORMAT),"compact"))) {
+                (print_json)?my_fprintf(stderr,"OPH_TERM_FORMAT not set or incorrect [CODE %d]\\n",OPH_TERM_INVALID_PARAM_VALUE):fprintf(stderr,"\e[1;31mOPH_TERM_FORMAT not set or incorrect [CODE %d]\e[0m\n",OPH_TERM_INVALID_PARAM_VALUE);
+                if (print_json) print_oph_term_output_json(hashtbl);
+                if (exec_one_statement) {
+            		oph_term_return = OPH_TERM_INVALID_PARAM_VALUE;
+            		break;
+            	}
+                continue;
+            }
             if (!hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_IMGS) ||
             		(strcmp((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_IMGS),"no_op") &&
             		 strcmp((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_IMGS),"save") &&
@@ -2167,12 +2182,12 @@ int main(int argc, char **argv, char **envp) {
 
             	// VISUALIZATION
             	if (response_for_viewer) {
-            		int save_img = (!strcmp((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_IMGS),"save") || !strcmp((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_IMGS),"open"))?1:0;
-            		int open_img = (!strcmp((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_IMGS),"open"))?1:0;
-                	int viewer_res = oph_term_viewer((const char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_VIEWER),
+            		int open_img = !strcmp((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_IMGS),"open");
+                	int save_img = open_img || !strcmp((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_IMGS),"save");
+            		int viewer_res = oph_term_viewer((const char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_VIEWER),
                 										&response_for_viewer,
                 										(hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_PS1))?((const char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_PS1)):"red",
-                										save_img,open_img,&newdatacube,&newcwd,(char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_GRAPH_LAYOUT));
+                										save_img,open_img,1,&newdatacube,&newcwd,(char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_GRAPH_LAYOUT));
                 	if (viewer_res!=0 && viewer_res!=OPH_TERM_ERROR_WITHIN_JSON) {
                 		(print_json)?my_fprintf(stderr,"Could not render result [CODE %d]\\n",OPH_TERM_GENERIC_ERROR):fprintf(stderr,"\e[1;31mCould not render result [CODE %d]\e[0m\n",OPH_TERM_GENERIC_ERROR);
             			if (newsession) {
@@ -2428,12 +2443,12 @@ int main(int argc, char **argv, char **envp) {
 
             	// VISUALIZATION
             	if (response_for_viewer) {
-            		int save_img = (!strcmp((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_IMGS),"save") || !strcmp((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_IMGS),"open"))?1:0;
-            		int open_img = (!strcmp((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_IMGS),"open"))?1:0;
-                	int viewer_res = oph_term_viewer((const char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_VIEWER),
+            		int open_img = !strcmp((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_IMGS),"open");
+                	int save_img = open_img || !strcmp((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_IMGS),"save");
+            		int viewer_res = oph_term_viewer((const char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_VIEWER),
                 										&response_for_viewer,
                 										(hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_PS1))?((const char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_PS1)):"red",
-                										save_img,open_img,&newdatacube,&newcwd,(char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_GRAPH_LAYOUT));
+                										save_img,open_img,1,&newdatacube,&newcwd,(char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_GRAPH_LAYOUT));
                 	if (viewer_res!=0 && viewer_res!=OPH_TERM_ERROR_WITHIN_JSON) {
                 		(print_json)?my_fprintf(stderr,"Could not render result [CODE %d]\\n",OPH_TERM_GENERIC_ERROR):fprintf(stderr,"\e[1;31mCould not render result [CODE %d]\e[0m\n",OPH_TERM_GENERIC_ERROR);
             			if (newsession) {
@@ -2767,9 +2782,10 @@ int main(int argc, char **argv, char **envp) {
 						}
 					}
 
-            		int save_img = (!strcmp((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_IMGS),"save") || !strcmp((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_IMGS),"open"))?1:0;
-            		int open_img = (!strcmp((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_IMGS),"open"))?1:0;
-            		if (view_status(iterations_num,command_line,tmp_submission_string,hashtbl,&oph_term_return,tmp_session,tmp_workflow,save_img,open_img,time_interval,NULL)) {
+            		int open_img = !strcmp((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_IMGS),"open");
+            		int save_img = open_img || !strcmp((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_IMGS),"save");
+			int show_list = strcmp((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_FORMAT),"compact");
+            		if (view_status(iterations_num,command_line,tmp_submission_string,hashtbl,&oph_term_return,tmp_session,tmp_workflow,save_img,open_img,show_list,time_interval,NULL)) {
                     	(print_json)?my_fprintf(stderr,"Error viewing status [CODE %d]\\n",OPH_TERM_GENERIC_ERROR):fprintf(stderr,"\e[1;31mError viewing status [CODE %d]\e[0m\n",OPH_TERM_GENERIC_ERROR);
                     	if (print_json) print_oph_term_output_json(hashtbl);
             			if (exec_one_statement) {
@@ -2856,9 +2872,10 @@ int main(int argc, char **argv, char **envp) {
             				}
             			}
 
-                		int save_img = (!strcmp((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_IMGS),"save") || !strcmp((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_IMGS),"open"))?1:0;
-                		int open_img = (!strcmp((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_IMGS),"open"))?1:0;
-                		if (view_status(iterations_num,command_line,submission_string,hashtbl,&oph_term_return,(hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_SESSION_ID))?((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_SESSION_ID)):"",tmp_workflow,save_img,open_img,time_interval,NULL)) {
+                		int open_img = !strcmp((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_IMGS),"open");
+                		int save_img = open_img || !strcmp((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_IMGS),"save");
+				int show_list = strcmp((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_FORMAT),"compact");
+                		if (view_status(iterations_num,command_line,submission_string,hashtbl,&oph_term_return,(hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_SESSION_ID))?((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_SESSION_ID)):"",tmp_workflow,save_img,open_img,show_list,time_interval,NULL)) {
                         	(print_json)?my_fprintf(stderr,"Error viewing status [CODE %d]\\n",OPH_TERM_GENERIC_ERROR):fprintf(stderr,"\e[1;31mError viewing status [CODE %d]\e[0m\n",OPH_TERM_GENERIC_ERROR);
                         	if (print_json) print_oph_term_output_json(hashtbl);
                 			if (exec_one_statement) {
@@ -2942,9 +2959,10 @@ int main(int argc, char **argv, char **envp) {
             				}
             			}
 
-                		int save_img = (!strcmp((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_IMGS),"save") || !strcmp((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_IMGS),"open"))?1:0;
-                		int open_img = (!strcmp((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_IMGS),"open"))?1:0;
-                		if (view_status(iterations_num,command_line,submission_string,hashtbl,&oph_term_return,(hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_SESSION_ID))?((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_SESSION_ID)):"",tmp_workflow,save_img,open_img,time_interval,NULL)) {
+                		int open_img = !strcmp((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_IMGS),"open");
+                		int save_img = open_img || !strcmp((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_IMGS),"save");
+				int show_list = strcmp((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_FORMAT),"compact");
+                		if (view_status(iterations_num,command_line,submission_string,hashtbl,&oph_term_return,(hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_SESSION_ID))?((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_SESSION_ID)):"",tmp_workflow,save_img,open_img,show_list,time_interval,NULL)) {
                         	(print_json)?my_fprintf(stderr,"Error viewing status [CODE %d]\\n",OPH_TERM_GENERIC_ERROR):fprintf(stderr,"\e[1;31mError viewing status [CODE %d]\e[0m\n",OPH_TERM_GENERIC_ERROR);
                         	if (print_json) print_oph_term_output_json(hashtbl);
                 			if (exec_one_statement) {
@@ -3845,7 +3863,7 @@ int main(int argc, char **argv, char **envp) {
         	// VISUALIZATION
         	if (response_for_viewer) {
         		int viewer_res = oph_term_viewer((const char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_VIEWER),&response_for_viewer,
-        				(hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_PS1))?((const char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_PS1)):"red",0,0,NULL,NULL,(char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_GRAPH_LAYOUT));
+        				(hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_PS1))?((const char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_PS1)):"red",0,0,1,NULL,NULL,(char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_GRAPH_LAYOUT));
         		if (viewer_res!=0 && viewer_res!=OPH_TERM_ERROR_WITHIN_JSON) {
         			(print_json)?my_fprintf(stderr,"Could not render result [CODE %d]\\n",OPH_TERM_GENERIC_ERROR):fprintf(stderr,"\e[1;31mCould not render result [CODE %d]\e[0m\n",OPH_TERM_GENERIC_ERROR);
         			if (print_json) print_oph_term_output_json(hashtbl);
@@ -4198,9 +4216,10 @@ int main(int argc, char **argv, char **envp) {
             		(print_json)?my_printf("Specified workflow (after parameter substitution) is a VALID Ophidia Workflow.\\n"):printf("Specified workflow (after parameter substitution) is a \e[1;32mVALID\e[0m Ophidia Workflow.\n");
 
             		// VISUALIZATION
-            		int save_img = (!strcmp((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_IMGS),"save") || !strcmp((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_IMGS),"open"))?1:0;
-            		int open_img = (!strcmp((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_IMGS),"open"))?1:0;
-            		if (view_status(0,NULL,NULL,hashtbl,NULL,NULL,NULL,save_img,open_img,0,tmp_workflow)) {
+            		int open_img = !strcmp((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_IMGS),"open");
+            		int save_img = open_img || !strcmp((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_IMGS),"save");
+			int show_list = strcmp((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_FORMAT),"compact");
+            		if (view_status(0,NULL,NULL,hashtbl,NULL,NULL,NULL,save_img,open_img,show_list,0,tmp_workflow)) {
             			if (print_json) print_oph_term_output_json(hashtbl);
             			if (exec_one_statement) {
             				oph_term_return = OPH_TERM_GENERIC_ERROR;

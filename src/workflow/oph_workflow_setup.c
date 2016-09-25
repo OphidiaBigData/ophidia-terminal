@@ -51,6 +51,7 @@ typedef struct _gtkstruct {
 	char *tmp_workflow;
 	int save_img;
 	int open_img;
+	int show_list;
 	int time_interval;
 	oph_workflow *wf;
 } gtkstruct;
@@ -813,6 +814,7 @@ void *main_loop(void *ptr) {
 	char *tmp_workflow = container->tmp_workflow;
 	int save_img = container->save_img;
 	int open_img = container->open_img;
+	int show_list = container->show_list;
 	int time_interval = container->time_interval;
 	short start_gtk = 0;
 	GThread *Thread1=NULL;
@@ -925,7 +927,7 @@ void *main_loop(void *ptr) {
 				int viewer_res = oph_term_viewer((const char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_VIEWER),
 									&response_for_viewer,
 									(hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_PS1))?((const char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_PS1)):"red",
-									save_img,open_img,NULL,NULL,(char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_GRAPH_LAYOUT));
+									save_img,open_img,show_list,NULL,NULL,(char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_GRAPH_LAYOUT));
 				if (viewer_res!=0 && viewer_res!=OPH_TERM_ERROR_WITHIN_JSON) {
 					(print_json)?my_fprintf(stderr,"Could not render result [CODE %d]\\n",OPH_TERM_GENERIC_ERROR):fprintf(stderr,"\e[1;31mCould not render result [CODE %d]\e[0m\n",OPH_TERM_GENERIC_ERROR);
 					if (start_gtk) {
@@ -940,7 +942,7 @@ void *main_loop(void *ptr) {
 					int viewer_res = oph_term_viewer((const char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_VIEWER),
 										&response_for_viewer,
 										(hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_PS1))?((const char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_PS1)):"red",
-										save_img,open_img,NULL,NULL,(char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_GRAPH_LAYOUT));
+										save_img,open_img,show_list,NULL,NULL,(char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_GRAPH_LAYOUT));
 					if (viewer_res!=0 && viewer_res!=OPH_TERM_ERROR_WITHIN_JSON) {
 						(print_json)?my_fprintf(stderr,"Could not render result [CODE %d]\\n",OPH_TERM_GENERIC_ERROR):fprintf(stderr,"\e[1;31mCould not render result [CODE %d]\e[0m\n",OPH_TERM_GENERIC_ERROR);
 						return NULL;
@@ -961,7 +963,7 @@ void *main_loop(void *ptr) {
 	return NULL;
 }
 
-int view_status(int iterations_num, char *command_line, char *tmp_submission_string, HASHTBL *hashtbl, int *oph_term_return, char *tmp_session, char *tmp_workflow, int save_img, int open_img, int time_interval, oph_workflow *wf)
+int view_status(int iterations_num, char *command_line, char *tmp_submission_string, HASHTBL *hashtbl, int *oph_term_return, char *tmp_session, char *tmp_workflow, int save_img, int open_img, int show_list, int time_interval, oph_workflow *wf)
 {
 	UNUSED(cmds) UNUSED(env_vars)
 	UNUSED(pre_defined_aliases_keys)
@@ -983,6 +985,7 @@ int view_status(int iterations_num, char *command_line, char *tmp_submission_str
 	container.open_img = open_img;
 	container.oph_term_return = oph_term_return;
 	container.save_img = save_img;
+	container.show_list = show_list;
 	container.time_interval = time_interval;
 	container.tmp_session = tmp_session;
 	container.tmp_submission_string = tmp_submission_string;

@@ -62,6 +62,8 @@ extern int oph_term_error_cur;
 #define OPH_TERM_VIEWER_COLOR_STRING_SURPLUS	11
 #define OPH_TERM_VIEWER_EXIT_STATUS_INDEX	5
 
+#define OPH_TERM_VIEWER_WORKFLOW_TASK_LIST	"Workflow Task List"
+
 //Render OPH_JSON string into console
 // viewer_type : dump (for plain json), basic (for a pretty output), coloured (basic+colors), extended (basic+source+consumers), extended_coloured (extended+colors)
 // json_string : json string to be rendered as double pointer (upon return the string is freed and NULLed)
@@ -71,7 +73,7 @@ extern int oph_term_error_cur;
 // newdatacube : retrieved new output cube if any or NULL
 // newcwd : retrieved new cwd if any or NULL
 // layout : layout of graph or NULL
-int oph_term_viewer(const char *viewer_type, char **json_string, const char *color, int save_img, int open_img, char **newdatacube, char **newcwd, char *layout);
+int oph_term_viewer(const char *viewer_type, char **json_string, const char *color, int save_img, int open_img, int show_list, char **newdatacube, char **newcwd, char *layout);
 
 //Retrieve command and/or jobid in request after a call to oph_resume
 int oph_term_viewer_retrieve_command_jobid(char *json_string, char **command, char **jobid);

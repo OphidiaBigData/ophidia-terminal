@@ -77,13 +77,14 @@ int oph_workflow_print(oph_workflow *workflow, int save_img, int open_img, char 
  * \param workflow Input OPH_WORKFLOW to be printed
  * \param save_img 1 to save image to file, 0 otherwise
  * \param open_img 1 to auto-open with xdg-open the image, 0 otherwise. Considered only when save_img=1
+ * \param show_list Flag set in case Workflow Task List has to be shown
  * \param json_string_with_status JSON response with the list of tasks
  * \param layout Layout of the graph
  * \return 0 if successful
  */
 int oph_workflow_print_status(oph_workflow *workflow, int save_img, int open_img, char *json_string_with_status, char *layout);
 
-int view_status(int iterations_num, char *command_line, char *tmp_submission_string, HASHTBL *hashtbl, int *oph_term_return, char *tmp_session, char *tmp_workflow, int save_img, int open_img, int time_interval, oph_workflow *wf);
+int view_status(int iterations_num, char *command_line, char *tmp_submission_string, HASHTBL *hashtbl, int *oph_term_return, char *tmp_session, char *tmp_workflow, int save_img, int open_img, int show_list, int time_interval, oph_workflow *wf);
 
 int oph_workflow_get_ranks_string(oph_workflow_task *tasks, int tasks_num, char **ranks_string);
 

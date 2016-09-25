@@ -255,6 +255,8 @@ void print_cmd_list() {
             (print_json)?my_printf("\\t%25s = %s",env_vars[i],OPH_TERM_HELP_OPH_DATACUBE_SHORT):printf("\t%25s = %s",env_vars[i],OPH_TERM_HELP_OPH_DATACUBE_SHORT);
         } else if (!strcmp(env_vars[i],OPH_TERM_ENV_OPH_TERM_VIEWER)) {
             (print_json)?my_printf("\\t%25s = %s",env_vars[i],OPH_TERM_HELP_OPH_TERM_VIEWER_SHORT):printf("\t%25s = %s",env_vars[i],OPH_TERM_HELP_OPH_TERM_VIEWER_SHORT);
+        } else if (!strcmp(env_vars[i],OPH_TERM_ENV_OPH_TERM_FORMAT)) {
+            (print_json)?my_printf("\\t%25s = %s",env_vars[i],OPH_TERM_HELP_OPH_TERM_FORMAT_SHORT):printf("\t%25s = %s",env_vars[i],OPH_TERM_HELP_OPH_TERM_FORMAT_SHORT);
         } else if (!strcmp(env_vars[i],OPH_TERM_ENV_OPH_TERM_IMGS)) {
             (print_json)?my_printf("\\t%25s = %s",env_vars[i],OPH_TERM_HELP_OPH_TERM_IMGS_SHORT):printf("\t%25s = %s",env_vars[i],OPH_TERM_HELP_OPH_TERM_IMGS_SHORT);
         } else if (!strcmp(env_vars[i],OPH_TERM_ENV_OPH_GRAPH_LAYOUT)) {
@@ -320,6 +322,8 @@ void print_env_var_usage(const char *var) {
         (print_json)?my_printf("%s",OPH_TERM_HELP_OPH_DATACUBE_LONG2):printf("%s",OPH_TERM_HELP_OPH_DATACUBE_LONG);
     } else if (!strcmp(var,OPH_TERM_ENV_OPH_TERM_VIEWER)) {
         (print_json)?my_printf("%s",OPH_TERM_HELP_OPH_TERM_VIEWER_LONG2):printf("%s",OPH_TERM_HELP_OPH_TERM_VIEWER_LONG);
+    } else if (!strcmp(var,OPH_TERM_ENV_OPH_TERM_FORMAT)) {
+        (print_json)?my_printf("%s",OPH_TERM_HELP_OPH_TERM_FORMAT_LONG2):printf("%s",OPH_TERM_HELP_OPH_TERM_FORMAT_LONG);
     } else if (!strcmp(var,OPH_TERM_ENV_OPH_TERM_IMGS)) {
         (print_json)?my_printf("%s",OPH_TERM_HELP_OPH_TERM_IMGS_LONG2):printf("%s",OPH_TERM_HELP_OPH_TERM_IMGS_LONG);
     } else if (!strcmp(var,OPH_TERM_ENV_OPH_GRAPH_LAYOUT)) {
