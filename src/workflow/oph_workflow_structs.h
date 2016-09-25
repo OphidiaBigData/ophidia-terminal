@@ -144,7 +144,8 @@ typedef struct _oph_workflow_task {
  * \param tasks_num Number of tasks
  * \param residual_tasks_num Number of residual tasks (initialized to tasks_num)
  * \param response Output of the execution
- * \param exit_values Values to be used in the operation executed on the end of workflow 
+ * \param exit_values Values to be used in the operation executed on the end of workflow
+ * \param output_format Format to code workflow output
  */
 typedef struct _oph_workflow {
 	int idjob;
@@ -171,6 +172,7 @@ typedef struct _oph_workflow {
 	char* on_error;
 	char* on_exit;
 	char* run;
+	int output_format;
 } oph_workflow;
 
 /* Functions for structs cleanup */

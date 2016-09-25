@@ -579,7 +579,7 @@ int oph_workflow_print_status(oph_workflow *workflow, int save_img, int open_img
 	    // create dot string for dag
 	    char dot_string[OPH_WORKFLOW_DOT_MAX_LEN];
 	    size_t cc = 0,i,j;
-	    int k,kk;
+	    int k,kk,offset=workflow->output_format?4:0;
 
 	    // name
 	    for (i = 0; i < strlen(workflow->name); i++) if (!isalnum(workflow->name[i])) workflow->name[i] = '_';
@@ -598,21 +598,21 @@ int oph_workflow_print_status(oph_workflow *workflow, int save_img, int open_img
 				if (!strcmp(json->response[j].objkey,"workflow_list")) {
 					int z;
 					for (z = 0; z < (int) ((oph_json_obj_grid *) json->response[j].objcontent)[0].values_num1; z++) {
-						if (!strcmp(workflow->tasks[i].name,((oph_json_obj_grid *) json->response[j].objcontent)[0].values[z][5])) {
-							if (!strcmp(((oph_json_obj_grid *) json->response[j].objcontent)[0].values[z][6],"MASSIVE")) doublecircle=1;
-							if (!strcmp(((oph_json_obj_grid *) json->response[j].objcontent)[0].values[z][7],"OPH_STATUS_COMPLETED")) {
+						if (!strcmp(workflow->tasks[i].name,((oph_json_obj_grid *) json->response[j].objcontent)[0].values[z][5-offset])) {
+							if (!strcmp(((oph_json_obj_grid *) json->response[j].objcontent)[0].values[z][6-offset],"MASSIVE")) doublecircle=1;
+							if (!strcmp(((oph_json_obj_grid *) json->response[j].objcontent)[0].values[z][7-offset],"OPH_STATUS_COMPLETED")) {
 							    memset(color,0,OPH_WORKFLOW_RANK_SIZE);
 							    snprintf(color,OPH_WORKFLOW_RANK_SIZE,"%s","palegreen");
-							} else if (!strcmp(((oph_json_obj_grid *) json->response[j].objcontent)[0].values[z][7],"OPH_STATUS_RUNNING")) {
+							} else if (!strcmp(((oph_json_obj_grid *) json->response[j].objcontent)[0].values[z][7-offset],"OPH_STATUS_RUNNING")) {
 							    memset(color,0,OPH_WORKFLOW_RANK_SIZE);
 							    snprintf(color,OPH_WORKFLOW_RANK_SIZE,"%s","orange");
-							} else if (strstr(((oph_json_obj_grid *) json->response[j].objcontent)[0].values[z][7],"ERROR")) {
+							} else if (strstr(((oph_json_obj_grid *) json->response[j].objcontent)[0].values[z][7-offset],"ERROR")) {
 							    memset(color,0,OPH_WORKFLOW_RANK_SIZE);
 							    snprintf(color,OPH_WORKFLOW_RANK_SIZE,"%s","brown1");
-							} else if (strstr(((oph_json_obj_grid *) json->response[j].objcontent)[0].values[z][7],"SKIPPED")) {
+							} else if (strstr(((oph_json_obj_grid *) json->response[j].objcontent)[0].values[z][7-offset],"SKIPPED")) {
 							    memset(color,0,OPH_WORKFLOW_RANK_SIZE);
 							    snprintf(color,OPH_WORKFLOW_RANK_SIZE,"%s","khaki1");
-							} else if (strstr(((oph_json_obj_grid *) json->response[j].objcontent)[0].values[z][7],"WAITING")) {
+							} else if (strstr(((oph_json_obj_grid *) json->response[j].objcontent)[0].values[z][7-offset],"WAITING")) {
 							    memset(color,0,OPH_WORKFLOW_RANK_SIZE);
 							    snprintf(color,OPH_WORKFLOW_RANK_SIZE,"%s","cyan");
 							} else {

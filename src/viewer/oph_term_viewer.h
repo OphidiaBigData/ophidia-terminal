@@ -63,6 +63,7 @@ extern int oph_term_error_cur;
 #define OPH_TERM_VIEWER_EXIT_STATUS_INDEX	5
 
 #define OPH_TERM_VIEWER_WORKFLOW_TASK_LIST	"Workflow Task List"
+#define OPH_TERM_VIEWER_WORKFLOW_TASK_LIST2	"Workflow Basic Information"
 
 //Render OPH_JSON string into console
 // viewer_type : dump (for plain json), basic (for a pretty output), coloured (basic+colors), extended (basic+source+consumers), extended_coloured (extended+colors)

@@ -320,7 +320,7 @@ void print_grid(oph_json_obj_grid *obj, const char *color_string, int show_list)
 	// print title
 	if (obj->title && strlen(obj->title)) {
 
-		if (!show_list && !strcasecmp(obj->title, OPH_TERM_VIEWER_WORKFLOW_TASK_LIST))
+		if (!show_list && (!strcasecmp(obj->title, OPH_TERM_VIEWER_WORKFLOW_TASK_LIST) || !strcasecmp(obj->title, OPH_TERM_VIEWER_WORKFLOW_TASK_LIST2)))
 			return;
 
 		printf(color_string,obj->title);
