@@ -3154,6 +3154,7 @@ int main(int argc, char **argv, char **envp) {
 				if (!strcmp(tmp_status,"OPH_STATUS_COMPLETED")) format = 2;
 				else if (!strcmp(tmp_status,"OPH_STATUS_RUNNING")) format = 3;
 				else if (!strcmp(tmp_status,"OPH_STATUS_WAITING")) format = 4;
+				else if (!strcmp(tmp_status,"OPH_STATUS_PENDING")) format = 5;
 			}
 
 			if (is_verbose)
