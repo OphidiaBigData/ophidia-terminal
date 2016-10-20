@@ -1,4 +1,20 @@
 
+## v0.10.6 - 2016-10-20
+
+### Fixed:
+
+- Bug [\#3](https://github.com/OphidiaBigData/ophidia-terminal/issues/3)
+- Bug in gtk handler when window is closed while running in auto-view mode
+
+### Added:
+
+- Environmental variable OPH_TERM_FORMAT to format workflow response format
+- Support for new state OPH_STATUS_WAITING (INDIGO-DataCloud Project)
+
+### Changed:
+
+- Output of resume command to also show the current workflow status 
+
 ## v0.10.5 - 2016-08-24
 
 ### Fixed:
