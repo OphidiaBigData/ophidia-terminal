@@ -230,12 +230,15 @@ if test "x${interface_type}" = "xssl"; then
 INTERFACE_TYPE=$interface_type
 elif test "x${interface_type}" = "xgsi"; then
 INTERFACE_TYPE=$interface_type
+elif test "x${interface_type}" = "xwps"; then
+INTERFACE_TYPE=$interface_type
 else
 AC_MSG_ERROR(Unsupported interface type)
 fi
 AC_SUBST(INTERFACE_TYPE)
 AM_CONDITIONAL([INTERFACE_TYPE_IS_SSL], [test "x$interface_type" = "xssl"])
 AM_CONDITIONAL([INTERFACE_TYPE_IS_GSI], [test "x$interface_type" = "xgsi"])
+AM_CONDITIONAL([INTERFACE_TYPE_IS_WPS], [test "x$interface_type" = "xwps"])
 
 AC_ARG_WITH(globus-libs,
                                 [  --with-globus-libs=GLOBUS_LIB_LOCATION   Set the Globus library location],

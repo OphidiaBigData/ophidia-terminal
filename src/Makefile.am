@@ -54,6 +54,14 @@ liboph_term_client_la_LDFLAGS = -static $(MYLDFLAGS)
 liboph_term_client_la_LIBADD = $(LIBXML_LIB) $(LIBCURL_LIB) -lpthread
 endif
 
+if INTERFACE_TYPE_IS_WPS
+IFLAG += -DINTERFACE_TYPE_IS_WPS
+liboph_term_client_la_SOURCES = client/$(INTERFACE_TYPE)/oph_term_client.c
+liboph_term_client_la_CFLAGS= -prefer-pic -I. -Iclient -Iclient/$(INTERFACE_TYPE) -Ienv ${lib_CFLAGS} $(OPT) -DWITH_DOM $(LIBXML_INCLUDE) $(LIBCURL_INCLUDE) $(IFLAG)
+liboph_term_client_la_LDFLAGS = -static
+liboph_term_client_la_LIBADD = $(LIBXML_LIB) $(LIBCURL_LIB) -lpthread
+endif
+
 LIBRARY += liboph_term_env.la
 liboph_term_env_la_SOURCES = env/oph_term_env.c env/hashtbl.c
 liboph_term_env_la_CFLAGS= -prefer-pic -I. -Ienv -Iclient ${lib_CFLAGS} $(OPT) $(LIBXML_INCLUDE) $(LIBCURL_INCLUDE) $(IFLAG)
