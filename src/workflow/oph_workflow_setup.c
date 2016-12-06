@@ -38,6 +38,8 @@
 
 GtkWidget *window;
 GtkWidget *image;
+GdkPixbuf *pixbuf;
+GVC_t *gvc = NULL;
 char filename[OPH_WORKFLOW_BASIC_SIZE];
 int abort_view;
 
@@ -523,8 +525,6 @@ int oph_workflow_print(oph_workflow *workflow, int save_img, int open_img, char 
 
 		cc += snprintf(dot_string+cc,OPH_WORKFLOW_DOT_MAX_LEN-cc,"} ");
 
-
-	    GVC_t *gvc = NULL;
 	    Agraph_t *g;
 	    FILE *fp;
 	    memset(filename,0,OPH_WORKFLOW_BASIC_SIZE);
@@ -534,7 +534,8 @@ int oph_workflow_print(oph_workflow *workflow, int save_img, int open_img, char 
 			(print_json)?my_fprintf(stderr,"Unable to create the new image file %s.\\n",filename):fprintf(stderr,"Unable to create the new image file %s.\n",filename);
 			return OPH_WORKFLOW_EXIT_GENERIC_ERROR;
 		}
-	    gvc = gvContext();
+
+	    if (!gvc) gvc = gvContext();	// It should be free with gvFreeContext(gvc); on exit
 
 		// create digraph
 	    g = agmemread(dot_string);
@@ -542,8 +543,6 @@ int oph_workflow_print(oph_workflow *workflow, int save_img, int open_img, char 
 	    gvRender(gvc,g,"svg:cairo",fp);
 	    gvFreeLayout(gvc,g);
 	    agclose(g);
-	    gvFreeContext(gvc);
-	    gvc = NULL;
 	    fclose(fp);
 
 		// print output filename
@@ -684,7 +683,6 @@ int oph_workflow_print_status(oph_workflow *workflow, int save_img, int open_img
 		cc += snprintf(dot_string+cc,OPH_WORKFLOW_DOT_MAX_LEN-cc,"} \n");
 
 
-	    GVC_t *gvc = NULL;
 	    Agraph_t *g;
 	    FILE *fp;
 	    memset(filename,0,OPH_WORKFLOW_BASIC_SIZE);
@@ -695,15 +693,15 @@ int oph_workflow_print_status(oph_workflow *workflow, int save_img, int open_img
 			if (json) oph_json_free(json);
 			return OPH_WORKFLOW_EXIT_GENERIC_ERROR;
 		}
-	    gvc = gvContext();
+
+	    if (!gvc) gvc = gvContext();	// It should be free with gvFreeContext(gvc); on exit
+
 		// create digraph
 	    g = agmemread(dot_string);
 	    gvLayout(gvc,g,"dot");
 	    gvRender(gvc,g,"svg:cairo",fp);
 	    gvFreeLayout(gvc,g);
 	    agclose(g);
-	    gvFreeContext(gvc);
-	    gvc = NULL;
 	    fclose(fp);
 
 		// print output filename
@@ -724,7 +722,7 @@ int oph_workflow_print_status(oph_workflow *workflow, int save_img, int open_img
 void destroy(GtkWidget *window, GtkWidget *widget)
 {
 	UNUSED(window) UNUSED(widget)
-    gtk_main_quit();
+	gtk_main_quit();
 }
 
 gboolean resize_image(GtkWidget *window, GdkEvent *event, GtkWidget *widget)
@@ -732,13 +730,15 @@ gboolean resize_image(GtkWidget *window, GdkEvent *event, GtkWidget *widget)
 	UNUSED(event)
 	GError *error = NULL;
 	if (strlen(filename)>0) {
-		GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file_at_size(filename,window->allocation.width-4, window->allocation.height-4, &error);
+		if (pixbuf) {
+			g_object_unref (G_OBJECT(pixbuf));
+		}
+		pixbuf = gdk_pixbuf_new_from_file_at_size(filename,window->allocation.width-4, window->allocation.height-4, &error);
 		if (pixbuf == NULL) {
 			//g_printerr ("Error loading file: #%d %s\n", error->code, error->message);
 			g_error_free (error);
 			return 1;
 		}
-
 		gtk_image_set_from_pixbuf(GTK_IMAGE(widget), pixbuf);
 	}
 
@@ -754,13 +754,15 @@ void resize_image2(GtkWidget *window, GtkWidget *widget)
 	UNUSED(widget)
 	GError *error = NULL;
 	if (strlen(filename)>0) {
-		GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file_at_size(filename,window->allocation.width-4, window->allocation.height-4, &error);
+		if (pixbuf) {
+			g_object_unref (G_OBJECT(pixbuf));
+		}
+		pixbuf = gdk_pixbuf_new_from_file_at_size(filename,window->allocation.width-4, window->allocation.height-4, &error);
 		if (pixbuf == NULL) {
 			//g_printerr ("Error loading file: #%d %s\n", error->code, error->message);
 			g_error_free (error);
 			return;
 		}
-
 		gtk_container_foreach(GTK_CONTAINER(window),set_image, (gpointer)pixbuf);
 	}
 
@@ -784,6 +786,8 @@ void *gtk_main_thread(void *ptr) {
 		//g_printerr("Could not open \"%s\"\n", filename);
 		return NULL;
 	}
+
+	pixbuf = NULL;
 
 	/* attach standard event handlers */
 	g_signal_connect(window, "destroy", G_CALLBACK(destroy), NULL);
@@ -839,6 +843,7 @@ void *main_loop(void *ptr) {
 				if (start_gtk) {
 					if (!abort_view) (print_json)?my_printf("Close image to continue...\\n"):printf("Close image to continue...\n");
 					g_thread_join(Thread1);
+					g_object_unref (G_OBJECT(pixbuf)); pixbuf = NULL;
 				}
 				return NULL;
 			}
@@ -868,6 +873,7 @@ void *main_loop(void *ptr) {
 					if (start_gtk) {
 						(print_json)?my_printf("Close image to continue...\\n"):printf("Close image to continue...\n");
 						g_thread_join(Thread1);
+						g_object_unref (G_OBJECT(pixbuf)); pixbuf = NULL;
 					}
 					return NULL;
 				}
@@ -882,6 +888,7 @@ void *main_loop(void *ptr) {
 					if (start_gtk) {
 						(print_json)?my_printf("Close image to continue...\\n"):printf("Close image to continue...\n");
 						g_thread_join(Thread1);
+						g_object_unref (G_OBJECT(pixbuf)); pixbuf = NULL;
 					}
 					return NULL;
 				}
@@ -896,6 +903,7 @@ void *main_loop(void *ptr) {
 					if (start_gtk) {
 						(print_json)?my_printf("Close image to continue...\\n"):printf("Close image to continue...\n");
 						g_thread_join(Thread1);
+						g_object_unref (G_OBJECT(pixbuf)); pixbuf = NULL;
 					}
 					return NULL;
 				}
@@ -906,6 +914,7 @@ void *main_loop(void *ptr) {
 					if (start_gtk) {
 						(print_json)?my_printf("Close image to continue...\\n"):printf("Close image to continue...\n");
 						g_thread_join(Thread1);
+						g_object_unref (G_OBJECT(pixbuf)); pixbuf = NULL;
 					}
 					return NULL;
 				}
@@ -915,6 +924,7 @@ void *main_loop(void *ptr) {
 					if (start_gtk) {
 						(print_json)?my_printf("Close image to continue...\\n"):printf("Close image to continue...\n");
 						g_thread_join(Thread1);
+						g_object_unref (G_OBJECT(pixbuf)); pixbuf = NULL;
 					}
 					return NULL;
 				}
@@ -933,6 +943,7 @@ void *main_loop(void *ptr) {
 					if (start_gtk) {
 						(print_json)?my_printf("Close image to continue...\\n"):printf("Close image to continue...\n");
 						g_thread_join(Thread1);
+						g_object_unref (G_OBJECT(pixbuf)); pixbuf = NULL;
 					}
 					return NULL;
 				}
@@ -948,6 +959,10 @@ void *main_loop(void *ptr) {
 						return NULL;
 					}
 				}
+				else if (response_for_viewer) {
+					free(response_for_viewer);
+					response_for_viewer = NULL;
+				}
 			}
 
 			if (iterations_num==0 || z != iterations_num-1) sleep(time_interval);
@@ -958,6 +973,7 @@ void *main_loop(void *ptr) {
 	if (start_gtk) {
 		(print_json)?my_printf("Close image to continue...\\n"):printf("Close image to continue...\n");
 		g_thread_join(Thread1);
+		g_object_unref (G_OBJECT(pixbuf)); pixbuf = NULL;
 	}
 
 	return NULL;
