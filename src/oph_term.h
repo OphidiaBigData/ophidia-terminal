@@ -40,9 +40,12 @@
 #include "workflow/oph_workflow_library.h"
 //...
 
+#define OPH_TERM_CMD_MASSIVE	"oph_massive"
+
 /* Local Commands */
 #define OPH_TERM_CMD_VERSION    "version"
 #define OPH_TERM_CMD_WARRANTY   "warranty"
+#define OPH_TERM_CMD_WATCH      "watch"
 #define OPH_TERM_CMD_CONDITIONS "conditions"
 #define OPH_TERM_CMD_HELP       "help"
 #define OPH_TERM_CMD_HISTORY    "history"
@@ -53,6 +56,7 @@
 #define OPH_TERM_CMD_QUIT       "quit"
 #define OPH_TERM_CMD_EXIT       "exit"
 #define OPH_TERM_CMD_CLEAR      "clear"
+#define OPH_TERM_CMD_WATCH      "watch"
 #define OPH_TERM_CMD_UPDATE     "update"
 #define OPH_TERM_CMD_RESUME     "resume"
 #define OPH_TERM_CMD_VIEW       "view"
@@ -79,13 +83,14 @@
 #define OPH_TERM_REMOTE_CMD_PREFIX_LEN	OPH_TERM_ENV_OPH_PREFIX_LEN
 
 #ifndef NO_WORKFLOW
-#define cmds_num 20+im_cmds_num
+#define cmds_num 21+im_cmds_num
 #else
-#define cmds_num 19+im_cmds_num
+#define cmds_num 20+im_cmds_num
 #endif
 static char *cmds[cmds_num] = {
         OPH_TERM_CMD_VERSION,
         OPH_TERM_CMD_WARRANTY,
+        OPH_TERM_CMD_WATCH,
         OPH_TERM_CMD_CONDITIONS,
         OPH_TERM_CMD_HELP,
         OPH_TERM_CMD_HISTORY,

@@ -52,6 +52,16 @@ int oph_term_help(const char *cmd);
 \\twarranty\\n\\n\
 \\tShow the Disclaimer of Warranty.\\n"
 
+#define OPH_TERM_HELP_WATCH_SHORT "\"repeat command submission automatically\"\n"
+#define OPH_TERM_HELP_WATCH_LONG \
+"\e[1mUSAGE OF watch COMMAND\e[0m\n\n\
+\twatch [cmd]\n\n\
+\tRepeat the command [cmd] after 1 second.\n"
+#define OPH_TERM_HELP_WATCH_LONG2 \
+"USAGE OF watch COMMAND\\n\\n\
+\\twatch [cmd]\\n\\n\
+\\tRepeat the command [cmd] after 1 second.\\n"
+
 #define OPH_TERM_HELP_CONDITIONS_SHORT "\"show the conditions to redistribute the software\"\n"
 #define OPH_TERM_HELP_CONDITIONS_LONG \
 "\e[1mUSAGE OF conditions COMMAND\e[0m\n\n\

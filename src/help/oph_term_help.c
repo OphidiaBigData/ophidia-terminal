@@ -73,6 +73,10 @@ void print_version_usage() {
 void print_warranty_usage() {
     (print_json)?my_printf("%s",OPH_TERM_HELP_WARRANTY_LONG2):printf("%s",OPH_TERM_HELP_WARRANTY_LONG);
 }
+// Print usage for "watch"
+void print_watch_usage() {
+    (print_json)?my_printf("%s",OPH_TERM_HELP_WATCH_LONG2):printf("%s",OPH_TERM_HELP_WATCH_LONG);
+}
 // Print usage for "version"
 void print_conditions_usage() {
     (print_json)?my_printf("%s",OPH_TERM_HELP_CONDITIONS_LONG2):printf("%s",OPH_TERM_HELP_CONDITIONS_LONG);
@@ -169,6 +173,8 @@ void print_cmd_list() {
             (print_json)?my_printf("\\t%25s = %s",cmds[i],OPH_TERM_HELP_VERSION_SHORT):printf("\t%25s = %s",cmds[i],OPH_TERM_HELP_VERSION_SHORT);
         } else if (!strcmp(cmds[i],OPH_TERM_CMD_WARRANTY)) {
             (print_json)?my_printf("\\t%25s = %s",cmds[i],OPH_TERM_HELP_WARRANTY_SHORT):printf("\t%25s = %s",cmds[i],OPH_TERM_HELP_WARRANTY_SHORT);
+        } else if (!strcmp(cmds[i],OPH_TERM_CMD_WATCH)) {
+            (print_json)?my_printf("\\t%25s = %s",cmds[i],OPH_TERM_HELP_WATCH_SHORT):printf("\t%25s = %s",cmds[i],OPH_TERM_HELP_WATCH_SHORT);
         } else if (!strcmp(cmds[i],OPH_TERM_CMD_CONDITIONS)) {
             (print_json)?my_printf("\\t%25s = %s",cmds[i],OPH_TERM_HELP_CONDITIONS_SHORT):printf("\t%25s = %s",cmds[i],OPH_TERM_HELP_CONDITIONS_SHORT);
         } else if (!strcmp(cmds[i],OPH_TERM_CMD_ENV)) {
@@ -357,6 +363,8 @@ int oph_term_help(const char *cmd) {
         print_version_usage();
     } else if (!strcmp(cmd,OPH_TERM_CMD_WARRANTY)) {
         print_warranty_usage();
+    } else if (!strcmp(cmd,OPH_TERM_CMD_WATCH)) {
+        print_watch_usage();
     } else if (!strcmp(cmd,OPH_TERM_CMD_CONDITIONS)) {
         print_conditions_usage();
     } else if (!strcmp(cmd,OPH_TERM_CMD_ENV)) {

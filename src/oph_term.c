@@ -619,13 +619,34 @@ char *oph_term_arguments_generator(const char *text, int state) {
   }
   if (i==rl_end)
 	  return NULL;
-  if (bracket) sprintf(opname,"oph_massive");
-  else for (j = i; j < rl_end; j++) {
-	if (rl_line_buffer[j]==' '){
-		break;
-	} else {
-		opname[k] = rl_line_buffer[j];
-		k++;
+  if (bracket) sprintf(opname,OPH_TERM_CMD_MASSIVE);
+  else
+  {
+	for (j = i; j < rl_end; j++) {
+		if (rl_line_buffer[j]==' '){
+			break;
+		} else {
+			opname[k] = rl_line_buffer[j];
+			k++;
+		}
+	}
+	if (!strcmp(opname,OPH_TERM_CMD_WATCH)) {
+		k = 0;
+		memset(opname,0,100);
+		for (i = j; i < rl_end; i++) {
+			if (rl_line_buffer[i]!=' ')
+				break;
+			}
+		if (i==rl_end)
+			return NULL;
+		for (j = i; j < rl_end; j++) {
+			if (rl_line_buffer[j]==' '){
+				break;
+			} else {
+				opname[k] = rl_line_buffer[j];
+				k++;
+			}
+		}
 	}
   }
 
@@ -679,13 +700,33 @@ char *oph_term_arg_values_generator(const char *text, int state) {
   }
   if (i==rl_end)
 	  return NULL;
-  if (bracket) sprintf(opname,"oph_massive");
-  else for (j = i; j < rl_end; j++) {
-	if (rl_line_buffer[j]==' '){
-		break;
-	} else {
-		opname[k] = rl_line_buffer[j];
-		k++;
+  if (bracket) sprintf(opname,OPH_TERM_CMD_MASSIVE);
+  else {
+	for (j = i; j < rl_end; j++) {
+		if (rl_line_buffer[j]==' ') {
+			break;
+		} else {
+			opname[k] = rl_line_buffer[j];
+			k++;
+		}
+	}
+	if (!strcmp(opname,OPH_TERM_CMD_WATCH)) {
+		k = 0;
+		memset(opname,0,100);
+		for (i = j; i < rl_end; i++) {
+			if (rl_line_buffer[i]!=' ')
+				break;
+			}
+		if (i==rl_end)
+			return NULL;
+		for (j = i; j < rl_end; j++) {
+			if (rl_line_buffer[j]==' '){
+				break;
+			} else {
+				opname[k] = rl_line_buffer[j];
+				k++;
+			}
+		}
 	}
   }
 
@@ -848,6 +889,10 @@ char **oph_term_completion(char *text, int start, int end) {
 				if (rl_line_buffer[j]!=' ')
 					break;
 			}
+
+			size_t p = strlen(OPH_TERM_CMD_WATCH);
+			if (!strncmp(rl_line_buffer+j, OPH_TERM_CMD_WATCH, p)) for (p++; p && (j < rl_end) && rl_line_buffer[j]; p--) j++;
+
 			if (j!=rl_end && !strncmp(rl_line_buffer+j,OPH_TERM_ENV_OPH_PREFIX,OPH_TERM_ENV_OPH_PREFIX_LEN))
 			{
 				for (jj = 0; jj < rl_end; jj++)
@@ -879,7 +924,7 @@ char **oph_term_completion(char *text, int start, int end) {
 							short int q=0;
 							short int i=1;
 							memset(opname,0,100);
-							if (bracket) sprintf(opname,"oph_massive");
+							if (bracket) sprintf(opname,OPH_TERM_CMD_MASSIVE);
 							else for (k = j; k < rl_end; k++) {
 								if (rl_line_buffer[k]==' '){
 									break;
@@ -940,7 +985,7 @@ char **oph_term_completion(char *text, int start, int end) {
 							short int q=0;
 							short int i=1;
 							memset(opname,0,100);
-							if (bracket) sprintf(opname,"oph_massive");
+							if (bracket) sprintf(opname,OPH_TERM_CMD_MASSIVE);
 							else for (k = j; k < rl_end; k++) {
 								if (rl_line_buffer[k]==' '){
 									break;
@@ -1158,6 +1203,7 @@ int main(int argc, char **argv, char **envp) {
     char *saveptr;
     short int exec_alias = 0;
     int alias_substitutions = 0;
+    short int watching = 0;
 
     /* INIT ENV */
     res = oph_term_env_init(&hashtbl);
@@ -1928,6 +1974,23 @@ int main(int argc, char **argv, char **envp) {
         	continue;
         }
 
+	watching = 0;
+	if (!strcmp(cursor,OPH_TERM_CMD_WATCH))
+        { // WATCH
+        	alias_substitutions = 0;
+		cursor = strtok_r (NULL," \t\n\"",&saveptr);
+		if (!cursor) {
+			(print_json)?my_fprintf(stderr,"Command not present [CODE %d]\\n",OPH_TERM_INVALID_PARAM_VALUE):fprintf(stderr,"\e[1;31mCommand not present [CODE %d]\e[0m\n",OPH_TERM_INVALID_PARAM_VALUE);
+			if (print_json) print_oph_term_output_json(hashtbl);
+			if (exec_one_statement) {
+				oph_term_return = OPH_TERM_INVALID_PARAM_VALUE;
+				break;
+			}
+			continue;
+		}
+		else watching = 1;
+        }
+
         // switch on cmd name
         if (!strcmp(cursor,OPH_TERM_CMD_QUIT) || !strcmp(cursor,OPH_TERM_CMD_EXIT))
         { // QUIT or EXIT
@@ -2020,6 +2083,10 @@ int main(int argc, char **argv, char **envp) {
             linecopy = new_line;
             new_line = NULL;
             cursor = strtok_r (linecopy," \t\n",&saveptr);
+
+	    if (watching && cursor)
+		cursor = strtok_r (NULL," \t\n",&saveptr);
+
 #ifndef INTERFACE_TYPE_IS_GSI
             if (!hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_USER)) {
                 (print_json)?my_fprintf(stderr,"OPH_USER not set [CODE %d]\\n",OPH_TERM_INVALID_PARAM_VALUE):fprintf(stderr,"\e[1;31mOPH_USER not set [CODE %d]\e[0m\n",OPH_TERM_INVALID_PARAM_VALUE);
@@ -2107,7 +2174,7 @@ int main(int argc, char **argv, char **envp) {
             		break;
             	}
                 continue;
-			}
+	    }
             if (strchr(current_operator,';')) {
                 (print_json)?my_fprintf(stderr,"Invalid operator name %s [CODE %d]\\n",current_operator,OPH_TERM_INVALID_PARAM_VALUE):fprintf(stderr,"\e[1;31mInvalid operator name %s [CODE %d]\e[0m\n",current_operator,OPH_TERM_INVALID_PARAM_VALUE);
                 if (print_json) print_oph_term_output_json(hashtbl);
@@ -2116,7 +2183,7 @@ int main(int argc, char **argv, char **envp) {
             		break;
             	}
                 continue;
-			}
+	    }
             cursor = strtok_r (NULL,"\t\n\"",&saveptr);
             if (cursor) {
             	//trim heading spaces
