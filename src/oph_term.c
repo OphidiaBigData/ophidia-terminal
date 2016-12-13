@@ -3155,6 +3155,10 @@ int main(int argc, char **argv, char **envp) {
 				else if (!strcmp(tmp_status,"OPH_STATUS_RUNNING")) format = 3;
 				else if (!strcmp(tmp_status,"OPH_STATUS_WAITING")) format = 4;
 				else if (!strcmp(tmp_status,"OPH_STATUS_PENDING")) format = 5;
+				else if (!strcmp(tmp_status,"OPH_STATUS_RUNNING_ERROR")) {
+					free(tmp_status);
+					tmp_status = exit_status[end-i-1] = strdup("OPH_STATUS_RUNNING");
+				}
 			}
 
 			if (is_verbose)
