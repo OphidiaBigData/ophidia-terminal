@@ -23,8 +23,13 @@
 #include <readline/history.h>
 #include <signal.h>
 #include <pthread.h>
+
 extern int errno;
 extern int abort_view;
+
+int watching = 0;
+char *stored_line = NULL;
+int signal_raise = 0;
 
 int print_json = 0;
 #ifdef DEBUG_LEVEL
@@ -130,6 +135,24 @@ void print_startup_usage(char *arg0,FILE *stream) {
     (print_json)?my_fprintf(stream,"   Oph_Term will always try to perform variable substitution on the submitted workflow (no alias substitution).\\n"):fprintf(stream,"   Oph_Term will always try to perform variable substitution on the submitted workflow (no alias substitution).\n");
     (print_json)?my_fprintf(stream,"   With the option -j, Oph_Term will always return a JSON string with 5 keys: request, response, jobid, stdout and stderr.\\n\\n"):fprintf(stream,"   With the option -j, Oph_Term will always return a JSON string with 5 keys: request, response, jobid, stdout and stderr.\n\n");
 #endif
+}
+
+/* Reading number of secords for watching */
+int oph_get_winterval(char **cursor, char **saveptr, int *watching) {
+	if (!cursor || !saveptr)
+		return 1;
+	if (strcmp(*cursor, "-n"))
+		return 0;
+	*cursor = strtok_r (NULL," \t\n\"", saveptr);
+	if (*cursor) {
+		if (watching) {
+			*watching = (int)strtol(*cursor, NULL, 10);
+			if (*watching <= 0)
+				return 1;
+		}
+		*cursor = strtok_r (NULL," \t\n\"", saveptr);
+	}
+	return (!*cursor);
 }
 
 /* Startup options parsing */
@@ -1166,13 +1189,20 @@ pthread_t tid;
 void siginthandler(int signum) {
 	(void)signum;
 	abort_view = 1;
-	if (pthread_cancel(tid)) {
+	if (watching) {
+		(print_json)?my_fprintf(stderr,"\\n"):fprintf(stderr,"\n");
+		signal_raise = 1;
+	} else
 		(print_json)?my_fprintf(stderr,"Use 'quit' or 'exit' to terminate Oph_Term! Use 'kill' to cancel jobs!\\n"):fprintf(stderr,"\e[1;31m Use 'quit' or 'exit' to terminate Oph_Term! Use 'kill' to cancel jobs!\e[0m\n");
+	if (pthread_cancel(tid)) {
 		rl_replace_line("",0);
 		rl_forced_update_display();
-	} else {
-		(print_json)?my_fprintf(stderr,"\\n"):fprintf(stderr,"\n");
 	}
+	if (stored_line) {
+		free (stored_line);
+		stored_line = NULL;
+	}
+	watching = 0;
 }
 
 /* Oph_Term Main program */
@@ -1201,9 +1231,8 @@ int main(int argc, char **argv, char **envp) {
     short int exec_one_statement = 0;
     int oph_term_return = OPH_TERM_SUCCESS;
     char *saveptr;
-    short int exec_alias = 0;
+    short int exec_alias = 0, exec_alias2;
     int alias_substitutions = 0;
-    short int watching = 0;
 
     /* INIT ENV */
     res = oph_term_env_init(&hashtbl);
@@ -1845,44 +1874,53 @@ int main(int argc, char **argv, char **envp) {
          * if first time then INIT READLINE*/
         if (!exec_alias) {
             if (!exec_statement) {
-            	char tmp_prompt[OPH_TERM_MAX_LEN];
-            	memset(tmp_prompt,0,OPH_TERM_MAX_LEN);
-            	char tmp_session_code[OPH_TERM_MAX_LEN];
-            	memset(tmp_session_code,0,OPH_TERM_MAX_LEN);
-            	char tmp_session_code2[OPH_TERM_MAX_LEN];
-            	memset(tmp_session_code2,0,OPH_TERM_MAX_LEN);
-            	if (hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_SESSION_ID)) {
-            		if (oph_term_get_session_code((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_SESSION_ID),tmp_session_code)) {
-    					snprintf(tmp_session_code2,OPH_TERM_MAX_LEN,"%s",OPH_TERM_PROMPT);
-    				} else {
-    		            int l = strlen(tmp_session_code);
-    		            snprintf(tmp_session_code2,OPH_TERM_MAX_LEN,"[%.2s..%s] >>",tmp_session_code,tmp_session_code+l-4);
-    				}
-            	} else {
-            		snprintf(tmp_session_code2,OPH_TERM_MAX_LEN,"%s",OPH_TERM_PROMPT);
-            	}
-            	if (hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_PS1)) {
-            		if (!strcmp((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_PS1),"black")) {
-            			snprintf(tmp_prompt,OPH_TERM_MAX_LEN,OPH_TERM_BLACK_PROMPT,tmp_session_code2);
-            		} else if (!strcmp((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_PS1),"green")) {
-            			snprintf(tmp_prompt,OPH_TERM_MAX_LEN,OPH_TERM_GREEN_PROMPT,tmp_session_code2);
-            		} else if (!strcmp((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_PS1),"yellow")) {
-            			snprintf(tmp_prompt,OPH_TERM_MAX_LEN,OPH_TERM_YELLOW_PROMPT,tmp_session_code2);
-            		} else if (!strcmp((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_PS1),"blue")) {
-            			snprintf(tmp_prompt,OPH_TERM_MAX_LEN,OPH_TERM_BLUE_PROMPT,tmp_session_code2);
-            		} else if (!strcmp((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_PS1),"purple")) {
-            			snprintf(tmp_prompt,OPH_TERM_MAX_LEN,OPH_TERM_PURPLE_PROMPT,tmp_session_code2);
-            		} else if (!strcmp((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_PS1),"cyan")) {
-            			snprintf(tmp_prompt,OPH_TERM_MAX_LEN,OPH_TERM_CYAN_PROMPT,tmp_session_code2);
-            		} else if (!strcmp((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_PS1),"white")) {
-            			snprintf(tmp_prompt,OPH_TERM_MAX_LEN,OPH_TERM_WHITE_PROMPT,tmp_session_code2);
-            		} else {
-            			snprintf(tmp_prompt,OPH_TERM_MAX_LEN,OPH_TERM_RED_PROMPT,tmp_session_code2);
-            		}
-            	} else {
-            		snprintf(tmp_prompt,OPH_TERM_MAX_LEN,OPH_TERM_RED_PROMPT,tmp_session_code2);
-            	}
-            	line = readline (tmp_prompt);
+		if (watching && stored_line)
+			sleep(watching);
+		if (watching && stored_line)
+			line = strdup(stored_line);
+		else {
+		    	char tmp_prompt[OPH_TERM_MAX_LEN];
+		    	memset(tmp_prompt,0,OPH_TERM_MAX_LEN);
+		    	char tmp_session_code[OPH_TERM_MAX_LEN];
+		    	memset(tmp_session_code,0,OPH_TERM_MAX_LEN);
+		    	char tmp_session_code2[OPH_TERM_MAX_LEN];
+		    	memset(tmp_session_code2,0,OPH_TERM_MAX_LEN);
+			if (!signal_raise) {
+			    	if (hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_SESSION_ID)) {
+			    		if (oph_term_get_session_code((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_SESSION_ID),tmp_session_code)) {
+		    				snprintf(tmp_session_code2,OPH_TERM_MAX_LEN,"%s",OPH_TERM_PROMPT);
+		    			} else {
+		    				int l = strlen(tmp_session_code);
+		   				snprintf(tmp_session_code2,OPH_TERM_MAX_LEN,"[%.2s..%s] >>",tmp_session_code,tmp_session_code+l-4);
+		    			}
+			    	} else {
+			    		snprintf(tmp_session_code2,OPH_TERM_MAX_LEN,"%s",OPH_TERM_PROMPT);
+			    	}
+			}
+			signal_raise = 0;
+		    	if (hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_PS1)) {
+		    		if (!strcmp((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_PS1),"black")) {
+		    			snprintf(tmp_prompt,OPH_TERM_MAX_LEN,OPH_TERM_BLACK_PROMPT,tmp_session_code2);
+		    		} else if (!strcmp((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_PS1),"green")) {
+		    			snprintf(tmp_prompt,OPH_TERM_MAX_LEN,OPH_TERM_GREEN_PROMPT,tmp_session_code2);
+		    		} else if (!strcmp((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_PS1),"yellow")) {
+		    			snprintf(tmp_prompt,OPH_TERM_MAX_LEN,OPH_TERM_YELLOW_PROMPT,tmp_session_code2);
+		    		} else if (!strcmp((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_PS1),"blue")) {
+		    			snprintf(tmp_prompt,OPH_TERM_MAX_LEN,OPH_TERM_BLUE_PROMPT,tmp_session_code2);
+		    		} else if (!strcmp((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_PS1),"purple")) {
+		    			snprintf(tmp_prompt,OPH_TERM_MAX_LEN,OPH_TERM_PURPLE_PROMPT,tmp_session_code2);
+		    		} else if (!strcmp((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_PS1),"cyan")) {
+		    			snprintf(tmp_prompt,OPH_TERM_MAX_LEN,OPH_TERM_CYAN_PROMPT,tmp_session_code2);
+		    		} else if (!strcmp((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_PS1),"white")) {
+		    			snprintf(tmp_prompt,OPH_TERM_MAX_LEN,OPH_TERM_WHITE_PROMPT,tmp_session_code2);
+		    		} else {
+		    			snprintf(tmp_prompt,OPH_TERM_MAX_LEN,OPH_TERM_RED_PROMPT,tmp_session_code2);
+		    		}
+		    	} else {
+		    		snprintf(tmp_prompt,OPH_TERM_MAX_LEN,OPH_TERM_RED_PROMPT,tmp_session_code2);
+		    	}
+			line = readline (tmp_prompt);
+		}
             } else {
             	line = exec_statement;
             	exec_one_statement = 1;
@@ -1961,10 +1999,9 @@ int main(int argc, char **argv, char **envp) {
             snprintf(command_line,OPH_TERM_MAX_LEN,"%s",line);
     	}
 
-    	exec_alias = 0;
-
         cursor = strtok_r (linecopy," \t\n",&saveptr); // extract cmd name
         if (!cursor) {
+	    	exec_alias = 0;
         	alias_substitutions = 0;
         	if (print_json) print_oph_term_output_json(hashtbl);
         	if (exec_one_statement) {
@@ -1974,7 +2011,9 @@ int main(int argc, char **argv, char **envp) {
         	continue;
         }
 
-	watching = 0;
+    	exec_alias2 = exec_alias;
+    	exec_alias = 0;
+
 	if (!strcmp(cursor,OPH_TERM_CMD_WATCH))
         { // WATCH
         	alias_substitutions = 0;
@@ -1988,8 +2027,24 @@ int main(int argc, char **argv, char **envp) {
 			}
 			continue;
 		}
-		else watching = 1;
-        }
+		watching = 2;
+		if (oph_get_winterval(&cursor, &saveptr, &watching)) {
+			(print_json)?my_fprintf(stderr,"Wrong use of option '-n' [CODE %d]\\n",OPH_TERM_INVALID_PARAM_VALUE):fprintf(stderr,"\e[1;31mWrong use of option '-n' [CODE %d]\e[0m\n",OPH_TERM_INVALID_PARAM_VALUE);
+			if (print_json) print_oph_term_output_json(hashtbl);
+			if (exec_one_statement) {
+				oph_term_return = OPH_TERM_INVALID_PARAM_VALUE;
+				break;
+			}
+			continue;
+		}
+		if (stored_line) free (stored_line);
+		stored_line = strdup(line);
+	}
+
+	if (watching && !exec_alias2) {
+		if (system("clear")) fprintf(stderr,"Error in executing command 'clear'\n");
+		(print_json)?my_fprintf(stdout,"Watching every %d seconds\\n\\n", watching):fprintf(stdout,"Watching every %d seconds\n\n", watching);
+	}
 
         // switch on cmd name
         if (!strcmp(cursor,OPH_TERM_CMD_QUIT) || !strcmp(cursor,OPH_TERM_CMD_EXIT))
@@ -2084,8 +2139,18 @@ int main(int argc, char **argv, char **envp) {
             new_line = NULL;
             cursor = strtok_r (linecopy," \t\n",&saveptr);
 
-	    if (watching && cursor)
+	    if (watching && !exec_alias2 && cursor) {
 		cursor = strtok_r (NULL," \t\n",&saveptr);
+		if (oph_get_winterval(&cursor, &saveptr, NULL)) {
+			(print_json)?my_fprintf(stderr,"Wrong use of option '-n' [CODE %d]\\n",OPH_TERM_INVALID_PARAM_VALUE):fprintf(stderr,"\e[1;31mWrong use of option '-n' [CODE %d]\e[0m\n",OPH_TERM_INVALID_PARAM_VALUE);
+			if (print_json) print_oph_term_output_json(hashtbl);
+			if (exec_one_statement) {
+				oph_term_return = OPH_TERM_INVALID_PARAM_VALUE;
+				break;
+			}
+			continue;
+		}
+	    }
 
 #ifndef INTERFACE_TYPE_IS_GSI
             if (!hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_USER)) {
@@ -2656,6 +2721,20 @@ int main(int argc, char **argv, char **envp) {
             linecopy = new_line;
             new_line = NULL;
             cursor = strtok_r (linecopy," \t\n",&saveptr);
+
+	    if (watching && !exec_alias2 && cursor) {
+		cursor = strtok_r (NULL," \t\n",&saveptr);
+		if (oph_get_winterval(&cursor, &saveptr, NULL)) {
+			(print_json)?my_fprintf(stderr,"Wrong use of option '-n' [CODE %d]\\n",OPH_TERM_INVALID_PARAM_VALUE):fprintf(stderr,"\e[1;31mWrong use of option '-n' [CODE %d]\e[0m\n",OPH_TERM_INVALID_PARAM_VALUE);
+			if (print_json) print_oph_term_output_json(hashtbl);
+			if (exec_one_statement) {
+				oph_term_return = OPH_TERM_INVALID_PARAM_VALUE;
+				break;
+			}
+			continue;
+		}
+	    }
+
 #ifndef INTERFACE_TYPE_IS_GSI
             if (!hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_USER)) {
                 (print_json)?my_fprintf(stderr,"OPH_USER not set [CODE %d]\\n",OPH_TERM_INVALID_PARAM_VALUE):fprintf(stderr,"\e[1;31mOPH_USER not set [CODE %d]\e[0m\n",OPH_TERM_INVALID_PARAM_VALUE);
@@ -2763,7 +2842,7 @@ int main(int argc, char **argv, char **envp) {
             		memset(tmp_marker,0,OPH_TERM_MAX_LEN);
             		memset(tmp_workflow,0,OPH_TERM_MAX_LEN);
 
-            		char *saveptr2,*tmp_cursor;
+            		char *saveptr2 = NULL, *tmp_cursor;
             		snprintf(tmp_job_id,OPH_TERM_MAX_LEN,"%s",cursor);
             		tmp_cursor = strtok_r (cursor,OPH_TERM_WORKFLOW_DELIMITER,&saveptr2);
             		if (!tmp_cursor) {
@@ -2824,30 +2903,40 @@ int main(int argc, char **argv, char **envp) {
             		// Retrieve iterations and interval
             		cursor = strtok_r (NULL," \t\n",&saveptr);
             		if (cursor) {
-						iterations_num = (int) strtol(cursor,NULL,10);
-						if (iterations_num < 0) {
-            				(print_json)?my_fprintf(stderr,"Iterations must be >= 0 [CODE %d]\\n",OPH_TERM_INVALID_PARAM_VALUE):fprintf(stderr,"\e[1;31mIterations must be >= 1 [CODE %d]\e[0m\n",OPH_TERM_INVALID_PARAM_VALUE);
-            				if (print_json) print_oph_term_output_json(hashtbl);
-            				if (exec_one_statement) {
-            					oph_term_return = OPH_TERM_INVALID_PARAM_VALUE;
-            					break;
-            				}
-            				continue;
-						}
-						cursor = strtok_r (NULL," \t\n",&saveptr);
-						if (cursor) {
-							time_interval = (int) strtol(cursor,NULL,10);
-							if (time_interval < 1) {
-	            				(print_json)?my_fprintf(stderr,"Time interval must be >= 1 seconds [CODE %d]\\n",OPH_TERM_INVALID_PARAM_VALUE):fprintf(stderr,"\e[1;31mTime interval must be >= 1 seconds [CODE %d]\e[0m\n",OPH_TERM_INVALID_PARAM_VALUE);
-	            				if (print_json) print_oph_term_output_json(hashtbl);
-	            				if (exec_one_statement) {
-	            					oph_term_return = OPH_TERM_INVALID_PARAM_VALUE;
-	            					break;
-	            				}
-	            				continue;
-							}
-						}
+				if (watching) {
+					watching = 0;
+					(print_json)?my_fprintf(stderr,"This command cannot be repeated during watching [CODE %d]\\n",OPH_TERM_INVALID_PARAM_VALUE):fprintf(stderr,"\e[1;31mThis command cannot be repeated during watching [CODE %d]\e[0m\n",OPH_TERM_INVALID_PARAM_VALUE);
+					if (print_json) print_oph_term_output_json(hashtbl);
+					if (exec_one_statement) {
+						oph_term_return = OPH_TERM_INVALID_PARAM_VALUE;
+						break;
 					}
+					continue;
+				}
+				iterations_num = (int) strtol(cursor,NULL,10);
+				if (iterations_num < 0) {
+					(print_json)?my_fprintf(stderr,"Iterations must be >= 0 [CODE %d]\\n",OPH_TERM_INVALID_PARAM_VALUE):fprintf(stderr,"\e[1;31mIterations must be >= 1 [CODE %d]\e[0m\n",OPH_TERM_INVALID_PARAM_VALUE);
+					if (print_json) print_oph_term_output_json(hashtbl);
+					if (exec_one_statement) {
+						oph_term_return = OPH_TERM_INVALID_PARAM_VALUE;
+						break;
+					}
+					continue;
+				}
+				cursor = strtok_r (NULL," \t\n",&saveptr);
+				if (cursor) {
+					time_interval = (int) strtol(cursor,NULL,10);
+					if (time_interval < 1) {
+						(print_json)?my_fprintf(stderr,"Time interval must be >= 1 seconds [CODE %d]\\n",OPH_TERM_INVALID_PARAM_VALUE):fprintf(stderr,"\e[1;31mTime interval must be >= 1 seconds [CODE %d]\e[0m\n",OPH_TERM_INVALID_PARAM_VALUE);
+						if (print_json) print_oph_term_output_json(hashtbl);
+						if (exec_one_statement) {
+							oph_term_return = OPH_TERM_INVALID_PARAM_VALUE;
+							break;
+						}
+						continue;
+					}
+				}
+			}
 
             		int open_img = !strcmp((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_IMGS),"open");
             		int save_img = open_img || !strcmp((char *)hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_TERM_IMGS),"save");
@@ -2868,7 +2957,7 @@ int main(int argc, char **argv, char **envp) {
             		memset(tmp_marker,0,OPH_TERM_MAX_LEN);
             		memset(tmp_workflow,0,OPH_TERM_MAX_LEN);
 
-            		char *saveptr2,*tmp_cursor;
+            		char *saveptr2 = NULL, *tmp_cursor;
             		tmp_cursor = strtok_r (cursor,OPH_TERM_MARKER_DELIMITER,&saveptr2);
             		if (!tmp_cursor) {
 #ifndef NO_WORKFLOW
@@ -2914,6 +3003,16 @@ int main(int argc, char **argv, char **envp) {
             			// Retrieve iterations and interval
             			cursor = strtok_r (NULL," \t\n",&saveptr);
             			if (cursor) {
+					if (watching) {
+						watching = 0;
+						(print_json)?my_fprintf(stderr,"This command cannot be repeated during watching [CODE %d]\\n",OPH_TERM_INVALID_PARAM_VALUE):fprintf(stderr,"\e[1;31mThis command cannot be repeated during watching [CODE %d]\e[0m\n",OPH_TERM_INVALID_PARAM_VALUE);
+						if (print_json) print_oph_term_output_json(hashtbl);
+						if (exec_one_statement) {
+							oph_term_return = OPH_TERM_INVALID_PARAM_VALUE;
+							break;
+						}
+						continue;
+					}
             				iterations_num = (int) strtol(cursor,NULL,10);
             				if (iterations_num < 0) {
             					(print_json)?my_fprintf(stderr,"Iterations must be >= 0 [CODE %d]\\n",OPH_TERM_INVALID_PARAM_VALUE):fprintf(stderr,"\e[1;31mIterations must be >= 1 [CODE %d]\e[0m\n",OPH_TERM_INVALID_PARAM_VALUE);
@@ -3001,6 +3100,16 @@ int main(int argc, char **argv, char **envp) {
             			// Retrieve iterations and interval
             			cursor = strtok_r (NULL," \t\n",&saveptr);
             			if (cursor) {
+					if (watching) {
+						watching = 0;
+						(print_json)?my_fprintf(stderr,"This command cannot be repeated during watching [CODE %d]\\n",OPH_TERM_INVALID_PARAM_VALUE):fprintf(stderr,"\e[1;31mThis command cannot be repeated during watching [CODE %d]\e[0m\n",OPH_TERM_INVALID_PARAM_VALUE);
+						if (print_json) print_oph_term_output_json(hashtbl);
+						if (exec_one_statement) {
+							oph_term_return = OPH_TERM_INVALID_PARAM_VALUE;
+							break;
+						}
+						continue;
+					}
             				iterations_num = (int) strtol(cursor,NULL,10);
             				if (iterations_num < 0) {
             					(print_json)?my_fprintf(stderr,"Iterations must be >= 0 [CODE %d]\\n",OPH_TERM_INVALID_PARAM_VALUE):fprintf(stderr,"\e[1;31mIterations must be >= 1 [CODE %d]\e[0m\n",OPH_TERM_INVALID_PARAM_VALUE);
@@ -3065,6 +3174,20 @@ int main(int argc, char **argv, char **envp) {
             linecopy = new_line;
             new_line = NULL;
             cursor = strtok_r (linecopy," \t\n",&saveptr);
+
+	    if (watching && !exec_alias2 && cursor) {
+		cursor = strtok_r (NULL," \t\n",&saveptr);
+		if (oph_get_winterval(&cursor, &saveptr, NULL)) {
+			(print_json)?my_fprintf(stderr,"Wrong use of option '-n' [CODE %d]\\n",OPH_TERM_INVALID_PARAM_VALUE):fprintf(stderr,"\e[1;31mWrong use of option '-n' [CODE %d]\e[0m\n",OPH_TERM_INVALID_PARAM_VALUE);
+			if (print_json) print_oph_term_output_json(hashtbl);
+			if (exec_one_statement) {
+				oph_term_return = OPH_TERM_INVALID_PARAM_VALUE;
+				break;
+			}
+			continue;
+		}
+	    }
+
 #ifndef INTERFACE_TYPE_IS_GSI
             if (!hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_USER)) {
                 (print_json)?my_fprintf(stderr,"OPH_USER not set [CODE %d]\\n",OPH_TERM_INVALID_PARAM_VALUE):fprintf(stderr,"\e[1;31mOPH_USER not set [CODE %d]\e[0m\n",OPH_TERM_INVALID_PARAM_VALUE);
@@ -3713,6 +3836,20 @@ int main(int argc, char **argv, char **envp) {
             linecopy = new_line;
             new_line = NULL;
             cursor = strtok_r (linecopy," \t\n",&saveptr);
+
+	    if (watching && !exec_alias2 && cursor) {
+		cursor = strtok_r (NULL," \t\n",&saveptr);
+		if (oph_get_winterval(&cursor, &saveptr, NULL)) {
+			(print_json)?my_fprintf(stderr,"Wrong use of option '-n' [CODE %d]\\n",OPH_TERM_INVALID_PARAM_VALUE):fprintf(stderr,"\e[1;31mWrong use of option '-n' [CODE %d]\e[0m\n",OPH_TERM_INVALID_PARAM_VALUE);
+			if (print_json) print_oph_term_output_json(hashtbl);
+			if (exec_one_statement) {
+				oph_term_return = OPH_TERM_INVALID_PARAM_VALUE;
+				break;
+			}
+			continue;
+		}
+	    }
+
 #ifndef INTERFACE_TYPE_IS_GSI
         	if (!hashtbl_get(hashtbl,OPH_TERM_ENV_OPH_USER)) {
         		(print_json)?my_fprintf(stderr,"OPH_USER not set [CODE %d]\\n",OPH_TERM_INVALID_PARAM_VALUE):fprintf(stderr,"\e[1;31mOPH_USER not set [CODE %d]\e[0m\n",OPH_TERM_INVALID_PARAM_VALUE);
@@ -4055,6 +4192,19 @@ int main(int argc, char **argv, char **envp) {
             linecopy = new_line;
             new_line = NULL;
             cursor = strtok_r (linecopy," \t\n",&saveptr);
+
+	    if (watching && !exec_alias2 && cursor) {
+		cursor = strtok_r (NULL," \t\n",&saveptr);
+		if (oph_get_winterval(&cursor, &saveptr, NULL)) {
+			(print_json)?my_fprintf(stderr,"Wrong use of option '-n' [CODE %d]\\n",OPH_TERM_INVALID_PARAM_VALUE):fprintf(stderr,"\e[1;31mWrong use of option '-n' [CODE %d]\e[0m\n",OPH_TERM_INVALID_PARAM_VALUE);
+			if (print_json) print_oph_term_output_json(hashtbl);
+			if (exec_one_statement) {
+				oph_term_return = OPH_TERM_INVALID_PARAM_VALUE;
+				break;
+			}
+			continue;
+		}
+	    }
 
             cursor = strtok_r (NULL," \t\n\"",&saveptr);
             if (!cursor) {
