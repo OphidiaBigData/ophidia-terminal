@@ -605,7 +605,7 @@ int oph_workflow_print_status(oph_workflow *workflow, int save_img, int open_img
 							} else if (!strcmp(((oph_json_obj_grid *) json->response[j].objcontent)[0].values[z][7-offset],"OPH_STATUS_RUNNING")) {
 							    memset(color,0,OPH_WORKFLOW_RANK_SIZE);
 							    snprintf(color,OPH_WORKFLOW_RANK_SIZE,"%s","orange");
-							} else if (strstr(((oph_json_obj_grid *) json->response[j].objcontent)[0].values[z][7-offset],"ERROR")) {
+							} else if (strstr(((oph_json_obj_grid *) json->response[j].objcontent)[0].values[z][7-offset],"ERROR") || strstr(((oph_json_obj_grid *) json->response[j].objcontent)[0].values[z][7-offset],"ABORTED")) {
 							    memset(color,0,OPH_WORKFLOW_RANK_SIZE);
 							    snprintf(color,OPH_WORKFLOW_RANK_SIZE,"%s","brown1");
 							} else if (strstr(((oph_json_obj_grid *) json->response[j].objcontent)[0].values[z][7-offset],"SKIPPED")) {
@@ -614,7 +614,7 @@ int oph_workflow_print_status(oph_workflow *workflow, int save_img, int open_img
 							} else if (strstr(((oph_json_obj_grid *) json->response[j].objcontent)[0].values[z][7-offset],"WAITING")) {
 							    memset(color,0,OPH_WORKFLOW_RANK_SIZE);
 							    snprintf(color,OPH_WORKFLOW_RANK_SIZE,"%s","cyan");
-							} else {
+							} else if (strstr(((oph_json_obj_grid *) json->response[j].objcontent)[0].values[z][7-offset],"PENDING")) {
 							    memset(color,0,OPH_WORKFLOW_RANK_SIZE);
 							    snprintf(color,OPH_WORKFLOW_RANK_SIZE,"%s","peachpuff");
 							}
