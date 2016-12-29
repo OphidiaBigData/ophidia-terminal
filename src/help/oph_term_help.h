@@ -55,12 +55,12 @@ int oph_term_help(const char *cmd);
 #define OPH_TERM_HELP_WATCH_SHORT "\"repeat command submission automatically\"\n"
 #define OPH_TERM_HELP_WATCH_LONG \
 "\e[1mUSAGE OF watch COMMAND\e[0m\n\n\
-\twatch [-n seconds] [cmd]\n\n\
-\tRuns the command [cmd] repeatedly, displaying its output. By default, the program is run every 2 seconds; use -n to specify a different interval.\n"
+\twatch [-n seconds] cmd\n\n\
+\tRuns the command \"cmd\" repeatedly, displaying its output. By default, the program is run every 2 seconds; use \"-n\" to specify a different interval.\n"
 #define OPH_TERM_HELP_WATCH_LONG2 \
 "USAGE OF watch COMMAND\\n\\n\
-\\twatch [-n seconds] [cmd]\\n\\n\
-\\tRuns the command [cmd] repeatedly, displaying its output. By default, the program is run every 2 seconds; use -n to specify a different interval.\\n"
+\\twatch [-n seconds] cmd\\n\\n\
+\\tRuns the command \\\"cmd\\\" repeatedly, displaying its output. By default, the program is run every 2 seconds; use \\\"-n\\\" to specify a different interval.\\n"
 
 #define OPH_TERM_HELP_CONDITIONS_SHORT "\"show the conditions to redistribute the software\"\n"
 #define OPH_TERM_HELP_CONDITIONS_LONG \
@@ -254,8 +254,8 @@ int oph_term_help(const char *cmd);
 #define OPH_TERM_HELP_VIEW_SHORT "\"view jobs output/status\"\n"
 #define OPH_TERM_HELP_VIEW_LONG \
 "\e[1mUSAGE OF view COMMAND\e[0m\n\n\
-\tview WorkflowID[#MarkerID] [iterations [interval]]\n\
-\tview -j JobID [iterations [interval]]\n\n\
+\tview WorkflowID[#MarkerID] [-s status] [iterations [interval]]\n\
+\tview -j JobID [-s status] [iterations [interval]]\n\n\
 \tView the output/status of a workflow associated to the current session, identified by a workflow id, or view\n\
 \tthe output/status of a particular task associated to the current session, identified by a workflow id and a marker id.\n\
 \tWith option \"-j\" view the output/status associated to a particular JobID, even belonging to a different session.\n\
@@ -265,12 +265,14 @@ int oph_term_help(const char *cmd);
 \ta combination of workflow id and marker id.\n\
 \tThe output will be prefixed with a string with the format \"[workflowid#markerid] command [jobid]\".\n\
 \tAccording to the value of OPH_TERM_IMGS, it can produce an image representing the real-time status of a multi-task workflow.\n\
+\tFor running workflows, the option \"-s\" can be used to set a bitmap \"status\" and filter jobs based on their status\n\
+\t(type \"man OPH_RESUME\" and refer to argument \"status_filter\" for further information).\n\
 \tIt is also possible to specify the number of iterations the command will perform (0 for viewing status until workflow ends)\n\
 \tand the time interval (in seconds) between iterations (default is 5 seconds).\n"
 #define OPH_TERM_HELP_VIEW_LONG2 \
 "USAGE OF view COMMAND\\n\\n\
-\\tview WorkflowID[#MarkerID] [iterations [interval]]\\n\
-\\tview -j JobID [iterations [interval]]\\n\\n\
+\\tview WorkflowID[#MarkerID] [-s status] [iterations [interval]]\\n\
+\\tview -j JobID [-s status] [iterations [interval]]\\n\\n\
 \\tView the output/status of a workflow associated to the current session, identified by a workflow id, or view\\n\
 \\tthe output/status of a particular task associated to the current session, identified by a workflow id and a marker id.\\n\
 \\tWith option \\\"-j\\\" view the output/status associated to a particular JobID, even belonging to a different session.\\n\
@@ -280,6 +282,8 @@ int oph_term_help(const char *cmd);
 \\ta combination of workflow id and marker id.\\n\
 \\tThe output will be prefixed with a string with the format \\\"[workflowid#markerid] command [jobid]\\\".\\n\
 \\tAccording to the value of OPH_TERM_IMGS, it can produce an image representing the real-time status of a multi-task workflow.\\n\
+\\tFor running workflows, the option \\\"-s\\\" can be used to set a bitmap \\\"status\\\" and filter jobs based on their status\\n\
+\\t(type \\\"man OPH_RESUME\\\" and refer to argument \\\"status_filter\\\" for further information).\\n\
 \\tIt is also possible to specify the number of iterations the command will perform (0 for viewing status until workflow ends)\\n\
 \\tand the time interval (in seconds) between iterations (default is 5 seconds).\\n"
 #else

@@ -3000,8 +3000,18 @@ int main(int argc, char **argv, char **envp) {
 
             			n += snprintf(submission_string+n,OPH_TERM_MAX_LEN-n,"id=%s;id_type=marker;",tmp_marker);
 
-            			// Retrieve iterations and interval
             			cursor = strtok_r (NULL," \t\n",&saveptr);
+
+            			// Retrieve status filter
+            			if (cursor && !strcmp(cursor,"-s")) {
+					cursor = strtok_r (NULL," \t\n",&saveptr);
+					if (cursor) {
+						n += snprintf(submission_string+n,OPH_TERM_MAX_LEN-n,"status_filter=%s;",cursor);
+						cursor = strtok_r (NULL," \t\n",&saveptr);
+					}
+				}
+
+				// Retrieve iterations and interval
             			if (cursor) {
 					if (watching) {
 						watching = 0;
@@ -3097,9 +3107,19 @@ int main(int argc, char **argv, char **envp) {
 
             			n += snprintf(submission_string+n,OPH_TERM_MAX_LEN-n,"id=%s;",tmp_workflow);
 
-            			// Retrieve iterations and interval
             			cursor = strtok_r (NULL," \t\n",&saveptr);
-            			if (cursor) {
+
+            			// Retrieve status filter
+            			if (cursor && !strcmp(cursor,"-s")) {
+					cursor = strtok_r (NULL," \t\n",&saveptr);
+					if (cursor) {
+						n += snprintf(submission_string+n,OPH_TERM_MAX_LEN-n,"status_filter=%s;",cursor);
+						cursor = strtok_r (NULL," \t\n",&saveptr);
+					}
+				}
+
+            			// Retrieve iterations and interval
+				if (cursor) {
 					if (watching) {
 						watching = 0;
 						(print_json)?my_fprintf(stderr,"This command cannot be repeated during watching [CODE %d]\\n",OPH_TERM_INVALID_PARAM_VALUE):fprintf(stderr,"\e[1;31mThis command cannot be repeated during watching [CODE %d]\e[0m\n",OPH_TERM_INVALID_PARAM_VALUE);
