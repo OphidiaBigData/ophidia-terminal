@@ -326,7 +326,49 @@ size_t _write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
 		return 0;
 	}
 
-	if (store_result_global) // Async mode
+	// Check for exceptions
+	char processFailed = 0;
+	xpathObj = xmlXPathEvalExpression((const xmlChar *)"/wps:ExecuteResponse/wps:Status/wps:ProcessFailed",xpathCtx);
+	if(!xpathObj) {
+		(print_json)?my_fprintf(stderr,"Error: unable to evaluate xpath expression\\n"):fprintf(stderr,"\e[1;31mError: unable to evaluate xpath expression\e[0m\n");
+		xmlXPathFreeContext(xpathCtx);
+		xmlFreeDoc(doc);
+		xmlFreeParserCtxt(ctxt);
+		return 0;
+	}
+	if (xpathObj->nodesetval && xpathObj->nodesetval->nodeNr) processFailed = 1;
+	xmlXPathFreeObject(xpathObj);
+
+	xmlChar *content = NULL;
+	if (processFailed)
+	{
+		xpathObj = xmlXPathEvalExpression((const xmlChar *)"/wps:ExecuteResponse/wps:Status/wps:ProcessFailed/wps:ExceptionReport/ows:Exception/ows:ExceptionText/text()",xpathCtx);
+		if(!xpathObj || !xpathObj->nodesetval || !xpathObj->nodesetval->nodeNr) {
+			(print_json)?my_fprintf(stderr,"Error: unable to evaluate xpath expression\\n"):fprintf(stderr,"\e[1;31mError: unable to evaluate xpath expression\e[0m\n");
+			xmlXPathFreeContext(xpathCtx);
+			xmlFreeDoc(doc);
+			xmlFreeParserCtxt(ctxt);
+			return 0;
+		}
+
+		node = xpathObj->nodesetval->nodeTab[0];
+		if (node) {
+			content = xmlNodeGetContent(node);
+			if (content) {
+				const char *_content = (const char *)content;
+				size_t i, j, len = strlen(_content);
+				char tmp[1 + len];
+				for (i = j = 0; i < len; i++)
+					if (_content[i] != '\\')
+						tmp[j++] = ((const char *)content)[i];
+				tmp[j] = 0;
+				(print_json)?my_fprintf(stderr,"Error: %s\\n", tmp):fprintf(stderr,"\e[1;31mError: %s\e[0m\n", tmp);
+				xmlFree(content);
+			}
+		}
+		xmlXPathFreeObject(xpathObj);
+	}
+	else if (store_result_global) // Async mode
 	{
 		xpathObj = xmlXPathEvalExpression((const xmlChar *)"/wps:ExecuteResponse/wps:Status/wps:ProcessAccepted",xpathCtx);
 		if(!xpathObj) {
@@ -340,7 +382,7 @@ size_t _write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
 		xmlXPathFreeObject(xpathObj);
 
 		xpathObj = xmlXPathEvalExpression((const xmlChar *)"/wps:ExecuteResponse",xpathCtx);
-		if(!xpathObj) {
+		if(!xpathObj || !xpathObj->nodesetval || !xpathObj->nodesetval->nodeNr) {
 			(print_json)?my_fprintf(stderr,"Error: unable to evaluate xpath expression\\n"):fprintf(stderr,"\e[1;31mError: unable to evaluate xpath expression\e[0m\n");
 			xmlXPathFreeContext(xpathCtx);
 			xmlFreeDoc(doc);
@@ -358,7 +400,7 @@ size_t _write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
 	else // Sync mode
 	{
 		xpathObj = xmlXPathEvalExpression((const xmlChar *)"/wps:ExecuteResponse/wps:ProcessOutputs/wps:Output[ows:Identifier/text()='return']/wps:Data/wps:LiteralData/text()",xpathCtx);
-		if(!xpathObj || !xpathObj->nodesetval) {
+		if(!xpathObj || !xpathObj->nodesetval || !xpathObj->nodesetval->nodeNr) {
 			(print_json)?my_fprintf(stderr,"Error: unable to evaluate xpath expression\\n"):fprintf(stderr,"\e[1;31mError: unable to evaluate xpath expression\e[0m\n");
 			xmlXPathFreeContext(xpathCtx);
 			xmlFreeDoc(doc);
@@ -366,7 +408,6 @@ size_t _write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
 			return 0;
 		}
 
-		xmlChar *content = NULL;
 		node = xpathObj->nodesetval->nodeTab[0];
 		if (node) {
 			content = xmlNodeGetContent(node);
@@ -380,24 +421,27 @@ size_t _write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
 		if (!mem->error)
 		{
 			xpathObj = xmlXPathEvalExpression((const xmlChar *)"/wps:ExecuteResponse/wps:ProcessOutputs/wps:Output[ows:Identifier/text()='jobid']/wps:Data/wps:LiteralData/text()",xpathCtx);
-			if(xpathObj)
-			{
-				if (xpathObj->nodesetval)
-				{
-					node = xpathObj->nodesetval->nodeTab[0];
-					if (node) {
-						content = xmlNodeGetContent(node);
-						if (content) {
-							if (strlen((const char *)content)) mem->jobid = strdup((const char *)content);
-							xmlFree(content);
-						}
+			if(!xpathObj) {
+				(print_json)?my_fprintf(stderr,"Error: unable to evaluate xpath expression\\n"):fprintf(stderr,"\e[1;31mError: unable to evaluate xpath expression\e[0m\n");
+				xmlXPathFreeContext(xpathCtx);
+				xmlFreeDoc(doc);
+				xmlFreeParserCtxt(ctxt);
+				return 0;
+			}
+			if (xpathObj->nodesetval && xpathObj->nodesetval->nodeNr) {
+				node = xpathObj->nodesetval->nodeTab[0];
+				if (node) {
+					content = xmlNodeGetContent(node);
+					if (content) {
+						if (strlen((const char *)content)) mem->jobid = strdup((const char *)content);
+						xmlFree(content);
 					}
 				}
 				xmlXPathFreeObject(xpathObj);
 			}
 
 			xpathObj = xmlXPathEvalExpression((const xmlChar *)"/wps:ExecuteResponse/wps:ProcessOutputs/wps:Output[ows:Identifier/text()='response']/wps:Data/wps:ComplexData/text()",xpathCtx);
-			if(!xpathObj || !xpathObj->nodesetval) {
+			if(!xpathObj || !xpathObj->nodesetval || !xpathObj->nodesetval->nodeNr) {
 				(print_json)?my_fprintf(stderr,"Error: unable to evaluate xpath expression\\n"):fprintf(stderr,"\e[1;31mError: unable to evaluate xpath expression\e[0m\n");
 				xmlXPathFreeContext(xpathCtx);
 				xmlFreeDoc(doc);
@@ -719,7 +763,7 @@ void oph_execute(char* query, char **newsession, int *return_value, char **out_r
 	response_global.xml = NULL;
 	response_global.buffer = NULL;
 	response_global.size = 0;
-	response_global.error = 0;
+	response_global.error = OPH_SERVER_OK;
 
 	snprintf(username_global,OPH_MAX_STRING_SIZE,"%s",username);
 	snprintf(password_global,OPH_MAX_STRING_SIZE,"%s",password);
@@ -815,9 +859,9 @@ void oph_execute(char* query, char **newsession, int *return_value, char **out_r
 					char *tmp = NULL;
 					char *ptr = NULL;
 
-					if (response_global.jobid && newsession) {
+					if (newsession) {
 						//retrieve newsession
-						if (strlen(response_global.jobid)==0) {
+						if (!response_global.jobid || strlen(response_global.jobid)==0) {
 							*newsession = strdup("");
 							if (!*newsession) {
 								(print_json)?my_fprintf(stderr,"Memory error retrieving sessionid\\n"):fprintf(stderr,"\e[1;31mMemory error retrieving sessionid\e[0m\n");
@@ -901,7 +945,7 @@ void oph_execute(char* query, char **newsession, int *return_value, char **out_r
 				}
 				break;
             case OPH_SERVER_UNKNOWN:
-                (print_json)?my_fprintf(stderr, "Error on serving request [%ld]: server unknown\\n",response_global.error):fprintf(stderr, "\e[1;31mError on serving request [%ld]: server unknown\e[0m\n",response_global.error);
+                (print_json)?my_fprintf(stderr, "Error on serving request [%ld]: undefined error\\n",response_global.error):fprintf(stderr, "\e[1;31mError on serving request [%ld]: undefined error\e[0m\n",response_global.error);
                 *return_value = OPH_SERVER_UNKNOWN;
                 break;
             case OPH_SERVER_NULL_POINTER:
