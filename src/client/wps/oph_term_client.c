@@ -16,6 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#define _GNU_SOURCE
+
 #include "oph_term_client.h"
 #include "oph_term_defs.h"
 
@@ -28,6 +30,7 @@
 #include <inttypes.h>
 #include <string.h>
 #include <curl/curl.h>
+#include <stdio.h>
 
 #define OPH_DEFAULT_NLOOPS 1
 #define OPH_DEFAULT_QUERY "OPH_NULL"
@@ -43,6 +46,8 @@ struct oph__ophResponse
 	char*	response;
 	long	error;
 	char*	xml;
+	char*	buffer;
+	size_t	size;
 } response_global;
 
 //TODO
@@ -247,12 +252,38 @@ int base64decode (const char *in, size_t inLen, char *out, size_t *outLen) {
 
 size_t _write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
 {
-	UNUSED(userdata)
+	UNUSED(userdata);
 
-	size_t realsize = size * nmemb;
-
+	size_t realsize = size * nmemb, totalsize = realsize;
 	struct oph__ophResponse *mem = &response_global;
+
+	if (realsize >= CURL_MAX_WRITE_SIZE) {
+
+		// Response is divided in more chucks
+		if (mem->buffer) {
+			char *tmp = mem->buffer;
+			asprintf(&mem->buffer, "%s%s", tmp, ptr);
+			free(tmp);
+		}
+		else mem->buffer = strdup(ptr);
+		mem->size += realsize;
+
+		return realsize;
+	}
+
+	if (mem->buffer)  {
+		char *tmp = mem->buffer;
+		asprintf(&mem->buffer, "%s%s", tmp, ptr);
+		free(tmp);
+		mem->size += realsize;
+
+		ptr = mem->buffer;
+		totalsize = mem->size;
+	}
+
+	if (mem->response) free(mem->response);
 	mem->response = NULL;
+	if (mem->jobid) free(mem->jobid);
 	mem->jobid = NULL;
 	mem->error = OPH_SERVER_ERROR;
 
@@ -269,7 +300,7 @@ size_t _write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
 		return 0;
 	}
 
-	doc = xmlCtxtReadMemory(ctxt, ptr, realsize, NULL, NULL, 0);
+	doc = xmlCtxtReadMemory(ctxt, ptr, totalsize, NULL, NULL, 0);
 
 	/* Create xpath evaluation context */
 	xpathCtx = xmlXPathNewContext(doc);
@@ -334,8 +365,16 @@ size_t _write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
 			xmlFreeParserCtxt(ctxt);
 			return 0;
 		}
+
+		xmlChar *content = NULL;
 		node = xpathObj->nodesetval->nodeTab[0];
-		if (node && xmlNodeGetContent(node) && strlen((const char *)xmlNodeGetContent(node))) mem->error = (int)strtol((const char *)xmlNodeGetContent(node),NULL,10);
+		if (node) {
+			content = xmlNodeGetContent(node);
+			if (content) {
+				if (strlen((const char *)content)) mem->error = (int)strtol((const char *)content,NULL,10);
+				xmlFree(content);
+			}
+		}
 		xmlXPathFreeObject(xpathObj);
 
 		if (!mem->error)
@@ -346,7 +385,13 @@ size_t _write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
 				if (xpathObj->nodesetval)
 				{
 					node = xpathObj->nodesetval->nodeTab[0];
-					if (node && xmlNodeGetContent(node) && strlen((const char *)xmlNodeGetContent(node))) mem->jobid = strdup((const char *)xmlNodeGetContent(node));
+					if (node) {
+						content = xmlNodeGetContent(node);
+						if (content) {
+							if (strlen((const char *)content)) mem->jobid = strdup((const char *)content);
+							xmlFree(content);
+						}
+					}
 				}
 				xmlXPathFreeObject(xpathObj);
 			}
@@ -360,7 +405,13 @@ size_t _write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
 				return 0;
 			}
 			node = xpathObj->nodesetval->nodeTab[0];
-			if (node && xmlNodeGetContent(node) && strlen((const char *)xmlNodeGetContent(node))) mem->response = strdup((const char *)xmlNodeGetContent(node));
+			if (node) {
+				content = xmlNodeGetContent(node);
+				if (content) {
+					if (strlen((const char *)content)) mem->response = strdup((const char *)content);
+					xmlFree(content);
+				}
+			}
 			xmlXPathFreeObject(xpathObj);
 		}
 	}
@@ -375,9 +426,9 @@ size_t _write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
 	return realsize;
 }
 
-int wps_call_oph__ophExecuteMain(char* server_global, char* query_global, char* username, char* password, int store_result, struct oph__ophResponse* response_global)
+int wps_call_oph__ophExecuteMain(char* server_global, char* query_global, char* username, char* password, int store_result)
 {
-	if (!server_global || !query_global || !response_global) return 1;
+	if (!server_global || !query_global) return 1;
 
 	// Build XML Request
 	char wpsRequest[WORKFLOW_MAX_LEN];
@@ -433,7 +484,7 @@ int wps_call_oph__ophExecuteMain(char* server_global, char* query_global, char* 
 	curl_easy_setopt(hnd, CURLOPT_POSTQUOTE, NULL);
 	curl_easy_setopt(hnd, CURLOPT_PREQUOTE, NULL);
 	curl_easy_setopt(hnd, CURLOPT_WRITEHEADER, NULL);
-	curl_easy_setopt(hnd, CURLOPT_WRITEDATA, &response_global);
+	curl_easy_setopt(hnd, CURLOPT_WRITEDATA, NULL);
 	curl_easy_setopt(hnd, CURLOPT_WRITEFUNCTION, _write_callback);
 	curl_easy_setopt(hnd, CURLOPT_COOKIEFILE, NULL);
 	curl_easy_setopt(hnd, CURLOPT_COOKIESESSION, 0);
@@ -468,7 +519,7 @@ int wps_call_oph__ophExecuteMain(char* server_global, char* query_global, char* 
 void *wpsthread(void *ptr) {
 	UNUSED(ptr)
 	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS,NULL);
-	wps_call_oph__ophExecuteMain_return = wps_call_oph__ophExecuteMain(server_global, query_global, username_global, password_global, store_result_global, &response_global);
+	wps_call_oph__ophExecuteMain_return = wps_call_oph__ophExecuteMain(server_global, query_global, username_global, password_global, store_result_global);
 	return NULL;
 }
 
@@ -666,6 +717,8 @@ void oph_execute(char* query, char **newsession, int *return_value, char **out_r
 	response_global.response = NULL;
 	response_global.jobid = NULL;
 	response_global.xml = NULL;
+	response_global.buffer = NULL;
+	response_global.size = 0;
 	response_global.error = 0;
 
 	snprintf(username_global,OPH_MAX_STRING_SIZE,"%s",username);
@@ -686,6 +739,7 @@ void oph_execute(char* query, char **newsession, int *return_value, char **out_r
 			if (response_global.response) free(response_global.response);
 			if (response_global.jobid) free(response_global.jobid);
 			if (response_global.xml) free(response_global.xml);
+			if (response_global.buffer) free(response_global.buffer);
 			return;
 		}
 		free(response_global.response);
@@ -889,6 +943,7 @@ void oph_execute(char* query, char **newsession, int *return_value, char **out_r
 	if (response_global.response) free(response_global.response);
 	if (response_global.jobid) free(response_global.jobid);
 	if (response_global.xml) free(response_global.xml);
+	if (response_global.buffer) free(response_global.buffer);
 }
 
 int oph_term_client(char *cmd_line,char *command,char **newsession,char *user,char *password,char *host,char *port, int *return_value, char **out_response, char **out_response_for_viewer, int workflow_wrap, HASHTBL *hashtbl)
