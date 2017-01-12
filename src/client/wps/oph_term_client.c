@@ -1,6 +1,6 @@
 /*
     Ophidia Terminal
-    Copyright (C) 2012-2016 CMCC Foundation
+    Copyright (C) 2012-2017 CMCC Foundation
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -756,7 +756,7 @@ void oph_execute(char* query, char **newsession, int *return_value, char **out_r
 		*return_value = OPH_TERM_GENERIC_ERROR;
 		return;
 	}
-	snprintf(query_global,WORKFLOW_MAX_LEN,"%s",result);
+	snprintf(query_global, WORKFLOW_MAX_LEN, "%s", result);
 
 	response_global.response = NULL;
 	response_global.jobid = NULL;
@@ -775,10 +775,11 @@ void oph_execute(char* query, char **newsession, int *return_value, char **out_r
 	if (!response_global.error && response_global.response)
 	{
 		int ret;
-		size_t outLen = WORKFLOW_MAX_LEN;
-		if ((ret=base64decode(response_global.response, strlen(response_global.response), result, &outLen)))
+		size_t outLen = strlen(response_global.response);
+		char result[1 + outLen];
+		if ((ret = base64decode(response_global.response, outLen, result, &outLen)))
 		{
-			(print_json)?my_fprintf(stderr,"Decoding error %d\\n",ret):fprintf(stderr,"\e[1;31mDecoding error %d\e[0m\n",ret);
+			(print_json)?my_fprintf(stderr,"Decoding error %d\\n",ret):fprintf(stderr,"\e[1;31mDecoding error %d\e[0m\n%s\n",ret,response_global.response);
 			*return_value = OPH_TERM_GENERIC_ERROR;
 			if (response_global.response) free(response_global.response);
 			if (response_global.jobid) free(response_global.jobid);
