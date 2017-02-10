@@ -27,13 +27,12 @@
 //gsoap oph  service method-action:        ophExecuteMain ""
 //gsoap oph  service method-documentation: ophExecuteMain Execute a command using the oph-parallel-framework
 
-struct oph__ophResponse
-{
-	xsd__string	jobid;
-	xsd__string	response;
-	xsd__int	error;
+struct oph__ophResponse {
+	xsd__string jobid;
+	xsd__string response;
+	xsd__int error;
 };
-int oph__ophExecuteMain(xsd__string ophExecuteMainRequest, struct oph__ophResponse* ophExecuteMainResponse);
+int oph__ophExecuteMain(xsd__string ophExecuteMainRequest, struct oph__ophResponse *ophExecuteMainResponse);
 
 
-#endif /* OPH_EXECUTE_MAIN_H_ */
+#endif				/* OPH_EXECUTE_MAIN_H_ */
