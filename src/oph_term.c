@@ -174,7 +174,7 @@ void print_startup_usage(char *arg0, FILE * stream)
 				  "   When the GSI interface is used, the variables OPH_USER and OPH_PASSWD are ignored and the user certificate is used for authentication.\\n") : fprintf(stream,
 																							    "   When the GSI interface is used, the variables OPH_USER and OPH_PASSWD are ignored and the user certificate is used for authentication.\n");
 	(print_json) ? my_fprintf(stream, "   OPH_SESSION_ID,OPH_EXEC_MODE,OPH_NCORES,OPH_CWD,OPH_CCD and OPH_DATACUBE will be inserted in\\n") : fprintf(stream,
-																		  "   OPH_SESSION_ID,OPH_EXEC_MODE,OPH_NCORES,OPH_CWD,OPH_CCD and OPH_DATACUBE will be inserted in\n");
+																			  "   OPH_SESSION_ID,OPH_EXEC_MODE,OPH_NCORES,OPH_CWD,OPH_CCD and OPH_DATACUBE will be inserted in\n");
 	(print_json) ? my_fprintf(stream, "   the JSON request (original file will remain untouched) if not already present.\\n") : fprintf(stream,
 																	    "   the JSON request (original file will remain untouched) if not already present.\n");
 	(print_json) ? my_fprintf(stream, "   \\\"file\\\" must be the name of a valid JSON file according to the Ophidia Workflow JSON Schema.\\n") : fprintf(stream,
@@ -1556,12 +1556,13 @@ int main(int argc, char **argv, char **envp)
 			}
 		}
 	}
-
 	// OPH_CDD is not saved at server side
 	if (oph_term_setenv(hashtbl, OPH_TERM_ENV_OPH_CDD, "/")) {
 		oph_term_env_clear(hashtbl);
 		oph_term_alias_clear(aliases);
-		(print_json) ? my_fprintf(stderr, "Could not set variable %s [CODE %d]\\n", OPH_TERM_ENV_OPH_CDD, OPH_TERM_MEMORY_ERROR) : fprintf(stderr, "\e[1;31mCould not set variable %s [CODE %d]\e[0m\n", OPH_TERM_ENV_OPH_CDD, OPH_TERM_MEMORY_ERROR);
+		(print_json) ? my_fprintf(stderr, "Could not set variable %s [CODE %d]\\n", OPH_TERM_ENV_OPH_CDD, OPH_TERM_MEMORY_ERROR) : fprintf(stderr,
+																		   "\e[1;31mCould not set variable %s [CODE %d]\e[0m\n",
+																		   OPH_TERM_ENV_OPH_CDD, OPH_TERM_MEMORY_ERROR);
 		if (!print_json)
 			printf("\e[0m");
 		if (exec_statement) {
