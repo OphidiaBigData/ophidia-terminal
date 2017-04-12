@@ -58,6 +58,7 @@
 #define OPH_TERM_ENV_OPH_EXEC_MODE      	"OPH_EXEC_MODE"
 #define OPH_TERM_ENV_OPH_NCORES         	"OPH_NCORES"
 #define OPH_TERM_ENV_OPH_CWD	        	"OPH_CWD"
+#define OPH_TERM_ENV_OPH_CDD	        	"OPH_CDD"
 #define OPH_TERM_ENV_OPH_DATACUBE		"OPH_DATACUBE"
 #define OPH_TERM_ENV_OPH_TERM_VIEWER		"OPH_TERM_VIEWER"
 #define OPH_TERM_ENV_OPH_TERM_IMGS		"OPH_TERM_IMGS"
@@ -68,9 +69,9 @@
 #ifdef WITH_IM_SUPPORT
 #define OPH_TERM_ENV_OPH_INFRASTRUCTURE_URL	"OPH_INFRASTRUCTURE_URL"
 #define OPH_TERM_ENV_OPH_AUTH_HEADER		"OPH_AUTH_HEADER"
-#define env_vars_num 18
+#define env_vars_num 19
 #else
-#define env_vars_num 16
+#define env_vars_num 17
 #endif
 
 static char *env_vars[env_vars_num] = {
@@ -83,6 +84,7 @@ static char *env_vars[env_vars_num] = {
 	OPH_TERM_ENV_OPH_EXEC_MODE,
 	OPH_TERM_ENV_OPH_NCORES,
 	OPH_TERM_ENV_OPH_CWD,
+	OPH_TERM_ENV_OPH_CDD,
 	OPH_TERM_ENV_OPH_DATACUBE,
 	OPH_TERM_ENV_OPH_TERM_VIEWER,
 	OPH_TERM_ENV_OPH_TERM_IMGS,

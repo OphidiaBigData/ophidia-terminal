@@ -73,8 +73,9 @@ extern int oph_term_error_cur;
 // open_img : 1 to auto-open with xdg-open graph images, 0 otherwise. Considered only when save_img=1
 // newdatacube : retrieved new output cube if any or NULL
 // newcwd : retrieved new cwd if any or NULL
+// newcdd : retrieved new cdd if any or NULL
 // layout : layout of graph or NULL
-int oph_term_viewer(const char *viewer_type, char **json_string, const char *color, int save_img, int open_img, int show_list, char **newdatacube, char **newcwd, char *layout);
+int oph_term_viewer(const char *viewer_type, char **json_string, const char *color, int save_img, int open_img, int show_list, char **newdatacube, char **newcwd, char **newccd, char *layout);
 
 //Retrieve command and/or jobid in request after a call to oph_resume
 int oph_term_viewer_retrieve_command_jobid(char *json_string, char **command, char **jobid);

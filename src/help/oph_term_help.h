@@ -324,7 +324,7 @@ int oph_term_help(const char *cmd);
 \tbefore the validation phase together with variable substitution.\n\
 \tAfter the validation phase, according to the value of OPH_TERM_IMGS, it can produce an image representing the workflow.\n\
 \tWith the option -m it returns the metadata relative to name,author and abstract and, if present,\n\
-\tsessionid,exec_mode,ncores,cwd,cube,callback_url,on_error,command,on_exit and run. In this case validation is not performed.\n"
+\tsessionid,exec_mode,ncores,cwd,cdd,cube,callback_url,on_error,command,on_exit and run. In this case validation is not performed.\n"
 #define OPH_TERM_HELP_CHECK_LONG2 \
 "USAGE OF check COMMAND\\n\\n\
 \\tcheck [-m] workflow.json [param1 [param2 [...]]]\\n\\n\
@@ -333,7 +333,7 @@ int oph_term_help(const char *cmd);
 \\tbefore the validation phase together with variable substitution.\\n\
 \\tAfter the validation phase, according to the value of OPH_TERM_IMGS, it can produce an image representing the workflow.\\n\
 \\tWith the option -m it returns the metadata relative to name,author and abstract and, if present,\\n\
-\\tsessionid,exec_mode,ncores,cwd,cube,callback_url,on_error,command,on_exit and run. In this case validation is not performed.\\n"
+\\tsessionid,exec_mode,ncores,cwd,cdd,cube,callback_url,on_error,command,on_exit and run. In this case validation is not performed.\\n"
 #endif
 
 #define OPH_TERM_HELP_ALIAS_SHORT "\"list aliases\"\n"
@@ -520,9 +520,10 @@ int oph_term_help(const char *cmd);
 \t  \"ncores\": it specifies the number of parallel processes requested for the execution of the operator (default is 1);\n\
 \t  \"sessionid\": it specifies the current session;\n\
 \t  \"cwd\": it specifies the current working directory;\n\
+\t  \"cdd\": it specifies the pathname working directory on data reporitory;\n\
 \t  \"cube\": it specifies the input datacube.\n\
 \tThey are special arguments that the user can explicitly write into the submission string or not,\n\
-\tin which case Oph_Term will look up and use the content of the variables OPH_SESSION_ID, OPH_EXEC_MODE, OPH_NCORES, OPH_CWD or OPH_DATACUBE if existent.\n\
+\tin which case Oph_Term will look up and use the content of the variables OPH_SESSION_ID, OPH_EXEC_MODE, OPH_NCORES, OPH_CWD, OPH_CDD or OPH_DATACUBE if existent.\n\
 \tIn synchronous mode the call is blocking and waits the server response, while in asynchronous mode it is non-blocking and returns just a link\n\
 \tto the file where output will be written by the operator for future analysis.\n"
 #define OPH_TERM_HELP_REMOTE_COMMAND2 \
@@ -543,9 +544,10 @@ int oph_term_help(const char *cmd);
 \\t  \\\"ncores\\\": it specifies the number of parallel processes requested for the execution of the operator (default is 1);\\n\
 \\t  \\\"sessionid\\\": it specifies the current session;\\n\
 \\t  \\\"cwd\\\": it specifies the current working directory;\\n\
+\\t  \\\"cdd\\\": it specifies the pathname working directory on data reporitory;\\n\
 \\t  \\\"cube\\\": it specifies the input datacube.\\n\
 \\tThey are special arguments that the user can explicitly write into the submission string or not,\\n\
-\\tin which case Oph_Term will look up and use the content of the variables OPH_SESSION_ID, OPH_EXEC_MODE, OPH_NCORES, OPH_CWD or OPH_DATACUBE if existent.\\n\
+\\tin which case Oph_Term will look up and use the content of the variables OPH_SESSION_ID, OPH_EXEC_MODE, OPH_NCORES, OPH_CWD, OPH_CCD or OPH_DATACUBE if existent.\\n\
 \\tIn synchronous mode the call is blocking and waits the server response, while in asynchronous mode it is non-blocking and returns just a link\\n\
 \\tto the file where output will be written by the operator for future analysis.\\n"
 
@@ -554,7 +556,7 @@ int oph_term_help(const char *cmd);
 "\e[1mHOW TO SUBMIT AN ENTIRE WORKFLOW\e[0m\n\n\
 \t./workflow.json [param1 [param2 [...]]]\n\n\
 \tSubmit an entire workflow to the Ophidia server.\n\
-\tOPH_SESSION_ID,OPH_EXEC_MODE,OPH_NCORES,OPH_CWD and OPH_DATACUBE will be inserted in\n\
+\tOPH_SESSION_ID,OPH_EXEC_MODE,OPH_NCORES,OPH_CWD,OPH_CDD and OPH_DATACUBE will be inserted in\n\
 \tthe JSON request (original file will remain untouched) if not already present.\n\
 \t\"./workflow.json\" must be the name of a valid local JSON file according to the Ophidia Workflow JSON Schema.\n\
 \tWith one or more parameters, the parameter substitution ($1,$2 etc.) is performed before the validation phase\n\
@@ -564,7 +566,7 @@ int oph_term_help(const char *cmd);
 "HOW TO SUBMIT AN ENTIRE WORKFLOW\\n\\n\
 \\t./workflow.json [param1 [param2 [...]]]\\n\\n\
 \\tSubmit an entire workflow to the Ophidia server.\\n\
-\\tOPH_SESSION_ID,OPH_EXEC_MODE,OPH_NCORES,OPH_CWD and OPH_DATACUBE will be inserted in\\n\
+\\tOPH_SESSION_ID,OPH_EXEC_MODE,OPH_NCORES,OPH_CWD,OPH_CDD and OPH_DATACUBE will be inserted in\\n\
 \\tthe JSON request (original file will remain untouched) if not already present.\\n\
 \\t\\\"./workflow.json\\\" must be the name of a valid local JSON file according to the Ophidia Workflow JSON Schema.\\n\
 \\tWith one or more parameters, the parameter substitution ($1,$2 etc.) is performed before the validation phase\\n\
@@ -720,6 +722,14 @@ int oph_term_help(const char *cmd);
 #define OPH_TERM_HELP_OPH_CWD_LONG2 \
 "OPH_CWD\\n\
 \\tCurrent working directory. It defaults to the session's root folder (/).\\n"
+
+#define OPH_TERM_HELP_OPH_CCD_SHORT "\"current data directory\"\n"
+#define OPH_TERM_HELP_OPH_CCD_LONG \
+"\e[1mOPH_CCD\e[0m\n\
+\tCurrent data directory. It defaults to root folder (/).\n"
+#define OPH_TERM_HELP_OPH_CCD_LONG2 \
+"OPH_CCD\\n\
+\\tCurrent data directory. It defaults to root folder (/).\\n"
 
 #define OPH_TERM_HELP_OPH_USER_SHORT "\"username\"\n"
 #define OPH_TERM_HELP_OPH_USER_LONG \

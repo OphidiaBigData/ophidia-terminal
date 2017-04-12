@@ -177,6 +177,9 @@ extern int oph_term_error_cur;
 #define OPH_TERM_DEFAULT_ALIAS_KEY_13 	"cc"
 #define OPH_TERM_DEFAULT_ALIAS_KEY_14 	"rc"
 #define OPH_TERM_DEFAULT_ALIAS_KEY_15 	"kill"
+#define OPH_TERM_DEFAULT_ALIAS_KEY_16 	"lsd"
+#define OPH_TERM_DEFAULT_ALIAS_KEY_17 	"cdd"
+#define OPH_TERM_DEFAULT_ALIAS_KEY_18 	"pdd"
 
 #define OPH_TERM_DEFAULT_ALIAS_VAL_1 	"oph_list path=$1;"
 #define OPH_TERM_DEFAULT_ALIAS_VAL_2 	"oph_folder command=cd;path=$1;"
@@ -193,8 +196,11 @@ extern int oph_term_error_cur;
 #define OPH_TERM_DEFAULT_ALIAS_VAL_13 	"oph_createcontainer container=$1;dim=lat|lon|time;dim_type=double|double|double;hierarchy=oph_base|oph_base|oph_time;"
 #define OPH_TERM_DEFAULT_ALIAS_VAL_14 	"oph_randcube container=$1;dim=lat|lon|time;dim_size=$2|$3|$4;exp_ndim=2;host_partition=test;measure=example_measure;measure_type=double;nfrag=$2;ntuple=$3;compressed=no;concept_level=c|c|d;filesystem=local;ndb=1;ndbms=1;nhost=1;"
 #define OPH_TERM_DEFAULT_ALIAS_VAL_15 	"oph_cancel id=$1"
+#define OPH_TERM_DEFAULT_ALIAS_VAL_16 	"oph_fs command=ls;path=$1;"
+#define OPH_TERM_DEFAULT_ALIAS_VAL_17 	"oph_fs command=cd;path=$1;"
+#define OPH_TERM_DEFAULT_ALIAS_VAL_18 	"getenv OPH_CDD"
 
-#define OPH_TERM_DEFAULT_ALIAS_NUM 15
+#define OPH_TERM_DEFAULT_ALIAS_NUM 18
 
 static char *pre_defined_aliases_keys[OPH_TERM_DEFAULT_ALIAS_NUM] = {
 	OPH_TERM_DEFAULT_ALIAS_KEY_1,
@@ -211,7 +217,10 @@ static char *pre_defined_aliases_keys[OPH_TERM_DEFAULT_ALIAS_NUM] = {
 	OPH_TERM_DEFAULT_ALIAS_KEY_12,
 	OPH_TERM_DEFAULT_ALIAS_KEY_13,
 	OPH_TERM_DEFAULT_ALIAS_KEY_14,
-	OPH_TERM_DEFAULT_ALIAS_KEY_15
+	OPH_TERM_DEFAULT_ALIAS_KEY_15,
+	OPH_TERM_DEFAULT_ALIAS_KEY_16,
+	OPH_TERM_DEFAULT_ALIAS_KEY_17,
+	OPH_TERM_DEFAULT_ALIAS_KEY_18
 };
 
 static char *pre_defined_aliases_values[OPH_TERM_DEFAULT_ALIAS_NUM] = {
@@ -229,7 +238,10 @@ static char *pre_defined_aliases_values[OPH_TERM_DEFAULT_ALIAS_NUM] = {
 	OPH_TERM_DEFAULT_ALIAS_VAL_12,
 	OPH_TERM_DEFAULT_ALIAS_VAL_13,
 	OPH_TERM_DEFAULT_ALIAS_VAL_14,
-	OPH_TERM_DEFAULT_ALIAS_VAL_15
+	OPH_TERM_DEFAULT_ALIAS_VAL_15,
+	OPH_TERM_DEFAULT_ALIAS_VAL_16,
+	OPH_TERM_DEFAULT_ALIAS_VAL_17,
+	OPH_TERM_DEFAULT_ALIAS_VAL_18
 };
 
 static const int pre_defined_aliases_num = OPH_TERM_DEFAULT_ALIAS_NUM;
@@ -240,10 +252,10 @@ extern pthread_t tid;
 
 #define OPH_TERM_VERSION \
 "Oph_Term - the Ophidia shell, version 1.0.0\n\
-Copyright (C) 2012-2016 CMCC Foundation - www.cmcc.it\n"
+Copyright (C) 2012-2017 CMCC Foundation - www.cmcc.it\n"
 #define OPH_TERM_VERSION2 \
 "Oph_Term - the Ophidia shell, version 1.0.0\\n\
-Copyright (C) 2012-2016 CMCC Foundation - www.cmcc.it\\n"
+Copyright (C) 2012-2017 CMCC Foundation - www.cmcc.it\\n"
 
 #define OPH_TERM_DISCLAIMER "This program comes with ABSOLUTELY NO WARRANTY; for details type `oph_term -x'.\nThis is free software, and you are welcome to redistribute it\nunder certain conditions; type `oph_term -z' for details.\n"
 #define OPH_TERM_DISCLAIMER2 "This program comes with ABSOLUTELY NO WARRANTY; for details type `oph_term -x'.\\nThis is free software, and you are welcome to redistribute it\nunder certain conditions; type `oph_term -z' for details.\\n"

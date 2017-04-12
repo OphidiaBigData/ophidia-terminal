@@ -1002,7 +1002,7 @@ void *main_loop(void *ptr)
 				int viewer_res = oph_term_viewer((const char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_VIEWER),
 								 &response_for_viewer,
 								 (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1)) ? ((const char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1)) : "red",
-								 save_img, open_img, show_list, NULL, NULL, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_GRAPH_LAYOUT));
+								 save_img, open_img, show_list, NULL, NULL, NULL, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_GRAPH_LAYOUT));
 				if (viewer_res != 0 && viewer_res != OPH_TERM_ERROR_WITHIN_JSON) {
 					(print_json) ? my_fprintf(stderr, "Could not render result [CODE %d]\\n", OPH_TERM_GENERIC_ERROR) : fprintf(stderr,
 																		    "\e[1;31mCould not render result [CODE %d]\e[0m\n",
@@ -1021,7 +1021,7 @@ void *main_loop(void *ptr)
 					int viewer_res = oph_term_viewer((const char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_VIEWER),
 									 &response_for_viewer,
 									 (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1)) ? ((const char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1)) : "red",
-									 save_img, open_img, show_list, NULL, NULL, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_GRAPH_LAYOUT));
+									 save_img, open_img, show_list, NULL, NULL, NULL, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_GRAPH_LAYOUT));
 					if (viewer_res != 0 && viewer_res != OPH_TERM_ERROR_WITHIN_JSON) {
 						(print_json) ? my_fprintf(stderr, "Could not render result [CODE %d]\\n", OPH_TERM_GENERIC_ERROR) : fprintf(stderr,
 																			    "\e[1;31mCould not render result [CODE %d]\e[0m\n",
