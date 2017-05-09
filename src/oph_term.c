@@ -173,8 +173,8 @@ void print_startup_usage(char *arg0, FILE * stream)
 	(print_json) ? my_fprintf(stream,
 				  "   When the GSI interface is used, the variables OPH_USER and OPH_PASSWD are ignored and the user certificate is used for authentication.\\n") : fprintf(stream,
 																							    "   When the GSI interface is used, the variables OPH_USER and OPH_PASSWD are ignored and the user certificate is used for authentication.\n");
-	(print_json) ? my_fprintf(stream, "   OPH_SESSION_ID,OPH_EXEC_MODE,OPH_NCORES,OPH_CWD,OPH_CCD and OPH_DATACUBE will be inserted in\\n") : fprintf(stream,
-																			  "   OPH_SESSION_ID,OPH_EXEC_MODE,OPH_NCORES,OPH_CWD,OPH_CCD and OPH_DATACUBE will be inserted in\n");
+	(print_json) ? my_fprintf(stream, "   OPH_SESSION_ID,OPH_EXEC_MODE,OPH_NCORES,OPH_CWD,OPH_CDD and OPH_DATACUBE will be inserted in\\n") : fprintf(stream,
+																			  "   OPH_SESSION_ID,OPH_EXEC_MODE,OPH_NCORES,OPH_CWD,OPH_CDD and OPH_DATACUBE will be inserted in\n");
 	(print_json) ? my_fprintf(stream, "   the JSON request (original file will remain untouched) if not already present.\\n") : fprintf(stream,
 																	    "   the JSON request (original file will remain untouched) if not already present.\n");
 	(print_json) ? my_fprintf(stream, "   \\\"file\\\" must be the name of a valid JSON file according to the Ophidia Workflow JSON Schema.\\n") : fprintf(stream,
@@ -1557,7 +1557,7 @@ int main(int argc, char **argv, char **envp)
 		}
 	}
 	// OPH_CDD is not saved at server side
-	if (oph_term_setenv(hashtbl, OPH_TERM_ENV_OPH_CDD, "/")) {
+	if (!hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CDD) && oph_term_setenv(hashtbl, OPH_TERM_ENV_OPH_CDD, "/")) {
 		oph_term_env_clear(hashtbl);
 		oph_term_alias_clear(aliases);
 		(print_json) ? my_fprintf(stderr, "Could not set variable %s [CODE %d]\\n", OPH_TERM_ENV_OPH_CDD, OPH_TERM_MEMORY_ERROR) : fprintf(stderr,
@@ -2542,7 +2542,7 @@ int main(int argc, char **argv, char **envp)
 				char *newsession = NULL;
 				char *newdatacube = NULL;
 				char *newcwd = NULL;
-				char *newccd = NULL;
+				char *newcdd = NULL;
 				int n = 0;
 
 				//prefix operator name
@@ -2577,7 +2577,7 @@ int main(int argc, char **argv, char **envp)
 					}
 				}
 				n += snprintf(submission_string + n, OPH_TERM_MAX_LEN - n, "cwd=%s;", (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CWD));
-				//ccd management
+				//cdd management
 				if (!hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CDD)) {
 					if (oph_term_setenv(hashtbl, OPH_TERM_ENV_OPH_CDD, "/")) {
 						(print_json) ? my_fprintf(stderr, "Could not set cdd [CODE %d]\\n", OPH_TERM_MEMORY_ERROR) : fprintf(stderr,
@@ -2621,7 +2621,7 @@ int main(int argc, char **argv, char **envp)
 					int viewer_res = oph_term_viewer((const char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_VIEWER),
 									 &response_for_viewer,
 									 (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1)) ? ((const char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1)) : "red",
-									 save_img, open_img, 1, &newdatacube, &newcwd, &newccd, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_GRAPH_LAYOUT));
+									 save_img, open_img, 1, &newdatacube, &newcwd, &newcdd, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_GRAPH_LAYOUT));
 					if (viewer_res != 0 && viewer_res != OPH_TERM_ERROR_WITHIN_JSON) {
 						(print_json) ? my_fprintf(stderr, "Could not render result [CODE %d]\\n", OPH_TERM_GENERIC_ERROR) : fprintf(stderr,
 																			    "\e[1;31mCould not render result [CODE %d]\e[0m\n",
@@ -2638,9 +2638,9 @@ int main(int argc, char **argv, char **envp)
 							free(newcwd);
 							newcwd = NULL;
 						}
-						if (newccd) {
-							free(newccd);
-							newccd = NULL;
+						if (newcdd) {
+							free(newcdd);
+							newcdd = NULL;
 						}
 						if (print_json)
 							print_oph_term_output_json(hashtbl);
@@ -2672,9 +2672,9 @@ int main(int argc, char **argv, char **envp)
 								free(newcwd);
 								newcwd = NULL;
 							}
-							if (newccd) {
-								free(newccd);
-								newccd = NULL;
+							if (newcdd) {
+								free(newcdd);
+								newcdd = NULL;
 							}
 							if (print_json)
 								print_oph_term_output_json(hashtbl);
@@ -2698,9 +2698,9 @@ int main(int argc, char **argv, char **envp)
 								free(newcwd);
 								newcwd = NULL;
 							}
-							if (newccd) {
-								free(newccd);
-								newccd = NULL;
+							if (newcdd) {
+								free(newcdd);
+								newcdd = NULL;
 							}
 							if (print_json)
 								print_oph_term_output_json(hashtbl);
@@ -2730,9 +2730,9 @@ int main(int argc, char **argv, char **envp)
 								free(newcwd);
 								newcwd = NULL;
 							}
-							if (newccd) {
-								free(newccd);
-								newccd = NULL;
+							if (newcdd) {
+								free(newcdd);
+								newcdd = NULL;
 							}
 							if (print_json)
 								print_oph_term_output_json(hashtbl);
@@ -2754,9 +2754,9 @@ int main(int argc, char **argv, char **envp)
 																			 OPH_TERM_MEMORY_ERROR);
 						free(newcwd);
 						newcwd = NULL;
-						if (newccd) {
-							free(newccd);
-							newccd = NULL;
+						if (newcdd) {
+							free(newcdd);
+							newcdd = NULL;
 						}
 						if (print_json)
 							print_oph_term_output_json(hashtbl);
@@ -2769,14 +2769,14 @@ int main(int argc, char **argv, char **envp)
 					free(newcwd);
 					newcwd = NULL;
 				}
-				//update OPH_CCD if necessary
-				if (newccd) {
-					if (oph_term_setenv(hashtbl, OPH_TERM_ENV_OPH_CDD, newccd)) {
+				//update OPH_CDD if necessary
+				if (newcdd) {
+					if (oph_term_setenv(hashtbl, OPH_TERM_ENV_OPH_CDD, newcdd)) {
 						(print_json) ? my_fprintf(stderr, "Could not set OPH_CDD [CODE %d]\\n", OPH_TERM_MEMORY_ERROR) : fprintf(stderr,
 																			 "\e[1;31mCould not set OPH_CDD [CODE %d]\e[0m\n",
 																			 OPH_TERM_MEMORY_ERROR);
-						free(newccd);
-						newccd = NULL;
+						free(newcdd);
+						newcdd = NULL;
 						if (print_json)
 							print_oph_term_output_json(hashtbl);
 						if (exec_one_statement) {
@@ -2785,14 +2785,14 @@ int main(int argc, char **argv, char **envp)
 						}
 						continue;
 					}
-					free(newccd);
-					newccd = NULL;
+					free(newcdd);
+					newcdd = NULL;
 				}
 			} else {	// submit with specific parameters
 				char *newsession = NULL;
 				char *newdatacube = NULL;
 				char *newcwd = NULL;
-				char *newccd = NULL;
+				char *newcdd = NULL;
 				char cursorcopy[OPH_TERM_MAX_LEN] = "\0";
 				int flag = 0;
 				for (i = strlen(cursor) - 1; i >= 0; i--) {
@@ -2927,8 +2927,8 @@ int main(int argc, char **argv, char **envp)
 						free(cursorcopy2);
 					}
 				}
-				//ccd management
-				if (!strstr(cursor, ";ccd=") && strncmp(cursor, "ccd=", 4)) {
+				//cdd management
+				if (!strstr(cursor, ";cdd=") && strncmp(cursor, "cdd=", 4)) {
 					if (!hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CDD)) {
 						if (oph_term_setenv(hashtbl, OPH_TERM_ENV_OPH_CDD, "/")) {
 							(print_json) ? my_fprintf(stderr, "Could not set cdd [CODE %d]\\n", OPH_TERM_MEMORY_ERROR) : fprintf(stderr,
@@ -2949,8 +2949,8 @@ int main(int argc, char **argv, char **envp)
 					} else {
 						char *cursorcopy2 = strdup(cursorcopy);
 						if (!cursorcopy2) {
-							(print_json) ? my_fprintf(stderr, "Could not use OPH_CCD [CODE %d]\\n", OPH_TERM_MEMORY_ERROR) : fprintf(stderr,
-																				 "\e[1;31mCould not use OPH_CCD [CODE %d]\e[0m\n",
+							(print_json) ? my_fprintf(stderr, "Could not use OPH_CDD [CODE %d]\\n", OPH_TERM_MEMORY_ERROR) : fprintf(stderr,
+																				 "\e[1;31mCould not use OPH_CDD [CODE %d]\e[0m\n",
 																				 OPH_TERM_MEMORY_ERROR);
 							if (print_json)
 								print_oph_term_output_json(hashtbl);
@@ -2995,7 +2995,7 @@ int main(int argc, char **argv, char **envp)
 					int viewer_res = oph_term_viewer((const char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_VIEWER),
 									 &response_for_viewer,
 									 (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1)) ? ((const char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1)) : "red",
-									 save_img, open_img, 1, &newdatacube, &newcwd, &newccd, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_GRAPH_LAYOUT));
+									 save_img, open_img, 1, &newdatacube, &newcwd, &newcdd, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_GRAPH_LAYOUT));
 					if (viewer_res != 0 && viewer_res != OPH_TERM_ERROR_WITHIN_JSON) {
 						(print_json) ? my_fprintf(stderr, "Could not render result [CODE %d]\\n", OPH_TERM_GENERIC_ERROR) : fprintf(stderr,
 																			    "\e[1;31mCould not render result [CODE %d]\e[0m\n",
@@ -3012,9 +3012,9 @@ int main(int argc, char **argv, char **envp)
 							free(newcwd);
 							newcwd = NULL;
 						}
-						if (newccd) {
-							free(newccd);
-							newccd = NULL;
+						if (newcdd) {
+							free(newcdd);
+							newcdd = NULL;
 						}
 						if (print_json)
 							print_oph_term_output_json(hashtbl);
@@ -3046,9 +3046,9 @@ int main(int argc, char **argv, char **envp)
 								free(newcwd);
 								newcwd = NULL;
 							}
-							if (newccd) {
-								free(newccd);
-								newccd = NULL;
+							if (newcdd) {
+								free(newcdd);
+								newcdd = NULL;
 							}
 							if (print_json)
 								print_oph_term_output_json(hashtbl);
@@ -3072,9 +3072,9 @@ int main(int argc, char **argv, char **envp)
 								free(newcwd);
 								newcwd = NULL;
 							}
-							if (newccd) {
-								free(newccd);
-								newccd = NULL;
+							if (newcdd) {
+								free(newcdd);
+								newcdd = NULL;
 							}
 							if (print_json)
 								print_oph_term_output_json(hashtbl);
@@ -3104,9 +3104,9 @@ int main(int argc, char **argv, char **envp)
 								free(newcwd);
 								newcwd = NULL;
 							}
-							if (newccd) {
-								free(newccd);
-								newccd = NULL;
+							if (newcdd) {
+								free(newcdd);
+								newcdd = NULL;
 							}
 							if (print_json)
 								print_oph_term_output_json(hashtbl);
@@ -3128,9 +3128,9 @@ int main(int argc, char **argv, char **envp)
 																			 OPH_TERM_MEMORY_ERROR);
 						free(newcwd);
 						newcwd = NULL;
-						if (newccd) {
-							free(newccd);
-							newccd = NULL;
+						if (newcdd) {
+							free(newcdd);
+							newcdd = NULL;
 						}
 						if (print_json)
 							print_oph_term_output_json(hashtbl);
@@ -3143,17 +3143,17 @@ int main(int argc, char **argv, char **envp)
 					free(newcwd);
 					newcwd = NULL;
 				}
-				//update OPH_CCD if necessary
-				if (newccd) {
-					if (oph_term_setenv(hashtbl, OPH_TERM_ENV_OPH_CDD, newccd)) {
-						(print_json) ? my_fprintf(stderr, "Could not set OPH_CCD [CODE %d]\\n", OPH_TERM_MEMORY_ERROR) : fprintf(stderr,
-																			 "\e[1;31mCould not set OPH_CCD [CODE %d]\e[0m\n",
+				//update OPH_CDD if necessary
+				if (newcdd) {
+					if (oph_term_setenv(hashtbl, OPH_TERM_ENV_OPH_CDD, newcdd)) {
+						(print_json) ? my_fprintf(stderr, "Could not set OPH_CDD [CODE %d]\\n", OPH_TERM_MEMORY_ERROR) : fprintf(stderr,
+																			 "\e[1;31mCould not set OPH_CDD [CODE %d]\e[0m\n",
 																			 OPH_TERM_MEMORY_ERROR);
-						free(newccd);
-						newccd = NULL;
-						if (newccd) {
-							free(newccd);
-							newccd = NULL;
+						free(newcdd);
+						newcdd = NULL;
+						if (newcdd) {
+							free(newcdd);
+							newcdd = NULL;
 						}
 						if (print_json)
 							print_oph_term_output_json(hashtbl);
@@ -3163,8 +3163,8 @@ int main(int argc, char **argv, char **envp)
 						}
 						continue;
 					}
-					free(newccd);
-					newccd = NULL;
+					free(newcdd);
+					newcdd = NULL;
 				}
 			}
 			if (print_json)
