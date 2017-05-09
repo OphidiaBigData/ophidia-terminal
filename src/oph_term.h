@@ -196,8 +196,8 @@ extern int oph_term_error_cur;
 #define OPH_TERM_DEFAULT_ALIAS_VAL_13 	"oph_createcontainer container=$1;dim=lat|lon|time;dim_type=double|double|double;hierarchy=oph_base|oph_base|oph_time;"
 #define OPH_TERM_DEFAULT_ALIAS_VAL_14 	"oph_randcube container=$1;dim=lat|lon|time;dim_size=$2|$3|$4;exp_ndim=2;host_partition=test;measure=example_measure;measure_type=double;nfrag=$2;ntuple=$3;compressed=no;concept_level=c|c|d;filesystem=local;ndb=1;ndbms=1;nhost=1;"
 #define OPH_TERM_DEFAULT_ALIAS_VAL_15 	"oph_cancel id=$1"
-#define OPH_TERM_DEFAULT_ALIAS_VAL_16 	"oph_fs command=ls;path=$1;"
-#define OPH_TERM_DEFAULT_ALIAS_VAL_17 	"oph_fs command=cd;path=$1;"
+#define OPH_TERM_DEFAULT_ALIAS_VAL_16 	"oph_fs command=ls;dpath=$1;"
+#define OPH_TERM_DEFAULT_ALIAS_VAL_17 	"oph_fs command=cd;dpath=$1;"
 #define OPH_TERM_DEFAULT_ALIAS_VAL_18 	"getenv OPH_CDD"
 
 #define OPH_TERM_DEFAULT_ALIAS_NUM 18
