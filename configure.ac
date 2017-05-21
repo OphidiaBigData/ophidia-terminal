@@ -339,6 +339,23 @@ if test "x${im_support}" = "xyes"; then
     OPT+=" -DWITH_IM_SUPPORT"
 fi
 
+#Enable chddir
+AC_ARG_ENABLE(chddir,
+       [  --enable-chddir Enables local folder switching based on current data folder. (Disabled by default)],
+       [
+            if test "x$enableval" = "xyes"; then
+                chddir="yes"
+            else
+                chddir="no"
+            fi
+       ],
+       [ chddir="yes"]
+       )
+if test "x${chddir}" = "xyes"; then
+    OPT+=" -DCHDDIR"
+fi
+
+
 case "${host}" in
         *-*-solaris*)   PLATFORM=SUN_OS
                         SAMPLE_EXTRA_LIBS="-lxnet -lsocket -lnsl"
