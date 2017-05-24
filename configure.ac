@@ -340,21 +340,12 @@ if test "x${im_support}" = "xyes"; then
 fi
 
 #Enable chddir
-AC_ARG_ENABLE(chddir,
-       [  --enable-chddir Enables local folder switching based on current data folder. (Disabled by default)],
+AC_ARG_WITH(base-src-path,
+       [  --with-base-src-path=BASE_SRC_PATH     Sets base_src_path for local folder switching. (Disabled by default)],
        [
-            if test "x$enableval" = "xyes"; then
-                chddir="yes"
-            else
-                chddir="no"
-            fi
-       ],
-       [ chddir="yes"]
+            OPT+=" -DCHDDIR=\\\"${withval}\\\""
+       ]
        )
-if test "x${chddir}" = "xyes"; then
-    OPT+=" -DCHDDIR"
-fi
-
 
 case "${host}" in
         *-*-solaris*)   PLATFORM=SUN_OS

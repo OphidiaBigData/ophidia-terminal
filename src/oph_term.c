@@ -1558,13 +1558,19 @@ int main(int argc, char **argv, char **envp)
 	}
 	// OPH_CDD is not saved at server side
 	if (!hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CDD)) {
-		char oph_cdd[OPH_TERM_MAX_LEN];
+		char oph_cdd[OPH_TERM_MAX_LEN], *_oph_cdd = oph_cdd;
 #ifdef CHDDIR
 		getcwd(oph_cdd, OPH_TERM_MAX_LEN);
+		char chddir[OPH_TERM_MAX_LEN], *_chddir = chddir;
+		snprintf(chddir, OPH_TERM_MAX_LEN, CHDDIR);
+		while (*_oph_cdd && *_chddir && (*_oph_cdd == *_chddir)) {
+			_oph_cdd++;
+			_chddir++;
+		}
 #else
 		strcpy(oph_cdd, "/");
 #endif
-		if (oph_term_setenv(hashtbl, OPH_TERM_ENV_OPH_CDD, oph_cdd)) {
+		if (oph_term_setenv(hashtbl, OPH_TERM_ENV_OPH_CDD, _oph_cdd)) {
 			oph_term_env_clear(hashtbl);
 			oph_term_alias_clear(aliases);
 			(print_json) ? my_fprintf(stderr, "Could not set variable %s [CODE %d]\\n", OPH_TERM_ENV_OPH_CDD, OPH_TERM_MEMORY_ERROR) : fprintf(stderr,
@@ -2587,13 +2593,19 @@ int main(int argc, char **argv, char **envp)
 				n += snprintf(submission_string + n, OPH_TERM_MAX_LEN - n, "cwd=%s;", (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CWD));
 				//cdd management
 				if (!hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CDD)) {
-					char oph_cdd[OPH_TERM_MAX_LEN];
+					char oph_cdd[OPH_TERM_MAX_LEN], *_oph_cdd = oph_cdd;
 #ifdef CHDDIR
 					getcwd(oph_cdd, OPH_TERM_MAX_LEN);
+					char chddir[OPH_TERM_MAX_LEN], *_chddir = chddir;
+					snprintf(chddir, OPH_TERM_MAX_LEN, CHDDIR);
+					while (*_oph_cdd && *_chddir && (*_oph_cdd == *_chddir)) {
+						_oph_cdd++;
+						_chddir++;
+					}
 #else
 					strcpy(oph_cdd, "/");
 #endif
-					if (oph_term_setenv(hashtbl, OPH_TERM_ENV_OPH_CDD, oph_cdd)) {
+					if (oph_term_setenv(hashtbl, OPH_TERM_ENV_OPH_CDD, _oph_cdd)) {
 						(print_json) ? my_fprintf(stderr, "Could not set cdd [CODE %d]\\n", OPH_TERM_MEMORY_ERROR) : fprintf(stderr,
 																		     "\e[1;31mCould not set cdd [CODE %d]\e[0m\n",
 																		     OPH_TERM_MEMORY_ERROR);
@@ -2800,7 +2812,9 @@ int main(int argc, char **argv, char **envp)
 						continue;
 					}
 #ifdef CHDDIR
-					chdir(newcdd);
+					char chddir[OPH_TERM_MAX_LEN];
+					snprintf(chddir, OPH_TERM_MAX_LEN, CHDDIR "/%s", newcdd);
+					chdir(chddir);
 #endif
 					free(newcdd);
 					newcdd = NULL;
@@ -2947,13 +2961,19 @@ int main(int argc, char **argv, char **envp)
 				//cdd management
 				if (!strstr(cursor, ";cdd=") && strncmp(cursor, "cdd=", 4)) {
 					if (!hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CDD)) {
-						char oph_cdd[OPH_TERM_MAX_LEN];
+						char oph_cdd[OPH_TERM_MAX_LEN], *_oph_cdd = oph_cdd;
 #ifdef CHDDIR
 						getcwd(oph_cdd, OPH_TERM_MAX_LEN);
+						char chddir[OPH_TERM_MAX_LEN], *_chddir = chddir;
+						snprintf(chddir, OPH_TERM_MAX_LEN, CHDDIR);
+						while (*_oph_cdd && *_chddir && (*_oph_cdd == *_chddir)) {
+							_oph_cdd++;
+							_chddir++;
+						}
 #else
 						strcpy(oph_cdd, "/");
 #endif
-						if (oph_term_setenv(hashtbl, OPH_TERM_ENV_OPH_CDD, oph_cdd)) {
+						if (oph_term_setenv(hashtbl, OPH_TERM_ENV_OPH_CDD, _oph_cdd)) {
 							(print_json) ? my_fprintf(stderr, "Could not set cdd [CODE %d]\\n", OPH_TERM_MEMORY_ERROR) : fprintf(stderr,
 																			     "\e[1;31mCould not set cdd [CODE %d]\e[0m\n",
 																			     OPH_TERM_MEMORY_ERROR);
@@ -3187,7 +3207,9 @@ int main(int argc, char **argv, char **envp)
 						continue;
 					}
 #ifdef CHDDIR
-					chdir(newcdd);
+					char chddir[OPH_TERM_MAX_LEN];
+					snprintf(chddir, OPH_TERM_MAX_LEN, CHDDIR "/%s", newcdd);
+					chdir(chddir);
 #endif
 					free(newcdd);
 					newcdd = NULL;
