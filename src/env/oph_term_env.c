@@ -135,11 +135,12 @@ int oph_term_env(HASHTBL * hashtbl)
 
 	for (i = 0; i < env_vars_num; i++) {
 		value = (char *) hashtbl_get(hashtbl, env_vars[i]);
-		if (!value) {
+		if (!value)
 			(print_json) ? my_printf("%s=\\n", env_vars[i]) : printf("%s=\n", env_vars[i]);
-		} else {
+		else if (strcmp(env_vars[i], OPH_TERM_ENV_OPH_PASSWD))
 			(print_json) ? my_printf("%s=%s\\n", env_vars[i], value) : printf("%s=%s\n", env_vars[i], value);
-		}
+		else
+			(print_json) ? my_printf("%s=***\\n", env_vars[i]) : printf("%s=***\n", env_vars[i]);
 	}
 
 	for (n = 0; n < hashtbl->size; n++) {
@@ -147,7 +148,10 @@ int oph_term_env(HASHTBL * hashtbl)
 		while (node) {
 			if (!is_env_var(node->key)) {
 				(print_json) ? my_printf("%s=", node->key) : printf("%s=", node->key);
-				(print_json) ? my_printf("%s\\n", (char *) node->data) : printf("%s\n", (char *) node->data);
+				if (strcmp(node->key, OPH_TERM_ENV_OPH_PASSWD))
+					(print_json) ? my_printf("%s\\n", (char *) node->data) : printf("%s\n", (char *) node->data);
+				else
+					(print_json) ? my_printf("***\\n") : printf("***\n");
 			}
 			node = node->next;
 		}
