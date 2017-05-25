@@ -347,6 +347,24 @@ AC_ARG_WITH(base-src-path,
        ]
        )
 
+xml_ssl_check=
+AC_ARG_ENABLE(xml_ssl_check,
+       [  --disable-xml-ssl-check    [Disable verification of SSL certificates when 
+				downloading operators XML. (Enabled by default)]],
+       [
+            if test "x$enableval" = "xno"; then
+                xml_ssl_check="no"
+            else
+                xml_ssl_check="yes"
+            fi
+       ],
+       [ xml_ssl_check="yes"]
+       )
+if test "x${xml_ssl_check}" = "xno"; then
+    AC_MSG_NOTICE("Disabled XML SSL certificate check")
+    OPT+=" -DNO_XML_SSL_CHECK"
+fi
+
 case "${host}" in
         *-*-solaris*)   PLATFORM=SUN_OS
                         SAMPLE_EXTRA_LIBS="-lxnet -lsocket -lnsl"

@@ -267,6 +267,10 @@ int oph_term_env_update_xml(const char *repoURL, const char *userpwd, const char
 	curl_easy_setopt(curl1, CURLOPT_FOLLOWLOCATION, 1L);
 	curl_easy_setopt(curl1, CURLOPT_WRITEDATA, file);
 	curl_easy_setopt(curl1, CURLOPT_CONNECTTIMEOUT, 10);
+#ifdef NO_XML_SSL_CHECK
+	curl_easy_setopt(curl1, CURLOPT_SSL_VERIFYPEER, 0L);
+#endif
+
 	if (userpwd)
 		curl_easy_setopt(curl1, CURLOPT_USERPWD, userpwd);
 	/* Perform the request, res will get the return code */
@@ -314,6 +318,10 @@ int oph_term_env_update_xml(const char *repoURL, const char *userpwd, const char
 	curl_easy_setopt(curl1, CURLOPT_NOBODY, 1);
 	curl_easy_setopt(curl1, CURLOPT_FILETIME, 1);
 	curl_easy_setopt(curl1, CURLOPT_CONNECTTIMEOUT, 10);
+#ifdef NO_XML_SSL_CHECK
+	curl_easy_setopt(curl1, CURLOPT_SSL_VERIFYPEER, 0L);
+#endif
+
 	if (userpwd)
 		curl_easy_setopt(curl1, CURLOPT_USERPWD, userpwd);
 
@@ -329,6 +337,10 @@ int oph_term_env_update_xml(const char *repoURL, const char *userpwd, const char
 	}
 	curl_easy_setopt(curl2, CURLOPT_FOLLOWLOCATION, 1L);
 	curl_easy_setopt(curl2, CURLOPT_CONNECTTIMEOUT, 10);
+#ifdef NO_XML_SSL_CHECK
+	curl_easy_setopt(curl2, CURLOPT_SSL_VERIFYPEER, 0L);
+#endif
+
 	if (userpwd)
 		curl_easy_setopt(curl2, CURLOPT_USERPWD, userpwd);
 
