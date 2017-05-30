@@ -1000,8 +1000,26 @@ char **oph_term_completion(char *text, int start, int end)
 	rl_attempted_completion_over = 1;
 
 	if (text[0] == '.' || text[0] == '/') {
+#ifdef CHDDIR
+		int i = 0;
+		char chddir[OPH_TERM_MAX_LEN];
+		if ((text[0] == '/') && (strlen(CHDDIR) > 1)) {
+			snprintf(chddir, OPH_TERM_MAX_LEN, CHDDIR "%s", text);
+			text = chddir;
+			i = 1;
+		}
+#endif
 		// completion over local filesystem
 		matches = rl_completion_matches(text, rl_filename_completion_function);
+#ifdef CHDDIR
+		if (i && matches) {
+			for (i = 0; matches[i]; i++) {
+				snprintf(chddir, OPH_TERM_MAX_LEN, "%s", matches[i] + strlen(CHDDIR));
+				free(matches[i]);
+				matches[i] = strdup(chddir);
+			}
+		}
+#endif
 	} else if (rl_line_buffer[(start - 1 < 0) ? start : start - 1] == '$'
 		   || (rl_line_buffer[(start - 2 < 0) ? start : start - 2] == '$' && rl_line_buffer[(start - 1 < 0) ? start : start - 1] == '{')) {
 		// completion over env vars (def+user)
