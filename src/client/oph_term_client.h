@@ -59,6 +59,7 @@
 // - user,password,host,port are login parameters
 // - workflow_wrap 1 for wrapping a command in a 1-task workflow, 0 for taking query as is
 // - hashtbl current environment
-int oph_term_client(char *cmd_line,char *command,char **newsession,char *user,char *password,char *host,char *port, int *return_value, char **out_response, char **out_response_for_viewer, int workflow_wrap, HASHTBL *hashtbl);
+int oph_term_client(char *cmd_line, char *command, char **newsession, char *user, char *password, char *host, char *port, int *return_value, char **out_response, char **out_response_for_viewer,
+		    int workflow_wrap, HASHTBL * hashtbl);
 
 #endif

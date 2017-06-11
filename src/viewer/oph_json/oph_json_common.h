@@ -134,14 +134,14 @@ typedef struct _oph_json_links {
  * \param json Address of a pointer to an OPH_JSON object
  * \return 0 if successfull, N otherwise
  */
-int oph_json_alloc(oph_json **json);
+int oph_json_alloc(oph_json ** json);
 
 /**
  * \brief Function to free an OPH_JSON object
  * \param json Pointer to an OPH_JSON object
  * \return 0 if successfull, N otherwise
  */
-int oph_json_free(oph_json *json);
+int oph_json_free(oph_json * json);
 
 /**
  * \brief Function to add a consumer to an OPH_JSON object
@@ -149,7 +149,7 @@ int oph_json_free(oph_json *json);
  * \param consumer Name of the consumer user
  * \return 0 if successfull, N otherwise
  */
-int oph_json_add_consumer(oph_json *json, const char *consumer);
+int oph_json_add_consumer(oph_json * json, const char *consumer);
 
 /**
  * \brief Function to create a JSON string from an OPH_JSON object.
@@ -157,7 +157,7 @@ int oph_json_add_consumer(oph_json *json, const char *consumer);
  * \param jstring Input JSON string (freed and NULLed before return)
  * \return 0 if successfull, N otherwise
  */
-int oph_json_from_json_string(oph_json **json, char **jstring);
+int oph_json_from_json_string(oph_json ** json, char **jstring);
 
 /**
  * \brief Function to set the data source properties
@@ -169,7 +169,7 @@ int oph_json_from_json_string(oph_json **json, char **jstring);
  * \param producer Producer user or NULL
  * \return 0 if successfull, N otherwise
  */
-int oph_json_set_source(oph_json *json, const char *srckey, const char *srcname, const char *srcurl, const char *description, const char *producer);
+int oph_json_set_source(oph_json * json, const char *srckey, const char *srcname, const char *srcurl, const char *description, const char *producer);
 
 /**
  * \brief Function to add a property to the data source
@@ -178,7 +178,7 @@ int oph_json_set_source(oph_json *json, const char *srckey, const char *srcname,
  * \param value Value of the source property
  * \return 0 if successfull, N otherwise
  */
-int oph_json_add_source_detail(oph_json *json, const char *key, const char *value);
+int oph_json_add_source_detail(oph_json * json, const char *key, const char *value);
 
 /***********OPH_JSON INTERNAL FUNCTIONS***********/
 
@@ -187,14 +187,14 @@ int oph_json_is_measuretype_correct(const char *measuretype);
 // Check if type does exist
 int oph_json_is_type_correct(const char *type);
 // Add an objkey to the responseKeyset if new
-int oph_json_add_responseKey(oph_json *json, const char *responseKey);
+int oph_json_add_responseKey(oph_json * json, const char *responseKey);
 // Free consumers
-int oph_json_free_consumers(oph_json *json);
+int oph_json_free_consumers(oph_json * json);
 // Free responseKeyset
-int oph_json_free_responseKeyset(oph_json *json);
+int oph_json_free_responseKeyset(oph_json * json);
 // Free source
-int oph_json_free_source(oph_json *json);
+int oph_json_free_source(oph_json * json);
 // Free response
-int oph_json_free_response(oph_json *json);
+int oph_json_free_response(oph_json * json);
 
 #endif

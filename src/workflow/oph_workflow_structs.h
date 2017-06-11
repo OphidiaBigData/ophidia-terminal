@@ -40,7 +40,7 @@ typedef struct _oph_workflow_light_task {
 	char **arguments_keys;
 	char **arguments_values;
 	int arguments_num;
-	char* response;
+	char *response;
 } oph_workflow_light_task;
 
 /* \brief Struct for an OPH_WORKFLOW dependency
@@ -112,12 +112,12 @@ typedef struct _oph_workflow_task {
 	char **outputs_keys;
 	char **outputs_values;
 	int outputs_num;
-	oph_workflow_light_task* light_tasks;
+	oph_workflow_light_task *light_tasks;
 	int light_tasks_num;
 	int residual_light_tasks_num;
 	int retry_num;
 	int residual_retry_num;
-	char* response;
+	char *response;
 	int exit_action;
 	int run;
 	int parent;
@@ -167,18 +167,18 @@ typedef struct _oph_workflow {
 	oph_workflow_task *tasks;
 	int tasks_num;
 	int residual_tasks_num;
-	char* response;
-	char* exit_values;
-	char* on_error;
-	char* on_exit;
-	char* run;
+	char *response;
+	char *exit_values;
+	char *on_error;
+	char *on_exit;
+	char *run;
 	int output_format;
 } oph_workflow;
 
 /* Functions for structs cleanup */
-int oph_workflow_free(oph_workflow *workflow);
-int oph_workflow_task_free(oph_workflow_task *task);
-int oph_workflow_dep_free(oph_workflow_dep *dep);
-int oph_workflow_light_task_free(oph_workflow_light_task *light_task);
+int oph_workflow_free(oph_workflow * workflow);
+int oph_workflow_task_free(oph_workflow_task * task);
+int oph_workflow_dep_free(oph_workflow_dep * dep);
+int oph_workflow_light_task_free(oph_workflow_light_task * light_task);
 
-#endif //__OPH_WORKFLOW_STRUCTS_H
+#endif				//__OPH_WORKFLOW_STRUCTS_H

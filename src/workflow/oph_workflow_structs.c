@@ -23,51 +23,53 @@
 
 #include "oph_workflow_structs.h"
 
-int oph_workflow_free(oph_workflow *workflow) {
-	if (!workflow) return OPH_WORKFLOW_EXIT_SUCCESS;
+int oph_workflow_free(oph_workflow * workflow)
+{
+	if (!workflow)
+		return OPH_WORKFLOW_EXIT_SUCCESS;
 	int i;
 	if (workflow->abstract) {
 		free(workflow->abstract);
-		workflow->abstract=NULL;
+		workflow->abstract = NULL;
 	}
 	if (workflow->author) {
 		free(workflow->author);
-		workflow->author=NULL;
+		workflow->author = NULL;
 	}
 	if (workflow->callback_url) {
 		free(workflow->callback_url);
-		workflow->callback_url=NULL;
+		workflow->callback_url = NULL;
 	}
 	if (workflow->cube) {
 		free(workflow->cube);
-		workflow->cube=NULL;
+		workflow->cube = NULL;
 	}
 	if (workflow->cwd) {
 		free(workflow->cwd);
-		workflow->cwd=NULL;
+		workflow->cwd = NULL;
 	}
 	if (workflow->exec_mode) {
 		free(workflow->exec_mode);
-		workflow->exec_mode=NULL;
+		workflow->exec_mode = NULL;
 	}
 	if (workflow->name) {
 		free(workflow->name);
-		workflow->name=NULL;
+		workflow->name = NULL;
 	}
 	if (workflow->sessionid) {
 		free(workflow->sessionid);
-		workflow->sessionid=NULL;
+		workflow->sessionid = NULL;
 	}
 	if (workflow->username) {
 		free(workflow->username);
-		workflow->username=NULL;
+		workflow->username = NULL;
 	}
 	if (workflow->tasks_num) {
 		for (i = 0; i < workflow->tasks_num; i++) {
 			oph_workflow_task_free(&(workflow->tasks[i]));
 		}
 		free(workflow->tasks);
-		workflow->tasks=NULL;
+		workflow->tasks = NULL;
 	}
 	if (workflow->response) {
 		free(workflow->response);
@@ -75,90 +77,91 @@ int oph_workflow_free(oph_workflow *workflow) {
 	}
 	if (workflow->command) {
 		free(workflow->command);
-		workflow->command=NULL;
+		workflow->command = NULL;
 	}
 	if (workflow->exit_values) {
 		free(workflow->exit_values);
-		workflow->exit_values=NULL;
+		workflow->exit_values = NULL;
 	}
 	if (workflow->on_error) {
 		free(workflow->on_error);
-		workflow->on_error=NULL;
+		workflow->on_error = NULL;
 	}
 	if (workflow->on_exit) {
 		free(workflow->on_exit);
-		workflow->on_exit=NULL;
+		workflow->on_exit = NULL;
 	}
 	if (workflow->run) {
 		free(workflow->run);
-		workflow->run=NULL;
+		workflow->run = NULL;
 	}
 	free(workflow);
-	workflow=NULL;
+	workflow = NULL;
 	return OPH_WORKFLOW_EXIT_SUCCESS;
 }
 
-int oph_workflow_task_free(oph_workflow_task *task)
+int oph_workflow_task_free(oph_workflow_task * task)
 {
-	if (!task) return OPH_WORKFLOW_EXIT_SUCCESS;
+	if (!task)
+		return OPH_WORKFLOW_EXIT_SUCCESS;
 	int i;
 	if (task->arguments_num) {
 		for (i = 0; i < task->arguments_num; i++) {
 			if (task->arguments_keys[i]) {
 				free(task->arguments_keys[i]);
-				task->arguments_keys[i]=NULL;
+				task->arguments_keys[i] = NULL;
 			}
 			if (task->arguments_values[i]) {
 				free(task->arguments_values[i]);
-				task->arguments_values[i]=NULL;
+				task->arguments_values[i] = NULL;
 			}
 		}
 		free(task->arguments_keys);
-		task->arguments_keys=NULL;
+		task->arguments_keys = NULL;
 		free(task->arguments_values);
-		task->arguments_values=NULL;
+		task->arguments_values = NULL;
 	}
 	if (task->dependents_indexes_num) {
 		free(task->dependents_indexes);
-		task->dependents_indexes=NULL;
+		task->dependents_indexes = NULL;
 	}
 	if (task->deps_num) {
 		for (i = 0; i < task->deps_num; i++) {
 			oph_workflow_dep_free(&(task->deps[i]));
 		}
 		free(task->deps);
-		task->deps=NULL;
+		task->deps = NULL;
 	}
 	if (task->light_tasks_num) {
 		for (i = 0; i < task->light_tasks_num; i++) {
 			oph_workflow_light_task_free(&(task->light_tasks[i]));
 		}
 		free(task->light_tasks);
-		task->light_tasks=NULL;
+		task->light_tasks = NULL;
 	}
 	if (task->name) {
 		free(task->name);
-		task->name=NULL;
+		task->name = NULL;
 	}
 	if (task->operator) {
 		free(task->operator);
-		task->operator=NULL;
+		task->operator= NULL;
 	}
 	if (task->outputs_num) {
 		for (i = 0; i < task->outputs_num; i++) {
 			if (task->outputs_keys[i]) {
 				free(task->outputs_keys[i]);
-				task->outputs_keys[i]=NULL;
+				task->outputs_keys[i] = NULL;
 			}
 			if (task->outputs_values[i]) {
 				free(task->outputs_values[i]);
-				task->outputs_values[i]=NULL;
+				task->outputs_values[i] = NULL;
 			}
 		}
 		free(task->outputs_keys);
-		task->outputs_keys=NULL;
+		task->outputs_keys = NULL;
 		free(task->outputs_values);
-		task->outputs_values=NULL;
+		task->outputs_values = NULL;
 	}
 	if (task->response) {
 		free(task->response);
@@ -167,57 +170,61 @@ int oph_workflow_task_free(oph_workflow_task *task)
 	return OPH_WORKFLOW_EXIT_SUCCESS;
 }
 
-int oph_workflow_dep_free(oph_workflow_dep *dep) {
-	if (!dep) return OPH_WORKFLOW_EXIT_SUCCESS;
+int oph_workflow_dep_free(oph_workflow_dep * dep)
+{
+	if (!dep)
+		return OPH_WORKFLOW_EXIT_SUCCESS;
 	if (dep->argument) {
 		free(dep->argument);
-		dep->argument=NULL;
+		dep->argument = NULL;
 	}
 	if (dep->filter) {
 		free(dep->filter);
-		dep->filter=NULL;
+		dep->filter = NULL;
 	}
 	if (dep->order) {
 		free(dep->order);
-		dep->order=NULL;
+		dep->order = NULL;
 	}
 	if (dep->output_argument) {
 		free(dep->output_argument);
-		dep->output_argument=NULL;
+		dep->output_argument = NULL;
 	}
 	if (dep->output_order) {
 		free(dep->output_order);
-		dep->output_order=NULL;
+		dep->output_order = NULL;
 	}
 	if (dep->task_name) {
 		free(dep->task_name);
-		dep->task_name=NULL;
+		dep->task_name = NULL;
 	}
 	if (dep->type) {
 		free(dep->type);
-		dep->type=NULL;
+		dep->type = NULL;
 	}
 	return OPH_WORKFLOW_EXIT_SUCCESS;
 }
 
-int oph_workflow_light_task_free(oph_workflow_light_task *light_task) {
-	if (!light_task) return OPH_WORKFLOW_EXIT_SUCCESS;
+int oph_workflow_light_task_free(oph_workflow_light_task * light_task)
+{
+	if (!light_task)
+		return OPH_WORKFLOW_EXIT_SUCCESS;
 	int i;
 	if (light_task->arguments_num) {
 		for (i = 0; i < light_task->arguments_num; i++) {
 			if (light_task->arguments_keys[i]) {
 				free(light_task->arguments_keys[i]);
-				light_task->arguments_keys[i]=NULL;
+				light_task->arguments_keys[i] = NULL;
 			}
 			if (light_task->arguments_values[i]) {
 				free(light_task->arguments_values[i]);
-				light_task->arguments_values[i]=NULL;
+				light_task->arguments_values[i] = NULL;
 			}
 		}
 		free(light_task->arguments_keys);
-		light_task->arguments_keys=NULL;
+		light_task->arguments_keys = NULL;
 		free(light_task->arguments_values);
-		light_task->arguments_values=NULL;
+		light_task->arguments_values = NULL;
 	}
 	if (light_task->response) {
 		free(light_task->response);
@@ -225,4 +232,3 @@ int oph_workflow_light_task_free(oph_workflow_light_task *light_task) {
 	}
 	return OPH_WORKFLOW_EXIT_SUCCESS;
 }
-

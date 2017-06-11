@@ -17,7 +17,7 @@
 #
 
 AC_PREREQ([2.60])
-AC_INIT([ophidia-terminal], [0.10.6], [ophidia-info@lists.cmcc.it])
+AC_INIT([ophidia-terminal], [1.0.0], [ophidia-info@lists.cmcc.it])
 AC_CONFIG_SRCDIR([src])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_AUX_DIR([config])
@@ -340,6 +340,24 @@ AC_ARG_ENABLE(im-support,
 if test "x${im_support}" = "xyes"; then
     AC_MSG_NOTICE("Enabled IM support")
     OPT+=" -DWITH_IM_SUPPORT"
+fi
+
+xml_ssl_check=
+AC_ARG_ENABLE(xml_ssl_check,
+       [  --disable-xml-ssl-check    [Disable verification of SSL certificates when 
+				downloading operators XML. (Enabled by default)]],
+       [
+            if test "x$enableval" = "xno"; then
+                xml_ssl_check="no"
+            else
+                xml_ssl_check="yes"
+            fi
+       ],
+       [ xml_ssl_check="yes"]
+       )
+if test "x${xml_ssl_check}" = "xno"; then
+    AC_MSG_NOTICE("Disabled XML SSL certificate check")
+    OPT+=" -DNO_XML_SSL_CHECK"
 fi
 
 case "${host}" in

@@ -19,7 +19,7 @@
 #ifndef __OPH_WORKFLOW_FUNCTIONS_H
 #define __OPH_WORKFLOW_FUNCTIONS_H
 
-#define OUTPUT_MAX_LEN 500*1024 // 500 KB
+#define OUTPUT_MAX_LEN 500*1024	// 500 KB
 #define OUTPUT_JSON_STRING "{\n  \"request\":\"%s\",\n  \"jobid\":\"%s\",\n  \"response\":%s,\n  \"stdout\":\"%s\",\n  \"stderr\":\"%s\"\n}"
 extern int print_json;
 extern char oph_term_request[OUTPUT_MAX_LEN];
@@ -40,20 +40,20 @@ extern int oph_term_error_cur;
  * \param workflow Output OPH_WORKFLOW
  * \return 0 if successful
  */
-int oph_workflow_load(char *json_string, char *username, oph_workflow **workflow);
+int oph_workflow_load(char *json_string, char *username, oph_workflow ** workflow);
 
 /* \brief Function to index task names in deps and init dependents_indexes
  * \param tasks Array of tasks
  * \param tasks_num Number of tasks
  * \return 0 if successful
  */
-int oph_workflow_indexing(oph_workflow_task *tasks, int tasks_num);
+int oph_workflow_indexing(oph_workflow_task * tasks, int tasks_num);
 
 /* \brief Function for cyclic dependencies check
  * \param workflow Input OPH_WORKFLOW to be validated
  * \return 0 if successful
  */
-int oph_workflow_validate(oph_workflow *workflow);
+int oph_workflow_validate(oph_workflow * workflow);
 
 /* \brief Function for the setup of the initial array of independent tasks
  * \param tasks Array of tasks
@@ -62,7 +62,7 @@ int oph_workflow_validate(oph_workflow *workflow);
  * \param initial_tasks_indexes_num Number of initial tasks
  * \return 0 if successful
  */
-int oph_workflow_init(oph_workflow_task *tasks, int tasks_num, int **initial_tasks_indexes, int *initial_tasks_indexes_num);
+int oph_workflow_init(oph_workflow_task * tasks, int tasks_num, int **initial_tasks_indexes, int *initial_tasks_indexes_num);
 
 /* \brief Function for printing a workflow as an image
  * \param workflow Input OPH_WORKFLOW to be printed
@@ -71,7 +71,7 @@ int oph_workflow_init(oph_workflow_task *tasks, int tasks_num, int **initial_tas
  * \param layout Layout of the graph
  * \return 0 if successful
  */
-int oph_workflow_print(oph_workflow *workflow, int save_img, int open_img, char *layout);
+int oph_workflow_print(oph_workflow * workflow, int save_img, int open_img, char *layout);
 
 /* \brief Function for printing a workflow status as an image
  * \param workflow Input OPH_WORKFLOW to be printed
@@ -82,10 +82,11 @@ int oph_workflow_print(oph_workflow *workflow, int save_img, int open_img, char 
  * \param layout Layout of the graph
  * \return 0 if successful
  */
-int oph_workflow_print_status(oph_workflow *workflow, int save_img, int open_img, char *json_string_with_status, char *layout);
+int oph_workflow_print_status(oph_workflow * workflow, int save_img, int open_img, char *json_string_with_status, char *layout);
 
-int view_status(int iterations_num, char *command_line, char *tmp_submission_string, HASHTBL *hashtbl, int *oph_term_return, char *tmp_session, char *tmp_workflow, int save_img, int open_img, int show_list, int time_interval, oph_workflow *wf);
+int view_status(int iterations_num, char *command_line, char *tmp_submission_string, HASHTBL * hashtbl, int *oph_term_return, char *tmp_session, char *tmp_workflow, int save_img, int open_img,
+		int show_list, int time_interval, oph_workflow * wf);
 
-int oph_workflow_get_ranks_string(oph_workflow_task *tasks, int tasks_num, char **ranks_string);
+int oph_workflow_get_ranks_string(oph_workflow_task * tasks, int tasks_num, char **ranks_string);
 
-#endif //__OPH_WORKFLOW_FUNCTIONS_H
+#endif				//__OPH_WORKFLOW_FUNCTIONS_H

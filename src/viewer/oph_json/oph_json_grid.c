@@ -31,7 +31,8 @@
 /***********OPH_JSON_OBJ_GRID INTERNAL FUNCTIONS***********/
 
 // Free a grid object contents
-int oph_json_free_grid(oph_json_obj_grid *obj) {
+int oph_json_free_grid(oph_json_obj_grid * obj)
+{
 	if (obj) {
 		if (obj->description) {
 			free(obj->description);
@@ -91,13 +92,14 @@ int oph_json_free_grid(oph_json_obj_grid *obj) {
 
 /***********OPH_JSON_OBJ_GRID FUNCTIONS***********/
 
-int oph_json_add_grid(oph_json *json, const char *objkey, const char *title, const char *description, const char **keys, int keys_num, const char **fieldtypes, int fieldtypes_num) {
-	if (!json || !objkey || !title || !keys || keys_num<1 || !fieldtypes || fieldtypes_num<1) {
+int oph_json_add_grid(oph_json * json, const char *objkey, const char *title, const char *description, const char **keys, int keys_num, const char **fieldtypes, int fieldtypes_num)
+{
+	if (!json || !objkey || !title || !keys || keys_num < 1 || !fieldtypes || fieldtypes_num < 1) {
 		return OPH_JSON_BAD_PARAM_ERROR;
 	}
 
 	if (json->response_num == 0) {
-		json->response = (oph_json_response *)malloc(sizeof(oph_json_response));
+		json->response = (oph_json_response *) malloc(sizeof(oph_json_response));
 		if (!json->response) {
 			return OPH_JSON_MEMORY_ERROR;
 		}
@@ -106,18 +108,18 @@ int oph_json_add_grid(oph_json *json, const char *objkey, const char *title, con
 		json->response[0].objcontent_num = 0;
 		json->response[0].objkey = NULL;
 
-		json->response[0].objclass = (char *)strdup(OPH_JSON_GRID);
+		json->response[0].objclass = (char *) strdup(OPH_JSON_GRID);
 		if (!json->response[0].objclass) {
 			return OPH_JSON_MEMORY_ERROR;
 		}
 
 		json->response_num++;
 
-		json->response[0].objkey = (char *)strdup(objkey);
+		json->response[0].objkey = (char *) strdup(objkey);
 		if (!json->response[0].objkey) {
 			return OPH_JSON_MEMORY_ERROR;
 		}
-		if (oph_json_add_responseKey(json,objkey)) {
+		if (oph_json_add_responseKey(json, objkey)) {
 			return OPH_JSON_MEMORY_ERROR;
 		}
 
@@ -135,7 +137,7 @@ int oph_json_add_grid(oph_json *json, const char *objkey, const char *title, con
 		((oph_json_obj_grid *) json->response[0].objcontent)[0].values_num1 = 0;
 		((oph_json_obj_grid *) json->response[0].objcontent)[0].values_num2 = 0;
 
-		((oph_json_obj_grid *) json->response[0].objcontent)[0].title = (char *)strdup(title);
+		((oph_json_obj_grid *) json->response[0].objcontent)[0].title = (char *) strdup(title);
 		if (!((oph_json_obj_grid *) json->response[0].objcontent)[0].title) {
 			return OPH_JSON_MEMORY_ERROR;
 		}
@@ -143,47 +145,48 @@ int oph_json_add_grid(oph_json *json, const char *objkey, const char *title, con
 		json->response[0].objcontent_num++;
 
 		if (description) {
-			((oph_json_obj_grid *) json->response[0].objcontent)[0].description = (char *)strdup(description);
+			((oph_json_obj_grid *) json->response[0].objcontent)[0].description = (char *) strdup(description);
 			if (!((oph_json_obj_grid *) json->response[0].objcontent)[0].description) {
 				return OPH_JSON_MEMORY_ERROR;
 			}
 		}
 
-		size_t k,q;
+		size_t k, q;
 
-		((oph_json_obj_grid *) json->response[0].objcontent)[0].keys = (char **)malloc(sizeof(char *)*keys_num);
+		((oph_json_obj_grid *) json->response[0].objcontent)[0].keys = (char **) malloc(sizeof(char *) * keys_num);
 		if (!((oph_json_obj_grid *) json->response[0].objcontent)[0].keys) {
 			return OPH_JSON_MEMORY_ERROR;
 		}
-		for (k = 0; k < (size_t)keys_num; k++) {
+		for (k = 0; k < (size_t) keys_num; k++) {
 			for (q = 0; q < k; q++) {
-				if (!strcmp(keys[q],keys[k])) {
+				if (!strcmp(keys[q], keys[k])) {
 					return OPH_JSON_BAD_PARAM_ERROR;
 				}
 			}
-			((oph_json_obj_grid *) json->response[0].objcontent)[0].keys[k] = (char *)strdup(keys[k]);
+			((oph_json_obj_grid *) json->response[0].objcontent)[0].keys[k] = (char *) strdup(keys[k]);
 			if (!((oph_json_obj_grid *) json->response[0].objcontent)[0].keys[k]) {
 				return OPH_JSON_MEMORY_ERROR;
 			}
 			((oph_json_obj_grid *) json->response[0].objcontent)[0].keys_num++;
 		}
 
-		((oph_json_obj_grid *) json->response[0].objcontent)[0].fieldtypes = (char **)malloc(sizeof(char *)*fieldtypes_num);
+		((oph_json_obj_grid *) json->response[0].objcontent)[0].fieldtypes = (char **) malloc(sizeof(char *) * fieldtypes_num);
 		if (!((oph_json_obj_grid *) json->response[0].objcontent)[0].fieldtypes) {
 			return OPH_JSON_MEMORY_ERROR;
 		}
-		for (k = 0; k < (size_t)fieldtypes_num; k++) {
+		for (k = 0; k < (size_t) fieldtypes_num; k++) {
 			if (!oph_json_is_type_correct(fieldtypes[k])) {
 				return OPH_JSON_BAD_PARAM_ERROR;
 			}
-			((oph_json_obj_grid *) json->response[0].objcontent)[0].fieldtypes[k] = (char *)strdup(fieldtypes[k]);
+			((oph_json_obj_grid *) json->response[0].objcontent)[0].fieldtypes[k] = (char *) strdup(fieldtypes[k]);
 			if (!((oph_json_obj_grid *) json->response[0].objcontent)[0].fieldtypes[k]) {
 				return OPH_JSON_MEMORY_ERROR;
 			}
 			((oph_json_obj_grid *) json->response[0].objcontent)[0].fieldtypes_num++;
 		}
 
-		if (keys_num != fieldtypes_num || (size_t)keys_num != ((oph_json_obj_grid *) json->response[0].objcontent)[0].keys_num || (size_t)fieldtypes_num != ((oph_json_obj_grid *) json->response[0].objcontent)[0].fieldtypes_num) {
+		if (keys_num != fieldtypes_num || (size_t) keys_num != ((oph_json_obj_grid *) json->response[0].objcontent)[0].keys_num
+		    || (size_t) fieldtypes_num != ((oph_json_obj_grid *) json->response[0].objcontent)[0].fieldtypes_num) {
 			return OPH_JSON_BAD_PARAM_ERROR;
 		}
 
@@ -192,8 +195,8 @@ int oph_json_add_grid(oph_json *json, const char *objkey, const char *title, con
 		size_t i;
 		int add_frag = 0;
 		for (i = 0; i < json->response_num; i++) {
-			if (!strcmp(json->response[i].objkey,objkey)) {
-				if (!strcmp(json->response[i].objclass,OPH_JSON_GRID)) {
+			if (!strcmp(json->response[i].objkey, objkey)) {
+				if (!strcmp(json->response[i].objclass, OPH_JSON_GRID)) {
 					add_frag = 1;
 					break;
 				}
@@ -203,7 +206,7 @@ int oph_json_add_grid(oph_json *json, const char *objkey, const char *title, con
 		if (add_frag) {
 			void *tmp = json->response[i].objcontent;
 			unsigned int index = json->response[i].objcontent_num;
-			json->response[i].objcontent = realloc(json->response[i].objcontent,sizeof(oph_json_obj_grid)*(json->response[i].objcontent_num + 1));
+			json->response[i].objcontent = realloc(json->response[i].objcontent, sizeof(oph_json_obj_grid) * (json->response[i].objcontent_num + 1));
 			if (!json->response[i].objcontent) {
 				json->response[i].objcontent = tmp;
 				return OPH_JSON_MEMORY_ERROR;
@@ -218,7 +221,7 @@ int oph_json_add_grid(oph_json *json, const char *objkey, const char *title, con
 			((oph_json_obj_grid *) json->response[i].objcontent)[index].values_num1 = 0;
 			((oph_json_obj_grid *) json->response[i].objcontent)[index].values_num2 = 0;
 
-			((oph_json_obj_grid *) json->response[i].objcontent)[index].title = (char *)strdup(title);
+			((oph_json_obj_grid *) json->response[i].objcontent)[index].title = (char *) strdup(title);
 			if (!((oph_json_obj_grid *) json->response[i].objcontent)[index].title) {
 				return OPH_JSON_MEMORY_ERROR;
 			}
@@ -226,47 +229,48 @@ int oph_json_add_grid(oph_json *json, const char *objkey, const char *title, con
 			json->response[i].objcontent_num++;
 
 			if (description) {
-				((oph_json_obj_grid *) json->response[i].objcontent)[index].description = (char *)strdup(description);
+				((oph_json_obj_grid *) json->response[i].objcontent)[index].description = (char *) strdup(description);
 				if (!((oph_json_obj_grid *) json->response[i].objcontent)[index].description) {
 					return OPH_JSON_MEMORY_ERROR;
 				}
 			}
 
-			size_t k,q;
+			size_t k, q;
 
-			((oph_json_obj_grid *) json->response[i].objcontent)[index].keys = (char **)malloc(sizeof(char *)*keys_num);
+			((oph_json_obj_grid *) json->response[i].objcontent)[index].keys = (char **) malloc(sizeof(char *) * keys_num);
 			if (!((oph_json_obj_grid *) json->response[i].objcontent)[index].keys) {
 				return OPH_JSON_MEMORY_ERROR;
 			}
-			for (k = 0; k < (size_t)keys_num; k++) {
+			for (k = 0; k < (size_t) keys_num; k++) {
 				for (q = 0; q < k; q++) {
-					if (!strcmp(keys[q],keys[k])) {
+					if (!strcmp(keys[q], keys[k])) {
 						return OPH_JSON_BAD_PARAM_ERROR;
 					}
 				}
-				((oph_json_obj_grid *) json->response[i].objcontent)[index].keys[k] = (char *)strdup(keys[k]);
+				((oph_json_obj_grid *) json->response[i].objcontent)[index].keys[k] = (char *) strdup(keys[k]);
 				if (!((oph_json_obj_grid *) json->response[i].objcontent)[index].keys[k]) {
 					return OPH_JSON_MEMORY_ERROR;
 				}
 				((oph_json_obj_grid *) json->response[i].objcontent)[index].keys_num++;
 			}
 
-			((oph_json_obj_grid *) json->response[i].objcontent)[index].fieldtypes = (char **)malloc(sizeof(char *)*fieldtypes_num);
+			((oph_json_obj_grid *) json->response[i].objcontent)[index].fieldtypes = (char **) malloc(sizeof(char *) * fieldtypes_num);
 			if (!((oph_json_obj_grid *) json->response[i].objcontent)[index].fieldtypes) {
 				return OPH_JSON_MEMORY_ERROR;
 			}
-			for (k = 0; k < (size_t)fieldtypes_num; k++) {
+			for (k = 0; k < (size_t) fieldtypes_num; k++) {
 				if (!oph_json_is_type_correct(fieldtypes[k])) {
 					return OPH_JSON_BAD_PARAM_ERROR;
 				}
-				((oph_json_obj_grid *) json->response[i].objcontent)[index].fieldtypes[k] = (char *)strdup(fieldtypes[k]);
+				((oph_json_obj_grid *) json->response[i].objcontent)[index].fieldtypes[k] = (char *) strdup(fieldtypes[k]);
 				if (!((oph_json_obj_grid *) json->response[i].objcontent)[index].fieldtypes[k]) {
 					return OPH_JSON_MEMORY_ERROR;
 				}
 				((oph_json_obj_grid *) json->response[i].objcontent)[index].fieldtypes_num++;
 			}
 
-			if (keys_num != fieldtypes_num || (size_t)keys_num != ((oph_json_obj_grid *) json->response[i].objcontent)[index].keys_num || (size_t)fieldtypes_num != ((oph_json_obj_grid *) json->response[i].objcontent)[index].fieldtypes_num) {
+			if (keys_num != fieldtypes_num || (size_t) keys_num != ((oph_json_obj_grid *) json->response[i].objcontent)[index].keys_num
+			    || (size_t) fieldtypes_num != ((oph_json_obj_grid *) json->response[i].objcontent)[index].fieldtypes_num) {
 				return OPH_JSON_BAD_PARAM_ERROR;
 			}
 
@@ -274,7 +278,7 @@ int oph_json_add_grid(oph_json *json, const char *objkey, const char *title, con
 		} else {
 			oph_json_response *tmp = json->response;
 			unsigned int index = json->response_num;
-			json->response = (oph_json_response *)realloc(json->response,sizeof(oph_json_response)*(json->response_num + 1));
+			json->response = (oph_json_response *) realloc(json->response, sizeof(oph_json_response) * (json->response_num + 1));
 			if (!json->response) {
 				json->response = tmp;
 				return OPH_JSON_MEMORY_ERROR;
@@ -284,18 +288,18 @@ int oph_json_add_grid(oph_json *json, const char *objkey, const char *title, con
 			json->response[index].objcontent_num = 0;
 			json->response[index].objkey = NULL;
 
-			json->response[index].objclass = (char *)strdup(OPH_JSON_GRID);
+			json->response[index].objclass = (char *) strdup(OPH_JSON_GRID);
 			if (!json->response[index].objclass) {
 				return OPH_JSON_MEMORY_ERROR;
 			}
 
 			json->response_num++;
 
-			json->response[index].objkey = (char *)strdup(objkey);
+			json->response[index].objkey = (char *) strdup(objkey);
 			if (!json->response[index].objkey) {
 				return OPH_JSON_MEMORY_ERROR;
 			}
-			if (oph_json_add_responseKey(json,objkey)) {
+			if (oph_json_add_responseKey(json, objkey)) {
 				return OPH_JSON_MEMORY_ERROR;
 			}
 
@@ -313,7 +317,7 @@ int oph_json_add_grid(oph_json *json, const char *objkey, const char *title, con
 			((oph_json_obj_grid *) json->response[index].objcontent)[0].values_num1 = 0;
 			((oph_json_obj_grid *) json->response[index].objcontent)[0].values_num2 = 0;
 
-			((oph_json_obj_grid *) json->response[index].objcontent)[0].title = (char *)strdup(title);
+			((oph_json_obj_grid *) json->response[index].objcontent)[0].title = (char *) strdup(title);
 			if (!((oph_json_obj_grid *) json->response[index].objcontent)[0].title) {
 				return OPH_JSON_MEMORY_ERROR;
 			}
@@ -321,47 +325,48 @@ int oph_json_add_grid(oph_json *json, const char *objkey, const char *title, con
 			json->response[index].objcontent_num++;
 
 			if (description) {
-				((oph_json_obj_grid *) json->response[index].objcontent)[0].description = (char *)strdup(description);
+				((oph_json_obj_grid *) json->response[index].objcontent)[0].description = (char *) strdup(description);
 				if (!((oph_json_obj_grid *) json->response[index].objcontent)[0].description) {
 					return OPH_JSON_MEMORY_ERROR;
 				}
 			}
 
-			size_t k,q;
+			size_t k, q;
 
-			((oph_json_obj_grid *) json->response[index].objcontent)[0].keys = (char **)malloc(sizeof(char *)*keys_num);
+			((oph_json_obj_grid *) json->response[index].objcontent)[0].keys = (char **) malloc(sizeof(char *) * keys_num);
 			if (!((oph_json_obj_grid *) json->response[index].objcontent)[0].keys) {
 				return OPH_JSON_MEMORY_ERROR;
 			}
-			for (k = 0; k < (size_t)keys_num; k++) {
+			for (k = 0; k < (size_t) keys_num; k++) {
 				for (q = 0; q < k; q++) {
-					if (!strcmp(keys[q],keys[k])) {
+					if (!strcmp(keys[q], keys[k])) {
 						return OPH_JSON_BAD_PARAM_ERROR;
 					}
 				}
-				((oph_json_obj_grid *) json->response[index].objcontent)[0].keys[k] = (char *)strdup(keys[k]);
+				((oph_json_obj_grid *) json->response[index].objcontent)[0].keys[k] = (char *) strdup(keys[k]);
 				if (!((oph_json_obj_grid *) json->response[index].objcontent)[0].keys[k]) {
 					return OPH_JSON_MEMORY_ERROR;
 				}
 				((oph_json_obj_grid *) json->response[index].objcontent)[0].keys_num++;
 			}
 
-			((oph_json_obj_grid *) json->response[index].objcontent)[0].fieldtypes = (char **)malloc(sizeof(char *)*fieldtypes_num);
+			((oph_json_obj_grid *) json->response[index].objcontent)[0].fieldtypes = (char **) malloc(sizeof(char *) * fieldtypes_num);
 			if (!((oph_json_obj_grid *) json->response[index].objcontent)[0].fieldtypes) {
 				return OPH_JSON_MEMORY_ERROR;
 			}
-			for (k = 0; k < (size_t)fieldtypes_num; k++) {
+			for (k = 0; k < (size_t) fieldtypes_num; k++) {
 				if (!oph_json_is_type_correct(fieldtypes[k])) {
 					return OPH_JSON_BAD_PARAM_ERROR;
 				}
-				((oph_json_obj_grid *) json->response[index].objcontent)[0].fieldtypes[k] = (char *)strdup(fieldtypes[k]);
+				((oph_json_obj_grid *) json->response[index].objcontent)[0].fieldtypes[k] = (char *) strdup(fieldtypes[k]);
 				if (!((oph_json_obj_grid *) json->response[index].objcontent)[0].fieldtypes[k]) {
 					return OPH_JSON_MEMORY_ERROR;
 				}
 				((oph_json_obj_grid *) json->response[index].objcontent)[0].fieldtypes_num++;
 			}
 
-			if (keys_num != fieldtypes_num || (size_t)keys_num != ((oph_json_obj_grid *) json->response[index].objcontent)[0].keys_num || (size_t)fieldtypes_num != ((oph_json_obj_grid *) json->response[index].objcontent)[0].fieldtypes_num) {
+			if (keys_num != fieldtypes_num || (size_t) keys_num != ((oph_json_obj_grid *) json->response[index].objcontent)[0].keys_num
+			    || (size_t) fieldtypes_num != ((oph_json_obj_grid *) json->response[index].objcontent)[0].fieldtypes_num) {
 				return OPH_JSON_BAD_PARAM_ERROR;
 			}
 
@@ -372,7 +377,8 @@ int oph_json_add_grid(oph_json *json, const char *objkey, const char *title, con
 	return OPH_JSON_SUCCESS;
 }
 
-int oph_json_add_grid_row(oph_json *json, const char *objkey, const char **values) {
+int oph_json_add_grid_row(oph_json * json, const char *objkey, const char **values)
+{
 	if (!json || !objkey || !values) {
 		return OPH_JSON_BAD_PARAM_ERROR;
 	}
@@ -384,8 +390,8 @@ int oph_json_add_grid_row(oph_json *json, const char *objkey, const char **value
 	size_t i;
 	int grid_present = 0;
 	for (i = 0; i < json->response_num; i++) {
-		if (!strcmp(json->response[i].objkey,objkey)) {
-			if (!strcmp(json->response[i].objclass,OPH_JSON_GRID)) {
+		if (!strcmp(json->response[i].objkey, objkey)) {
+			if (!strcmp(json->response[i].objclass, OPH_JSON_GRID)) {
 				grid_present = 1;
 				break;
 			}
@@ -398,14 +404,16 @@ int oph_json_add_grid_row(oph_json *json, const char *objkey, const char **value
 		}
 		unsigned int index = 0;
 		if (((oph_json_obj_grid *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].values_num1 == 0) {
-			((oph_json_obj_grid *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].values = (char ***)malloc(sizeof(char **));
+			((oph_json_obj_grid *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].values = (char ***) malloc(sizeof(char **));
 			if (!((oph_json_obj_grid *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].values) {
 				return OPH_JSON_MEMORY_ERROR;
 			}
 			index = 0;
 		} else {
 			char ***tmp = ((oph_json_obj_grid *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].values;
-			((oph_json_obj_grid *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].values = (char ***)realloc(((oph_json_obj_grid *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].values,sizeof(char **)*(((oph_json_obj_grid *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].values_num1 + 1));
+			((oph_json_obj_grid *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].values =
+			    (char ***) realloc(((oph_json_obj_grid *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].values,
+					       sizeof(char **) * (((oph_json_obj_grid *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].values_num1 + 1));
 			if (!((oph_json_obj_grid *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].values) {
 				((oph_json_obj_grid *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].values = tmp;
 				return OPH_JSON_MEMORY_ERROR;
@@ -415,7 +423,8 @@ int oph_json_add_grid_row(oph_json *json, const char *objkey, const char **value
 
 		size_t k;
 
-		((oph_json_obj_grid *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].values[index] = (char **)malloc(sizeof(char *)*(((oph_json_obj_grid *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].values_num2));
+		((oph_json_obj_grid *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].values[index] =
+		    (char **) malloc(sizeof(char *) * (((oph_json_obj_grid *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].values_num2));
 		if (!((oph_json_obj_grid *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].values[index]) {
 			return OPH_JSON_MEMORY_ERROR;
 		}
@@ -425,7 +434,7 @@ int oph_json_add_grid_row(oph_json *json, const char *objkey, const char **value
 			((oph_json_obj_grid *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].values[index][k] = NULL;
 		}
 		for (k = 0; k < ((oph_json_obj_grid *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].values_num2; k++) {
-			((oph_json_obj_grid *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].values[index][k] = (char *)strdup(values[k]);
+			((oph_json_obj_grid *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].values[index][k] = (char *) strdup(values[k]);
 			if (!((oph_json_obj_grid *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].values[index][k]) {
 				return OPH_JSON_MEMORY_ERROR;
 			}

@@ -93,7 +93,9 @@ typedef struct _oph_json_obj_multigrid {
  * \param measuretype Measure type (required)
  * \return 0 if successfull, N otherwise
  */
-int oph_json_add_multigrid(oph_json *json, const char *objkey, const char *title, const char *description, const char **rowkeys, int rowkeys_num, const char **rowfieldtypes, int rowfieldtypes_num, const char **colkeys, int colkeys_num, const char **colfieldtypes, int colfieldtypes_num, const char ***colvalues, int colvalues_num, const char *measurename, const char *measuretype);
+int oph_json_add_multigrid(oph_json * json, const char *objkey, const char *title, const char *description, const char **rowkeys, int rowkeys_num, const char **rowfieldtypes, int rowfieldtypes_num,
+			   const char **colkeys, int colkeys_num, const char **colfieldtypes, int colfieldtypes_num, const char ***colvalues, int colvalues_num, const char *measurename,
+			   const char *measuretype);
 
 /**
  * \brief Function to add a row to a multigrid object in OPH_JSON
@@ -103,11 +105,11 @@ int oph_json_add_multigrid(oph_json *json, const char *objkey, const char *title
  * \param measurevalues The row of measures to be inserted
  * \return 0 if successfull, N otherwise
  */
-int oph_json_add_multigrid_row(oph_json *json, const char *objkey, const char **rowvalues, const char **measurevalues);
+int oph_json_add_multigrid_row(oph_json * json, const char *objkey, const char **rowvalues, const char **measurevalues);
 
 /***********OPH_JSON_OBJ_MULTIGRID INTERNAL FUNCTIONS***********/
 
 // Free a multigrid object contents
-int oph_json_free_multigrid(oph_json_obj_multigrid *obj);
+int oph_json_free_multigrid(oph_json_obj_multigrid * obj);
 
 #endif

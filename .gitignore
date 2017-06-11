@@ -23,5 +23,6 @@ stamp-h1
 *.la
 *.lo
 *.so
+*.svg
 *~
 oph_term

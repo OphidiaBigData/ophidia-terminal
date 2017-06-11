@@ -31,7 +31,8 @@
 /***********OPH_JSON_OBJ_TREE INTERNAL FUNCTIONS***********/
 
 // Free a tree object contents
-int oph_json_free_tree(oph_json_obj_tree *obj) {
+int oph_json_free_tree(oph_json_obj_tree * obj)
+{
 	if (obj) {
 		if (obj->description) {
 			free(obj->description);
@@ -107,13 +108,14 @@ int oph_json_free_tree(oph_json_obj_tree *obj) {
 
 /***********OPH_JSON_OBJ_TREE FUNCTIONS***********/
 
-int oph_json_add_tree(oph_json *json, const char *objkey, const char *title, const char *description, const char **nodekeys, int nodekeys_num) {
-	if (!json || !objkey || !title || nodekeys_num<0) {
+int oph_json_add_tree(oph_json * json, const char *objkey, const char *title, const char *description, const char **nodekeys, int nodekeys_num)
+{
+	if (!json || !objkey || !title || nodekeys_num < 0) {
 		return OPH_JSON_BAD_PARAM_ERROR;
 	}
 
 	if (json->response_num == 0) {
-		json->response = (oph_json_response *)malloc(sizeof(oph_json_response));
+		json->response = (oph_json_response *) malloc(sizeof(oph_json_response));
 		if (!json->response) {
 			return OPH_JSON_MEMORY_ERROR;
 		}
@@ -122,18 +124,18 @@ int oph_json_add_tree(oph_json *json, const char *objkey, const char *title, con
 		json->response[0].objcontent_num = 0;
 		json->response[0].objkey = NULL;
 
-		json->response[0].objclass = (char *)strdup(OPH_JSON_TREE);
+		json->response[0].objclass = (char *) strdup(OPH_JSON_TREE);
 		if (!json->response[0].objclass) {
 			return OPH_JSON_MEMORY_ERROR;
 		}
 
 		json->response_num++;
 
-		json->response[0].objkey = (char *)strdup(objkey);
+		json->response[0].objkey = (char *) strdup(objkey);
 		if (!json->response[0].objkey) {
 			return OPH_JSON_MEMORY_ERROR;
 		}
-		if (oph_json_add_responseKey(json,objkey)) {
+		if (oph_json_add_responseKey(json, objkey)) {
 			return OPH_JSON_MEMORY_ERROR;
 		}
 
@@ -152,7 +154,7 @@ int oph_json_add_tree(oph_json *json, const char *objkey, const char *title, con
 		((oph_json_obj_tree *) json->response[0].objcontent)[0].rootnode = NULL;
 		((oph_json_obj_tree *) json->response[0].objcontent)[0].title = NULL;
 
-		((oph_json_obj_tree *) json->response[0].objcontent)[0].title = (char *)strdup(title);
+		((oph_json_obj_tree *) json->response[0].objcontent)[0].title = (char *) strdup(title);
 		if (!((oph_json_obj_tree *) json->response[0].objcontent)[0].title) {
 			return OPH_JSON_MEMORY_ERROR;
 		}
@@ -160,26 +162,26 @@ int oph_json_add_tree(oph_json *json, const char *objkey, const char *title, con
 		json->response[0].objcontent_num++;
 
 		if (description) {
-			((oph_json_obj_tree *) json->response[0].objcontent)[0].description = (char *)strdup(description);
+			((oph_json_obj_tree *) json->response[0].objcontent)[0].description = (char *) strdup(description);
 			if (!((oph_json_obj_tree *) json->response[0].objcontent)[0].description) {
 				return OPH_JSON_MEMORY_ERROR;
 			}
 		}
 
 		if (nodekeys) {
-			size_t k,q;
+			size_t k, q;
 
-			((oph_json_obj_tree *) json->response[0].objcontent)[0].nodekeys = (char **)malloc(sizeof(char *)*nodekeys_num);
+			((oph_json_obj_tree *) json->response[0].objcontent)[0].nodekeys = (char **) malloc(sizeof(char *) * nodekeys_num);
 			if (!((oph_json_obj_tree *) json->response[0].objcontent)[0].nodekeys) {
 				return OPH_JSON_MEMORY_ERROR;
 			}
-			for (k = 0; k < (size_t)nodekeys_num; k++) {
+			for (k = 0; k < (size_t) nodekeys_num; k++) {
 				for (q = 0; q < k; q++) {
-					if (!strcmp(nodekeys[q],nodekeys[k])) {
+					if (!strcmp(nodekeys[q], nodekeys[k])) {
 						return OPH_JSON_BAD_PARAM_ERROR;
 					}
 				}
-				((oph_json_obj_tree *) json->response[0].objcontent)[0].nodekeys[k] = (char *)strdup(nodekeys[k]);
+				((oph_json_obj_tree *) json->response[0].objcontent)[0].nodekeys[k] = (char *) strdup(nodekeys[k]);
 				if (!((oph_json_obj_tree *) json->response[0].objcontent)[0].nodekeys[k]) {
 					return OPH_JSON_MEMORY_ERROR;
 				}
@@ -192,8 +194,8 @@ int oph_json_add_tree(oph_json *json, const char *objkey, const char *title, con
 		size_t i;
 		int add_frag = 0;
 		for (i = 0; i < json->response_num; i++) {
-			if (!strcmp(json->response[i].objkey,objkey)) {
-				if (!strcmp(json->response[i].objclass,OPH_JSON_TREE)) {
+			if (!strcmp(json->response[i].objkey, objkey)) {
+				if (!strcmp(json->response[i].objclass, OPH_JSON_TREE)) {
 					add_frag = 1;
 					break;
 				}
@@ -203,7 +205,7 @@ int oph_json_add_tree(oph_json *json, const char *objkey, const char *title, con
 		if (add_frag) {
 			void *tmp = json->response[i].objcontent;
 			unsigned int index = json->response[i].objcontent_num;
-			json->response[i].objcontent = realloc(json->response[i].objcontent,sizeof(oph_json_obj_tree)*(json->response[i].objcontent_num + 1));
+			json->response[i].objcontent = realloc(json->response[i].objcontent, sizeof(oph_json_obj_tree) * (json->response[i].objcontent_num + 1));
 			if (!json->response[i].objcontent) {
 				json->response[i].objcontent = tmp;
 				return OPH_JSON_MEMORY_ERROR;
@@ -219,7 +221,7 @@ int oph_json_add_tree(oph_json *json, const char *objkey, const char *title, con
 			((oph_json_obj_tree *) json->response[i].objcontent)[index].rootnode = NULL;
 			((oph_json_obj_tree *) json->response[i].objcontent)[index].title = NULL;
 
-			((oph_json_obj_tree *) json->response[i].objcontent)[index].title = (char *)strdup(title);
+			((oph_json_obj_tree *) json->response[i].objcontent)[index].title = (char *) strdup(title);
 			if (!((oph_json_obj_tree *) json->response[i].objcontent)[index].title) {
 				return OPH_JSON_MEMORY_ERROR;
 			}
@@ -227,26 +229,26 @@ int oph_json_add_tree(oph_json *json, const char *objkey, const char *title, con
 			json->response[i].objcontent_num++;
 
 			if (description) {
-				((oph_json_obj_tree *) json->response[i].objcontent)[index].description = (char *)strdup(description);
+				((oph_json_obj_tree *) json->response[i].objcontent)[index].description = (char *) strdup(description);
 				if (!((oph_json_obj_tree *) json->response[i].objcontent)[index].description) {
 					return OPH_JSON_MEMORY_ERROR;
 				}
 			}
 
 			if (nodekeys) {
-				size_t k,q;
+				size_t k, q;
 
-				((oph_json_obj_tree *) json->response[i].objcontent)[index].nodekeys = (char **)malloc(sizeof(char *)*nodekeys_num);
+				((oph_json_obj_tree *) json->response[i].objcontent)[index].nodekeys = (char **) malloc(sizeof(char *) * nodekeys_num);
 				if (!((oph_json_obj_tree *) json->response[i].objcontent)[index].nodekeys) {
 					return OPH_JSON_MEMORY_ERROR;
 				}
-				for (k = 0; k < (size_t)nodekeys_num; k++) {
+				for (k = 0; k < (size_t) nodekeys_num; k++) {
 					for (q = 0; q < k; q++) {
-						if (!strcmp(nodekeys[q],nodekeys[k])) {
+						if (!strcmp(nodekeys[q], nodekeys[k])) {
 							return OPH_JSON_BAD_PARAM_ERROR;
 						}
 					}
-					((oph_json_obj_tree *) json->response[i].objcontent)[index].nodekeys[k] = (char *)strdup(nodekeys[k]);
+					((oph_json_obj_tree *) json->response[i].objcontent)[index].nodekeys[k] = (char *) strdup(nodekeys[k]);
 					if (!((oph_json_obj_tree *) json->response[i].objcontent)[index].nodekeys[k]) {
 						return OPH_JSON_MEMORY_ERROR;
 					}
@@ -258,7 +260,7 @@ int oph_json_add_tree(oph_json *json, const char *objkey, const char *title, con
 		} else {
 			oph_json_response *tmp = json->response;
 			unsigned int index = json->response_num;
-			json->response = (oph_json_response *)realloc(json->response,sizeof(oph_json_response)*(json->response_num + 1));
+			json->response = (oph_json_response *) realloc(json->response, sizeof(oph_json_response) * (json->response_num + 1));
 			if (!json->response) {
 				json->response = tmp;
 				return OPH_JSON_MEMORY_ERROR;
@@ -268,18 +270,18 @@ int oph_json_add_tree(oph_json *json, const char *objkey, const char *title, con
 			json->response[index].objcontent_num = 0;
 			json->response[index].objkey = NULL;
 
-			json->response[index].objclass = (char *)strdup(OPH_JSON_TREE);
+			json->response[index].objclass = (char *) strdup(OPH_JSON_TREE);
 			if (!json->response[index].objclass) {
 				return OPH_JSON_MEMORY_ERROR;
 			}
 
 			json->response_num++;
 
-			json->response[index].objkey = (char *)strdup(objkey);
+			json->response[index].objkey = (char *) strdup(objkey);
 			if (!json->response[index].objkey) {
 				return OPH_JSON_MEMORY_ERROR;
 			}
-			if (oph_json_add_responseKey(json,objkey)) {
+			if (oph_json_add_responseKey(json, objkey)) {
 				return OPH_JSON_MEMORY_ERROR;
 			}
 
@@ -298,7 +300,7 @@ int oph_json_add_tree(oph_json *json, const char *objkey, const char *title, con
 			((oph_json_obj_tree *) json->response[index].objcontent)[0].rootnode = NULL;
 			((oph_json_obj_tree *) json->response[index].objcontent)[0].title = NULL;
 
-			((oph_json_obj_tree *) json->response[index].objcontent)[0].title = (char *)strdup(title);
+			((oph_json_obj_tree *) json->response[index].objcontent)[0].title = (char *) strdup(title);
 			if (!((oph_json_obj_tree *) json->response[index].objcontent)[0].title) {
 				return OPH_JSON_MEMORY_ERROR;
 			}
@@ -306,26 +308,26 @@ int oph_json_add_tree(oph_json *json, const char *objkey, const char *title, con
 			json->response[index].objcontent_num++;
 
 			if (description) {
-				((oph_json_obj_tree *) json->response[index].objcontent)[0].description = (char *)strdup(description);
+				((oph_json_obj_tree *) json->response[index].objcontent)[0].description = (char *) strdup(description);
 				if (!((oph_json_obj_tree *) json->response[index].objcontent)[0].description) {
 					return OPH_JSON_MEMORY_ERROR;
 				}
 			}
 
 			if (nodekeys) {
-				size_t k,q;
+				size_t k, q;
 
-				((oph_json_obj_tree *) json->response[index].objcontent)[0].nodekeys = (char **)malloc(sizeof(char *)*nodekeys_num);
+				((oph_json_obj_tree *) json->response[index].objcontent)[0].nodekeys = (char **) malloc(sizeof(char *) * nodekeys_num);
 				if (!((oph_json_obj_tree *) json->response[index].objcontent)[0].nodekeys) {
 					return OPH_JSON_MEMORY_ERROR;
 				}
-				for (k = 0; k < (size_t)nodekeys_num; k++) {
+				for (k = 0; k < (size_t) nodekeys_num; k++) {
 					for (q = 0; q < k; q++) {
-						if (!strcmp(nodekeys[q],nodekeys[k])) {
+						if (!strcmp(nodekeys[q], nodekeys[k])) {
 							return OPH_JSON_BAD_PARAM_ERROR;
 						}
 					}
-					((oph_json_obj_tree *) json->response[index].objcontent)[0].nodekeys[k] = (char *)strdup(nodekeys[k]);
+					((oph_json_obj_tree *) json->response[index].objcontent)[0].nodekeys[k] = (char *) strdup(nodekeys[k]);
 					if (!((oph_json_obj_tree *) json->response[index].objcontent)[0].nodekeys[k]) {
 						return OPH_JSON_MEMORY_ERROR;
 					}
@@ -340,7 +342,8 @@ int oph_json_add_tree(oph_json *json, const char *objkey, const char *title, con
 	return OPH_JSON_SUCCESS;
 }
 
-int oph_json_add_tree_node(oph_json *json, const char *objkey, const char **nodevalues) {
+int oph_json_add_tree_node(oph_json * json, const char *objkey, const char **nodevalues)
+{
 	if (!json || !objkey) {
 		return OPH_JSON_BAD_PARAM_ERROR;
 	}
@@ -352,8 +355,8 @@ int oph_json_add_tree_node(oph_json *json, const char *objkey, const char **node
 	size_t i;
 	int tree_present = 0;
 	for (i = 0; i < json->response_num; i++) {
-		if (!strcmp(json->response[i].objkey,objkey)) {
-			if (!strcmp(json->response[i].objclass,OPH_JSON_TREE)) {
+		if (!strcmp(json->response[i].objkey, objkey)) {
+			if (!strcmp(json->response[i].objclass, OPH_JSON_TREE)) {
 				tree_present = 1;
 				break;
 			}
@@ -370,14 +373,16 @@ int oph_json_add_tree_node(oph_json *json, const char *objkey, const char **node
 			}
 			unsigned int index = 0;
 			if (((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodevalues_num1 == 0) {
-				((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodevalues = (char ***)malloc(sizeof(char **));
+				((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodevalues = (char ***) malloc(sizeof(char **));
 				if (!((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodevalues) {
 					return OPH_JSON_MEMORY_ERROR;
 				}
 				index = 0;
 			} else {
 				char ***tmp = ((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodevalues;
-				((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodevalues = (char ***)realloc(((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodevalues,sizeof(char **)*(((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodevalues_num1 + 1));
+				((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodevalues =
+				    (char ***) realloc(((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodevalues,
+						       sizeof(char **) * (((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodevalues_num1 + 1));
 				if (!((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodevalues) {
 					((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodevalues = tmp;
 					return OPH_JSON_MEMORY_ERROR;
@@ -387,7 +392,8 @@ int oph_json_add_tree_node(oph_json *json, const char *objkey, const char **node
 
 			size_t k;
 
-			((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodevalues[index] = (char **)malloc(sizeof(char *)*(((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodevalues_num2));
+			((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodevalues[index] =
+			    (char **) malloc(sizeof(char *) * (((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodevalues_num2));
 			if (!((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodevalues[index]) {
 				return OPH_JSON_MEMORY_ERROR;
 			}
@@ -397,7 +403,7 @@ int oph_json_add_tree_node(oph_json *json, const char *objkey, const char **node
 				((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodevalues[index][k] = NULL;
 			}
 			for (k = 0; k < ((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodevalues_num2; k++) {
-				((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodevalues[index][k] = (char *)strdup(nodevalues[k]);
+				((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodevalues[index][k] = (char *) strdup(nodevalues[k]);
 				if (!((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodevalues[index][k]) {
 					return OPH_JSON_MEMORY_ERROR;
 				}
@@ -410,14 +416,16 @@ int oph_json_add_tree_node(oph_json *json, const char *objkey, const char **node
 
 		unsigned int index = 0;
 		if (((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodelinks_num == 0) {
-			((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodelinks = (oph_json_links *)malloc(sizeof(oph_json_links));
+			((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodelinks = (oph_json_links *) malloc(sizeof(oph_json_links));
 			if (!((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodelinks) {
 				return OPH_JSON_MEMORY_ERROR;
 			}
 			index = 0;
 		} else {
 			oph_json_links *tmp = ((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodelinks;
-			((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodelinks = (oph_json_links *)realloc(((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodelinks,sizeof(oph_json_links)*(((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodelinks_num + 1));
+			((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodelinks =
+			    (oph_json_links *) realloc(((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodelinks,
+						       sizeof(oph_json_links) * (((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodelinks_num + 1));
 			if (!((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodelinks) {
 				((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodelinks = tmp;
 				return OPH_JSON_MEMORY_ERROR;
@@ -436,8 +444,9 @@ int oph_json_add_tree_node(oph_json *json, const char *objkey, const char **node
 	return OPH_JSON_SUCCESS;
 }
 
-int oph_json_set_tree_root(oph_json *json, const char *objkey, int rootnode) {
-	if (!json || !objkey || rootnode<0) {
+int oph_json_set_tree_root(oph_json * json, const char *objkey, int rootnode)
+{
+	if (!json || !objkey || rootnode < 0) {
 		return OPH_JSON_BAD_PARAM_ERROR;
 	}
 
@@ -448,8 +457,8 @@ int oph_json_set_tree_root(oph_json *json, const char *objkey, int rootnode) {
 	size_t i;
 	int tree_present = 0;
 	for (i = 0; i < json->response_num; i++) {
-		if (!strcmp(json->response[i].objkey,objkey)) {
-			if (!strcmp(json->response[i].objclass,OPH_JSON_TREE)) {
+		if (!strcmp(json->response[i].objkey, objkey)) {
+			if (!strcmp(json->response[i].objclass, OPH_JSON_TREE)) {
 				tree_present = 1;
 				break;
 			}
@@ -466,9 +475,9 @@ int oph_json_set_tree_root(oph_json *json, const char *objkey, int rootnode) {
 		}
 
 		char buf[20];
-		memset(buf,0,20);
-		snprintf(buf,20,"%d",rootnode);
-		((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].rootnode = (char *)strdup(buf);
+		memset(buf, 0, 20);
+		snprintf(buf, 20, "%d", rootnode);
+		((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].rootnode = (char *) strdup(buf);
 		if (!((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].rootnode) {
 			return OPH_JSON_MEMORY_ERROR;
 		}
@@ -479,8 +488,9 @@ int oph_json_set_tree_root(oph_json *json, const char *objkey, int rootnode) {
 	return OPH_JSON_SUCCESS;
 }
 
-int oph_json_add_tree_link(oph_json *json, const char *objkey, int sourcenode, int targetnode, const char *description) {
-	if (!json || !objkey || sourcenode<0 || targetnode<0) {
+int oph_json_add_tree_link(oph_json * json, const char *objkey, int sourcenode, int targetnode, const char *description)
+{
+	if (!json || !objkey || sourcenode < 0 || targetnode < 0) {
 		return OPH_JSON_BAD_PARAM_ERROR;
 	}
 
@@ -491,8 +501,8 @@ int oph_json_add_tree_link(oph_json *json, const char *objkey, int sourcenode, i
 	size_t i;
 	int tree_present = 0;
 	for (i = 0; i < json->response_num; i++) {
-		if (!strcmp(json->response[i].objkey,objkey)) {
-			if (!strcmp(json->response[i].objclass,OPH_JSON_TREE)) {
+		if (!strcmp(json->response[i].objkey, objkey)) {
+			if (!strcmp(json->response[i].objclass, OPH_JSON_TREE)) {
 				tree_present = 1;
 				break;
 			}
@@ -503,26 +513,31 @@ int oph_json_add_tree_link(oph_json *json, const char *objkey, int sourcenode, i
 		if (json->response[i].objcontent_num < 1) {
 			return OPH_JSON_BAD_PARAM_ERROR;
 		}
-		if (sourcenode != targetnode && ((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodelinks_num >= (size_t)(sourcenode + 1) && ((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodelinks_num >= (size_t)(targetnode + 1)) {
+		if (sourcenode != targetnode && ((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodelinks_num >= (size_t) (sourcenode + 1)
+		    && ((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodelinks_num >= (size_t) (targetnode + 1)) {
 			unsigned int index = 0;
 			if (((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodelinks[sourcenode].links_num == 0) {
-				((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodelinks[sourcenode].links = (oph_json_link *)malloc(sizeof(oph_json_link));
+				((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodelinks[sourcenode].links =
+				    (oph_json_link *) malloc(sizeof(oph_json_link));
 				if (!((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodelinks[sourcenode].links) {
 					return OPH_JSON_MEMORY_ERROR;
 				}
 				index = 0;
 			} else {
 				char buf[20];
-				memset(buf,0,20);
-				snprintf(buf,20,"%d",targetnode);
+				memset(buf, 0, 20);
+				snprintf(buf, 20, "%d", targetnode);
 				size_t n;
 				for (n = 0; n < ((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodelinks[sourcenode].links_num; n++) {
-					if (!strcmp(((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodelinks[sourcenode].links[n].node,buf)) {
+					if (!strcmp(((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodelinks[sourcenode].links[n].node, buf)) {
 						return OPH_JSON_BAD_PARAM_ERROR;
 					}
 				}
 				oph_json_link *tmp = ((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodelinks[sourcenode].links;
-				((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodelinks[sourcenode].links = (oph_json_link *)realloc(((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodelinks[sourcenode].links,sizeof(oph_json_link)*(((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodelinks[sourcenode].links_num + 1));
+				((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodelinks[sourcenode].links =
+				    (oph_json_link *) realloc(((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodelinks[sourcenode].links,
+							      sizeof(oph_json_link) *
+							      (((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodelinks[sourcenode].links_num + 1));
 				if (!((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodelinks[sourcenode].links) {
 					((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodelinks[sourcenode].links = tmp;
 					return OPH_JSON_MEMORY_ERROR;
@@ -535,15 +550,16 @@ int oph_json_add_tree_link(oph_json *json, const char *objkey, int sourcenode, i
 			((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodelinks[sourcenode].links_num++;
 
 			char buf[20];
-			memset(buf,0,20);
-			snprintf(buf,20,"%d",targetnode);
-			((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodelinks[sourcenode].links[index].node = (char *)strdup(buf);
+			memset(buf, 0, 20);
+			snprintf(buf, 20, "%d", targetnode);
+			((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodelinks[sourcenode].links[index].node = (char *) strdup(buf);
 			if (!((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodelinks[sourcenode].links[index].node) {
 				return OPH_JSON_MEMORY_ERROR;
 			}
 
 			if (description) {
-				((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodelinks[sourcenode].links[index].description = (char *)strdup(description);
+				((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodelinks[sourcenode].links[index].description =
+				    (char *) strdup(description);
 				if (!((oph_json_obj_tree *) json->response[i].objcontent)[json->response[i].objcontent_num - 1].nodelinks[sourcenode].links[index].description) {
 					return OPH_JSON_MEMORY_ERROR;
 				}

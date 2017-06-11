@@ -1,4 +1,26 @@
 
+## v1.0.0 - 2017-03-23
+
+### Changed:
+
+- Code indentation style
+
+## v0.11.0 - 2017-01-31
+
+### Fixed:
+
+- Memory leaks in graphic libraries usage
+
+### Added:
+
+- Watch command
+- Support for OPH_RUNNING_ERROR status in case of workflow is still running
+- Disk color for OPH_STATUS_ABORTED status
+
+### Changed:
+
+- View command to filter jobs based on their status
+
 ## v0.10.6 - 2016-10-20
 
 ### Fixed:

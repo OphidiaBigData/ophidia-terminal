@@ -24,7 +24,7 @@
 #include <string.h>
 #include <stddef.h>
 
-#define OUTPUT_MAX_LEN 500*1024 // 500 KB
+#define OUTPUT_MAX_LEN 500*1024	// 500 KB
 #define OUTPUT_JSON_STRING "{\n  \"request\":\"%s\",\n  \"jobid\":\"%s\",\n  \"response\":%s,\n  \"stdout\":\"%s\",\n  \"stderr\":\"%s\"\n}"
 extern int print_json;
 extern int print_debug_data;
@@ -80,7 +80,7 @@ int oph_term_viewer(const char *viewer_type, char **json_string, const char *col
 int oph_term_viewer_retrieve_command_jobid(char *json_string, char **command, char **jobid);
 
 //Retrieve number of jobs in session after a call to oph_resume
-int oph_term_viewer_retrieve_session_size(char *json_string, int *session_size, char*** exit_status);
+int oph_term_viewer_retrieve_session_size(char *json_string, int *session_size, char ***exit_status);
 
 //Check if session has been saved by server after a call to oph_resume with save=yes
 int oph_term_viewer_is_session_switched(char *json_string);
