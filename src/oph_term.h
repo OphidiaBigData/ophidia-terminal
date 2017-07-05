@@ -82,6 +82,8 @@
 #define OPH_TERM_REMOTE_CMD_PREFIX	OPH_TERM_ENV_OPH_PREFIX
 #define OPH_TERM_REMOTE_CMD_PREFIX_LEN	OPH_TERM_ENV_OPH_PREFIX_LEN
 
+#define OPH_TERM_TOKEN_USER "__token__"
+
 #ifndef NO_WORKFLOW
 #define cmds_num 21+im_cmds_num
 #else

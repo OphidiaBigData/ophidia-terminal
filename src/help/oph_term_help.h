@@ -747,6 +747,14 @@ int oph_term_help(const char *cmd);
 "OPH_PASSWD\\n\
 \\tPassword used to connect to the remote server when SSL is used (default). With the GSI interface it is ignored.\\n"
 
+#define OPH_TERM_HELP_OPH_TOKEN_SHORT "\"token\"\n"
+#define OPH_TERM_HELP_OPH_TOKEN_LONG \
+"\e[1mOPH_TOKEN\e[0m\n\
+\tToken used to connect to the remote server by using OpenId. If it is set, username and password will be ignored.\n"
+#define OPH_TERM_HELP_OPH_TOKEN_LONG2 \
+"OPH_TOKEN\\n\
+\\tToken used to connect to the remote server by using OpenId. If it is set, username and password will be ignored.\\n"
+
 #define OPH_TERM_HELP_OPH_SERVER_HOST_SHORT "\"server address\"\n"
 #define OPH_TERM_HELP_OPH_SERVER_HOST_LONG \
 "\e[1mOPH_SERVER_HOST\e[0m\n\

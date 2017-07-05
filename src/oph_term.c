@@ -281,6 +281,13 @@ int startup_opt_setup(int argc, char *argv[], char *envp[], HASHTBL * hashtbl, c
 																				 OPH_TERM_MEMORY_ERROR);
 		return OPH_TERM_MEMORY_ERROR;
 	}
+	//preset OPH_TOKEN
+	if (oph_term_setenv(hashtbl, OPH_TERM_ENV_OPH_TOKEN, "")) {
+		(print_json) ? my_fprintf(stderr, "Could not set variable %s [CODE %d]\\n", OPH_TERM_ENV_OPH_TOKEN, OPH_TERM_MEMORY_ERROR) : fprintf(stderr,
+																		     "\e[1;31mCould not set variable %s [CODE %d]\e[0m\n",
+																		     OPH_TERM_ENV_OPH_TOKEN, OPH_TERM_MEMORY_ERROR);
+		return OPH_TERM_MEMORY_ERROR;
+	}
 	//preset useful aliases
 	int z;
 	for (z = 0; z < pre_defined_aliases_num; z++) {
@@ -376,7 +383,7 @@ int startup_opt_setup(int argc, char *argv[], char *envp[], HASHTBL * hashtbl, c
 		}
 	}
 
-	while ((opt = getopt_long(argc, argv, "hvu:p:H:P:e:w:a:jxz", long_options, &long_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "hvu:p:H:P:e:w:a:jt:xz", long_options, &long_index)) != -1) {
 		switch (opt) {
 			case 'h':
 				print_startup_usage(argv[0], stdout);
@@ -553,6 +560,25 @@ int startup_opt_setup(int argc, char *argv[], char *envp[], HASHTBL * hashtbl, c
 			case 'j':
 				print_json = 1;
 				break;
+			case 't':
+				if (!optarg) {
+					(print_json) ? my_fprintf(stderr, "Error: no token!\\n\\n") : fprintf(stderr, "\e[1;31mError: no token!\e[0m\n\n");
+					print_startup_usage(argv[0], stderr);
+					if (*exec_statement) {
+						free(*exec_statement);
+						*exec_statement = NULL;
+					}
+					return OPH_TERM_OPTION_NOT_RECOGNIZED;
+				} else {
+					if (oph_term_setenv(hashtbl, OPH_TERM_ENV_OPH_TOKEN, optarg)) {
+						if (*exec_statement) {
+							free(*exec_statement);
+							*exec_statement = NULL;
+						}
+						return OPH_TERM_MEMORY_ERROR;
+					}
+					break;
+				}
 		}
 	}
 
@@ -1418,11 +1444,17 @@ int main(int argc, char **argv, char **envp)
 	if (!print_json)
 		printf("\e[2m");
 
+	char *_user = hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_USER), *_passwd = hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_PASSWD);
+	char token_user[10], *_token = hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TOKEN);
+	if (_token && strlen(_token)) {
+		strcpy(token_user, OPH_TERM_TOKEN_USER);
+		_user = token_user;
+		_passwd = _token;
+	}
 	// Init OPH_SESSION_ID if empty
 	if (!hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SESSION_ID)) {
 #ifndef INTERFACE_TYPE_IS_GSI
-		if (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST) && hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT) && hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_USER)
-		    && hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_PASSWD)) {
+		if (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST) && hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT) && _user && _passwd) {
 #else
 		if (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST) && hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT)) {
 #endif
@@ -1430,8 +1462,8 @@ int main(int argc, char **argv, char **envp)
 			// Retrieve last sessionid from oph_server here
 			char *last_sessionid = NULL;
 			if (oph_term_env_oph_get_config
-			    (OPH_TERM_SESSION_ID_KEY, hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST), hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT), &oph_term_return, &last_sessionid,
-			     hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_USER), hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_PASSWD), 1, hashtbl)) {
+			    (OPH_TERM_SESSION_ID_KEY, hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST), hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT), &oph_term_return, &last_sessionid, _user,
+			     _passwd, 1, hashtbl)) {
 				(print_json) ? my_fprintf(stderr, "\\nWarning: Unable to resume last session\\n") : fprintf(stderr, "\e[2m\nWarning: Unable to resume last session\e[0m\n");
 				oph_term_return = OPH_TERM_SUCCESS;
 				if (last_sessionid) {
@@ -1466,7 +1498,7 @@ int main(int argc, char **argv, char **envp)
 					char *last_cwd = NULL;
 					if (oph_term_env_oph_get_config
 					    (OPH_TERM_OPH_CWD_KEY, hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST), hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT), &oph_term_return, &last_cwd,
-					     hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_USER), hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_PASSWD), 1, hashtbl)) {
+					     _user, _passwd, 1, hashtbl)) {
 						(print_json) ? my_fprintf(stderr, "\\nWarning: Unable to resume last cwd\\n") : fprintf(stderr, "\e[2m\nWarning: Unable to resume last cwd\e[0m\n");
 						oph_term_return = OPH_TERM_SUCCESS;
 						if (last_cwd) {
@@ -1526,7 +1558,7 @@ int main(int argc, char **argv, char **envp)
 					char *last_cube = NULL;
 					if (oph_term_env_oph_get_config
 					    (OPH_TERM_OPH_DATACUBE_KEY, hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST), hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT), &oph_term_return,
-					     &last_cube, hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_USER), hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_PASSWD), 1, hashtbl)) {
+					     &last_cube, _user, _passwd, 1, hashtbl)) {
 						(print_json) ? my_fprintf(stderr, "\\nWarning: Unable to resume last datacube\\n") : fprintf(stderr,
 																	     "\e[2m\nWarning: Unable to resume last datacube\e[0m\n");
 						oph_term_return = OPH_TERM_SUCCESS;
@@ -1616,7 +1648,7 @@ int main(int argc, char **argv, char **envp)
 			exec_statement = NULL;
 		}
 #ifndef INTERFACE_TYPE_IS_GSI
-		if (!hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_USER)) {
+		if (!_user) {
 			(print_json) ? my_fprintf(stderr, "OPH_USER not set [CODE %d]\\n", OPH_TERM_INVALID_PARAM_VALUE) : fprintf(stderr, "\e[1;31mOPH_USER not set [CODE %d]\e[0m\n",
 																   OPH_TERM_INVALID_PARAM_VALUE);
 			oph_term_env_clear(hashtbl);
@@ -1625,7 +1657,7 @@ int main(int argc, char **argv, char **envp)
 				print_oph_term_output_json(hashtbl);
 			return OPH_TERM_INVALID_PARAM_VALUE;
 		}
-		if (!hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_PASSWD)) {
+		if (!_passwd) {
 			(print_json) ? my_fprintf(stderr, "OPH_PASSWD not set [CODE %d]\\n", OPH_TERM_INVALID_PARAM_VALUE) : fprintf(stderr, "\e[1;31mOPH_PASSWD not set [CODE %d]\e[0m\n",
 																     OPH_TERM_INVALID_PARAM_VALUE);
 			oph_term_env_clear(hashtbl);
@@ -1802,9 +1834,8 @@ int main(int argc, char **argv, char **envp)
 				print_oph_term_output_json(hashtbl);
 			return OPH_TERM_MEMORY_ERROR;
 		}
-		oph_term_client(command_line, submission_workflow, &session, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_USER), (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_PASSWD),
-				(char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST), (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT), &oph_term_return, NULL, &response_for_viewer,
-				0, hashtbl);
+		oph_term_client(command_line, submission_workflow, &session, _user, _passwd, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST),
+				(char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT), &oph_term_return, NULL, &response_for_viewer, 0, hashtbl);
 		if (submission_workflow) {
 			free(submission_workflow);
 			submission_workflow = NULL;
@@ -2021,16 +2052,15 @@ int main(int argc, char **argv, char **envp)
 
 		/* INIT/UPDATE XML FOLDER IF VAR SET */
 #ifndef INTERFACE_TYPE_IS_GSI
-		if (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST) && hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT) && hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_USER)
-		    && hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_PASSWD)) {
+		if (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST) && hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT) && _user && _passwd) {
 #else
 		if (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST) && hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT)) {
 #endif
 			// Retrieve correct URL from oph_server here
 			char *tmpurl = NULL;
 			if (oph_term_env_oph_get_config
-			    (OPH_TERM_XML_URL_KEY, hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST), hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT), &oph_term_return, &tmpurl,
-			     hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_USER), hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_PASSWD), 1, hashtbl)) {
+			    (OPH_TERM_XML_URL_KEY, hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST), hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT), &oph_term_return, &tmpurl, _user, _passwd, 1,
+			     hashtbl)) {
 				(print_json) ? my_fprintf(stderr, "Warning: Unable to get XML folder\\n") : fprintf(stderr, "\e[2mWarning: Unable to get XML folder\e[0m\n");
 				oph_term_return = OPH_TERM_SUCCESS;
 				if (tmpurl) {
@@ -2436,7 +2466,7 @@ int main(int argc, char **argv, char **envp)
 				}
 			}
 #ifndef INTERFACE_TYPE_IS_GSI
-			if (!hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_USER)) {
+			if (!_user) {
 				(print_json) ? my_fprintf(stderr, "OPH_USER not set [CODE %d]\\n", OPH_TERM_INVALID_PARAM_VALUE) : fprintf(stderr, "\e[1;31mOPH_USER not set [CODE %d]\e[0m\n",
 																	   OPH_TERM_INVALID_PARAM_VALUE);
 				if (print_json)
@@ -2447,7 +2477,7 @@ int main(int argc, char **argv, char **envp)
 				}
 				continue;
 			}
-			if (!hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_PASSWD)) {
+			if (!_passwd) {
 				(print_json) ? my_fprintf(stderr, "OPH_PASSWD not set [CODE %d]\\n", OPH_TERM_INVALID_PARAM_VALUE) : fprintf(stderr, "\e[1;31mOPH_PASSWD not set [CODE %d]\e[0m\n",
 																	     OPH_TERM_INVALID_PARAM_VALUE);
 				if (print_json)
@@ -2643,10 +2673,8 @@ int main(int argc, char **argv, char **envp)
 					massive_flag = 1;
 				(print_json) ? snprintf(oph_term_request, OUTPUT_MAX_LEN, "%s", submission_string) : printf("\e[1;34m[Request]:\e[0m\n%s\n\n", submission_string);
 				char *response_for_viewer = NULL;
-				oph_term_client(command_line, submission_string, &newsession, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_USER),
-						(char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_PASSWD), (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST), (char *) hashtbl_get(hashtbl,
-																							  OPH_TERM_ENV_OPH_SERVER_PORT),
-						&oph_term_return, NULL, &response_for_viewer, 1, hashtbl);
+				oph_term_client(command_line, submission_string, &newsession, _user, _passwd, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST),
+						(char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT), &oph_term_return, NULL, &response_for_viewer, 1, hashtbl);
 				if (!print_debug_data && response_for_viewer
 				    && ((int) strlen(response_for_viewer) > 1024 * strtol((char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_RESPONSE_BUFFER), NULL, 10))) {
 					if (response_for_viewer)
@@ -3034,10 +3062,8 @@ int main(int argc, char **argv, char **envp)
 					massive_flag = 1;
 				(print_json) ? snprintf(oph_term_request, OUTPUT_MAX_LEN, "%s", submission_string) : printf("\e[1;34m[Request]:\e[0m\n%s\n\n", submission_string);
 				char *response_for_viewer = NULL;
-				oph_term_client(command_line, submission_string, &newsession, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_USER),
-						(char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_PASSWD), (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST), (char *) hashtbl_get(hashtbl,
-																							  OPH_TERM_ENV_OPH_SERVER_PORT),
-						&oph_term_return, NULL, &response_for_viewer, 1, hashtbl);
+				oph_term_client(command_line, submission_string, &newsession, _user, _passwd, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST),
+						(char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT), &oph_term_return, NULL, &response_for_viewer, 1, hashtbl);
 				if (!print_debug_data && response_for_viewer
 				    && ((int) strlen(response_for_viewer) > 1024 * strtol((char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_RESPONSE_BUFFER), NULL, 10))) {
 					if (response_for_viewer)
@@ -3277,7 +3303,7 @@ int main(int argc, char **argv, char **envp)
 				}
 			}
 #ifndef INTERFACE_TYPE_IS_GSI
-			if (!hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_USER)) {
+			if (!_user) {
 				(print_json) ? my_fprintf(stderr, "OPH_USER not set [CODE %d]\\n", OPH_TERM_INVALID_PARAM_VALUE) : fprintf(stderr, "\e[1;31mOPH_USER not set [CODE %d]\e[0m\n",
 																	   OPH_TERM_INVALID_PARAM_VALUE);
 				if (print_json)
@@ -3288,7 +3314,7 @@ int main(int argc, char **argv, char **envp)
 				}
 				continue;
 			}
-			if (!hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_PASSWD)) {
+			if (!_passwd) {
 				(print_json) ? my_fprintf(stderr, "OPH_PASSWD not set [CODE %d]\\n", OPH_TERM_INVALID_PARAM_VALUE) : fprintf(stderr, "\e[1;31mOPH_PASSWD not set [CODE %d]\e[0m\n",
 																	     OPH_TERM_INVALID_PARAM_VALUE);
 				if (print_json)
@@ -3449,8 +3475,8 @@ int main(int argc, char **argv, char **envp)
 					snprintf(tmp_marker, OPH_TERM_MAX_LEN, "%s", tmp_cursor);
 
 					if (oph_term_check_wid_mkid
-					    (tmp_session, tmp_workflow, tmp_marker, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_USER), (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_PASSWD),
-					     (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST), (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT), &oph_term_return, hashtbl)) {
+					    (tmp_session, tmp_workflow, tmp_marker, _user, _passwd, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST),
+					     (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT), &oph_term_return, hashtbl)) {
 						if (print_json)
 							print_oph_term_output_json(hashtbl);
 						if (exec_one_statement)
@@ -3460,9 +3486,8 @@ int main(int argc, char **argv, char **envp)
 
 					char *tmp_command = NULL;
 					if (oph_term_get_request_with_marker
-					    (tmp_session, tmp_marker, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_USER), (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_PASSWD),
-					     (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST), (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT), &oph_term_return, &tmp_command,
-					     NULL, hashtbl)) {
+					    (tmp_session, tmp_marker, _user, _passwd, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST),
+					     (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT), &oph_term_return, &tmp_command, NULL, hashtbl)) {
 						if (print_json)
 							print_oph_term_output_json(hashtbl);
 						if (exec_one_statement)
@@ -3578,9 +3603,8 @@ int main(int argc, char **argv, char **envp)
 
 						if (oph_term_check_wid_mkid
 						    ((hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SESSION_ID)) ? ((char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SESSION_ID)) : "", tmp_workflow, tmp_marker,
-						     (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_USER), (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_PASSWD), (char *) hashtbl_get(hashtbl,
-																							OPH_TERM_ENV_OPH_SERVER_HOST),
-						     (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT), &oph_term_return, hashtbl)) {
+						     _user, _passwd, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST), (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT),
+						     &oph_term_return, hashtbl)) {
 							if (print_json)
 								print_oph_term_output_json(hashtbl);
 							if (exec_one_statement)
@@ -3590,10 +3614,9 @@ int main(int argc, char **argv, char **envp)
 
 						char *tmp_command = NULL;
 						if (oph_term_get_request_with_marker
-						    ((hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SESSION_ID)) ? ((char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SESSION_ID)) : "", tmp_marker,
-						     (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_USER), (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_PASSWD), (char *) hashtbl_get(hashtbl,
-																							OPH_TERM_ENV_OPH_SERVER_HOST),
-						     (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT), &oph_term_return, &tmp_command, NULL, hashtbl)) {
+						    ((hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SESSION_ID)) ? ((char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SESSION_ID)) : "", tmp_marker, _user,
+						     _passwd, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST), (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT),
+						     &oph_term_return, &tmp_command, NULL, hashtbl)) {
 							if (print_json)
 								print_oph_term_output_json(hashtbl);
 							if (exec_one_statement)
@@ -3724,10 +3747,9 @@ int main(int argc, char **argv, char **envp)
 						char *tmp_command = NULL;
 						char *tmp_jobid = NULL;
 						if (oph_term_get_request
-						    ((hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SESSION_ID)) ? ((char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SESSION_ID)) : "", tmp_workflow,
-						     (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_USER), (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_PASSWD), (char *) hashtbl_get(hashtbl,
-																							OPH_TERM_ENV_OPH_SERVER_HOST),
-						     (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT), &oph_term_return, &tmp_command, &tmp_jobid, hashtbl)) {
+						    ((hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SESSION_ID)) ? ((char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SESSION_ID)) : "", tmp_workflow, _user,
+						     _passwd, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST), (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT),
+						     &oph_term_return, &tmp_command, &tmp_jobid, hashtbl)) {
 							if (print_json)
 								print_oph_term_output_json(hashtbl);
 							if (exec_one_statement)
@@ -3868,7 +3890,7 @@ int main(int argc, char **argv, char **envp)
 				}
 			}
 #ifndef INTERFACE_TYPE_IS_GSI
-			if (!hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_USER)) {
+			if (!_user) {
 				(print_json) ? my_fprintf(stderr, "OPH_USER not set [CODE %d]\\n", OPH_TERM_INVALID_PARAM_VALUE) : fprintf(stderr, "\e[1;31mOPH_USER not set [CODE %d]\e[0m\n",
 																	   OPH_TERM_INVALID_PARAM_VALUE);
 				if (print_json)
@@ -3879,7 +3901,7 @@ int main(int argc, char **argv, char **envp)
 				}
 				continue;
 			}
-			if (!hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_PASSWD)) {
+			if (!_passwd) {
 				(print_json) ? my_fprintf(stderr, "OPH_PASSWD not set [CODE %d]\\n", OPH_TERM_INVALID_PARAM_VALUE) : fprintf(stderr, "\e[1;31mOPH_PASSWD not set [CODE %d]\e[0m\n",
 																	     OPH_TERM_INVALID_PARAM_VALUE);
 				if (print_json)
@@ -4002,9 +4024,8 @@ int main(int argc, char **argv, char **envp)
 
 				//retrieve number of jobs of new session from server
 				if (oph_term_get_session_size
-				    (tmp_session, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_USER), (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_PASSWD),
-				     (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST), (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT), &oph_term_return, &end, 1, hashtbl,
-				     &exit_status)) {
+				    (tmp_session, _user, _passwd, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST), (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT),
+				     &oph_term_return, &end, 1, hashtbl, &exit_status)) {
 					if (exit_status) {
 						int jj;
 						for (jj = 0; jj < end; ++jj)
@@ -4027,13 +4048,13 @@ int main(int argc, char **argv, char **envp)
 				char *tmp_jobid = NULL;
 				char *tmp_status = NULL;
 				char buf[OPH_TERM_MAX_LEN];
+
 				for (i = last_njobs - 1; i >= 0; i--) {
 					memset(buf, 0, OPH_TERM_MAX_LEN);
 					snprintf(buf, OPH_TERM_MAX_LEN, "%d", end - i);
 					if (oph_term_get_request
-					    (tmp_session, buf, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_USER), (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_PASSWD),
-					     (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST), (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT), &oph_term_return, &tmp_command,
-					     &tmp_jobid, hashtbl)) {
+					    (tmp_session, buf, _user, _passwd, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST), (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT),
+					     &oph_term_return, &tmp_command, &tmp_jobid, hashtbl)) {
 						stop = 1;
 						break;
 					}
@@ -4097,8 +4118,8 @@ int main(int argc, char **argv, char **envp)
 			if ((hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SESSION_ID) && strcmp((char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SESSION_ID), tmp_session))
 			    || !hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SESSION_ID)) {
 				if (oph_term_switch_remote_session
-				    (tmp_session, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_USER), (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_PASSWD),
-				     (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST), (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT), &oph_term_return, 1, hashtbl)) {
+				    (tmp_session, _user, _passwd, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST), (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT),
+				     &oph_term_return, 1, hashtbl)) {
 					if (print_json)
 						print_oph_term_output_json(hashtbl);
 					if (exec_one_statement) {
@@ -4125,8 +4146,8 @@ int main(int argc, char **argv, char **envp)
 				// Init OPH_CWD
 				char *last_cwd = NULL;
 				if (oph_term_env_oph_get_config
-				    (OPH_TERM_OPH_CWD_KEY, hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST), hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT), &oph_term_return, &last_cwd,
-				     hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_USER), hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_PASSWD), 1, hashtbl)) {
+				    (OPH_TERM_OPH_CWD_KEY, hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST), hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT), &oph_term_return, &last_cwd, _user,
+				     _passwd, 1, hashtbl)) {
 					(print_json) ? my_fprintf(stderr, "\\nWarning: Unable to resume last cwd\\n") : fprintf(stderr, "\e[2m\nWarning: Unable to resume last cwd\e[0m\n");
 					oph_term_return = OPH_TERM_SUCCESS;
 					if (last_cwd) {
@@ -4181,7 +4202,7 @@ int main(int argc, char **argv, char **envp)
 				char *last_cube = NULL;
 				if (oph_term_env_oph_get_config
 				    (OPH_TERM_OPH_DATACUBE_KEY, hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST), hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT), &oph_term_return, &last_cube,
-				     hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_USER), hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_PASSWD), 1, hashtbl)) {
+				     _user, _passwd, 1, hashtbl)) {
 					(print_json) ? my_fprintf(stderr, "\\nWarning: Unable to resume last datacube\\n") : fprintf(stderr, "\e[2m\nWarning: Unable to resume last datacube\e[0m\n");
 					oph_term_return = OPH_TERM_SUCCESS;
 					if (last_cube) {
@@ -4384,8 +4405,7 @@ int main(int argc, char **argv, char **envp)
 			cursor = strtok_r(NULL, " \t\n", &saveptr);
 			if (!cursor) {	// "update"
 #ifndef INTERFACE_TYPE_IS_GSI
-				if (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST) && hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT) && hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_USER)
-				    && hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_PASSWD)) {
+				if (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST) && hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT) && _user && _passwd) {
 #else
 				if (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST) && hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT)) {
 #endif
@@ -4393,7 +4413,7 @@ int main(int argc, char **argv, char **envp)
 					char *tmpurl = NULL;
 					if (oph_term_env_oph_get_config
 					    (OPH_TERM_XML_URL_KEY, hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST), hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT), &oph_term_return, &tmpurl,
-					     hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_USER), hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_PASSWD), 1, hashtbl)) {
+					     _user, _passwd, 1, hashtbl)) {
 						(print_json) ? my_fprintf(stderr, "Unable to get XML folder [CODE %d]\\n", OPH_TERM_GENERIC_ERROR) : fprintf(stderr,
 																			     "\e[1;31mUnable to get XML folder [CODE %d]\e[0m\n",
 																			     OPH_TERM_GENERIC_ERROR);
@@ -4474,8 +4494,7 @@ int main(int argc, char **argv, char **envp)
 				}
 			} else if (!strcmp(cursor, "-f")) {	// "update -f"
 #ifndef INTERFACE_TYPE_IS_GSI
-				if (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST) && hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT) && hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_USER)
-				    && hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_PASSWD)) {
+				if (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST) && hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT) && _user && _passwd) {
 #else
 				if (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST) && hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT)) {
 #endif
@@ -4483,7 +4502,7 @@ int main(int argc, char **argv, char **envp)
 					char *tmpurl = NULL;
 					if (oph_term_env_oph_get_config
 					    (OPH_TERM_XML_URL_KEY, hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST), hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT), &oph_term_return, &tmpurl,
-					     hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_USER), hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_PASSWD), 1, hashtbl)) {
+					     _user, _passwd, 1, hashtbl)) {
 						(print_json) ? my_fprintf(stderr, "Unable to get XML folder [CODE %d]\\n", OPH_TERM_GENERIC_ERROR) : fprintf(stderr,
 																			     "\e[1;31mUnable to get XML folder [CODE %d]\e[0m\n",
 																			     OPH_TERM_GENERIC_ERROR);
@@ -4665,7 +4684,7 @@ int main(int argc, char **argv, char **envp)
 				}
 			}
 #ifndef INTERFACE_TYPE_IS_GSI
-			if (!hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_USER)) {
+			if (!_user) {
 				(print_json) ? my_fprintf(stderr, "OPH_USER not set [CODE %d]\\n", OPH_TERM_INVALID_PARAM_VALUE) : fprintf(stderr, "\e[1;31mOPH_USER not set [CODE %d]\e[0m\n",
 																	   OPH_TERM_INVALID_PARAM_VALUE);
 				if (print_json)
@@ -4676,7 +4695,7 @@ int main(int argc, char **argv, char **envp)
 				}
 				continue;
 			}
-			if (!hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_PASSWD)) {
+			if (!_passwd) {
 				(print_json) ? my_fprintf(stderr, "OPH_PASSWD not set [CODE %d]\\n", OPH_TERM_INVALID_PARAM_VALUE) : fprintf(stderr, "\e[1;31mOPH_PASSWD not set [CODE %d]\e[0m\n",
 																	     OPH_TERM_INVALID_PARAM_VALUE);
 				if (print_json)
@@ -4880,9 +4899,8 @@ int main(int argc, char **argv, char **envp)
 				}
 				continue;
 			}
-			oph_term_client(command_line, submission_workflow, &session, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_USER), (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_PASSWD),
-					(char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST), (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT), &oph_term_return, NULL,
-					&response_for_viewer, 0, hashtbl);
+			oph_term_client(command_line, submission_workflow, &session, _user, _passwd, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST),
+					(char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT), &oph_term_return, NULL, &response_for_viewer, 0, hashtbl);
 			if (submission_workflow) {
 				free(submission_workflow);
 				submission_workflow = NULL;
