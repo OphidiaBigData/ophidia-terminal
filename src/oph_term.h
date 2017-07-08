@@ -182,6 +182,7 @@ extern int oph_term_error_cur;
 #define OPH_TERM_DEFAULT_ALIAS_KEY_16 	"lsd"
 #define OPH_TERM_DEFAULT_ALIAS_KEY_17 	"cdd"
 #define OPH_TERM_DEFAULT_ALIAS_KEY_18 	"pdd"
+#define OPH_TERM_DEFAULT_ALIAS_KEY_19 	"getprogress"
 
 #define OPH_TERM_DEFAULT_ALIAS_VAL_1 	"oph_list path=$1;"
 #define OPH_TERM_DEFAULT_ALIAS_VAL_2 	"oph_folder command=cd;path=$1;"
@@ -201,8 +202,9 @@ extern int oph_term_error_cur;
 #define OPH_TERM_DEFAULT_ALIAS_VAL_16 	"oph_fs command=ls;dpath=$1;"
 #define OPH_TERM_DEFAULT_ALIAS_VAL_17 	"oph_fs command=cd;dpath=$1;"
 #define OPH_TERM_DEFAULT_ALIAS_VAL_18 	"getenv OPH_CDD"
+#define OPH_TERM_DEFAULT_ALIAS_VAL_19 	"oph_resume level=0;id=$1"
 
-#define OPH_TERM_DEFAULT_ALIAS_NUM 18
+#define OPH_TERM_DEFAULT_ALIAS_NUM 19
 
 static char *pre_defined_aliases_keys[OPH_TERM_DEFAULT_ALIAS_NUM] = {
 	OPH_TERM_DEFAULT_ALIAS_KEY_1,
@@ -222,7 +224,8 @@ static char *pre_defined_aliases_keys[OPH_TERM_DEFAULT_ALIAS_NUM] = {
 	OPH_TERM_DEFAULT_ALIAS_KEY_15,
 	OPH_TERM_DEFAULT_ALIAS_KEY_16,
 	OPH_TERM_DEFAULT_ALIAS_KEY_17,
-	OPH_TERM_DEFAULT_ALIAS_KEY_18
+	OPH_TERM_DEFAULT_ALIAS_KEY_18,
+	OPH_TERM_DEFAULT_ALIAS_KEY_19
 };
 
 static char *pre_defined_aliases_values[OPH_TERM_DEFAULT_ALIAS_NUM] = {
@@ -243,7 +246,8 @@ static char *pre_defined_aliases_values[OPH_TERM_DEFAULT_ALIAS_NUM] = {
 	OPH_TERM_DEFAULT_ALIAS_VAL_15,
 	OPH_TERM_DEFAULT_ALIAS_VAL_16,
 	OPH_TERM_DEFAULT_ALIAS_VAL_17,
-	OPH_TERM_DEFAULT_ALIAS_VAL_18
+	OPH_TERM_DEFAULT_ALIAS_VAL_18,
+	OPH_TERM_DEFAULT_ALIAS_VAL_19
 };
 
 static const int pre_defined_aliases_num = OPH_TERM_DEFAULT_ALIAS_NUM;
