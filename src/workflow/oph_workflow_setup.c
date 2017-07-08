@@ -867,6 +867,14 @@ void *main_loop(void *ptr)
 	if (!gtk_init_check(NULL, NULL))
 		open_img = 0;
 
+	char *_user = hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_USER), *_passwd = hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_PASSWD);
+	char token_user[10], *_token = hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TOKEN);
+	if (_token && strlen(_token)) {
+		strcpy(token_user, OPH_TERM_TOKEN_USER);
+		_user = token_user;
+		_passwd = _token;
+	}
+
 	if (wf) {
 		oph_workflow_print(wf, save_img, open_img, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_GRAPH_LAYOUT));
 		oph_workflow_free(wf);
@@ -875,9 +883,8 @@ void *main_loop(void *ptr)
 		for (z = 0; z < iterations_num || iterations_num == 0; z++) {
 			// SUBMISSION
 			char *response_for_viewer = NULL;
-			oph_term_client(command_line, tmp_submission_string, NULL, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_USER), (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_PASSWD),
-					(char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST), (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT), oph_term_return, NULL,
-					&response_for_viewer, 1, hashtbl);
+			oph_term_client(command_line, tmp_submission_string, NULL, _user, _passwd, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST),
+					(char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT), oph_term_return, NULL, &response_for_viewer, 1, hashtbl);
 
 			if (!response_for_viewer) {
 				(print_json) ? my_fprintf(stderr, "Could not get response from server [CODE %d]\\n", OPH_TERM_GENERIC_ERROR) : fprintf(stderr,
@@ -912,9 +919,8 @@ void *main_loop(void *ptr)
 				}
 				char *full_request = NULL;
 				if (oph_term_get_full_request
-				    (tmp_session, tmp_workflow, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_USER), (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_PASSWD),
-				     (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST), (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT), oph_term_return, &full_request, NULL,
-				     hashtbl)) {
+				    (tmp_session, tmp_workflow, _user, _passwd, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST),
+				     (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT), oph_term_return, &full_request, NULL, hashtbl)) {
 					(print_json) ? my_fprintf(stderr, "Could not get full request [CODE %d]\\n", OPH_TERM_GENERIC_ERROR) : fprintf(stderr,
 																		       "\e[1;31mCould not get full request [CODE %d]\e[0m\n",
 																		       OPH_TERM_GENERIC_ERROR);

@@ -50,7 +50,6 @@ void cleanup(struct soap *soap)
 	globus_module_deactivate(GLOBUS_GSI_GSSAPI_MODULE);
 }
 
-//TODO
 struct soap soap_global;
 char server_global[OPH_MAX_STRING_SIZE];
 char query_global[WORKFLOW_MAX_LEN];
@@ -59,8 +58,8 @@ int soap_call_oph__ophExecuteMain_return;
 
 void *soapthread(void *ptr)
 {
-	UNUSED(ptr)
-	    pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
+	UNUSED(ptr);
+	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
 	soap_call_oph__ophExecuteMain_return = soap_call_oph__ophExecuteMain(&soap_global, server_global, "", query_global, &response_global);
 	return NULL;
 }
@@ -461,14 +460,19 @@ void oph_execute(struct soap *soap, xsd__string query, char *wps, char **newsess
 int oph_term_client(char *cmd_line, char *command, char **newsession, char *user, char *password, char *host, char *port, int *return_value, char **out_response, char **out_response_for_viewer,
 		    int workflow_wrap, HASHTBL * hashtbl)
 {
-	UNUSED(cmds) UNUSED(pre_defined_aliases_keys)
-	    UNUSED(pre_defined_aliases_values) UNUSED(env_vars)
-	    UNUSED(env_vars_ptr) UNUSED(alias_ptr)
-	    UNUSED(xml_defs) UNUSED(operators_list)
-	    UNUSED(operators_list_size)
-	    UNUSED(user) UNUSED(password)
+	UNUSED(cmds);
+	UNUSED(pre_defined_aliases_keys);
+	UNUSED(pre_defined_aliases_values);
+	UNUSED(env_vars);
+	UNUSED(env_vars_ptr);
+	UNUSED(alias_ptr);
+	UNUSED(xml_defs);
+	UNUSED(operators_list);
+	UNUSED(operators_list_size);
+	UNUSED(user);
+	UNUSED(password);
 
-	    snprintf(query_global, WORKFLOW_MAX_LEN, OPH_DEFAULT_QUERY);
+	snprintf(query_global, WORKFLOW_MAX_LEN, OPH_DEFAULT_QUERY);
 	char *wps = 0;
 
 	if (command)
@@ -542,7 +546,8 @@ int oph_term_client(char *cmd_line, char *command, char **newsession, char *user
 
 void sigpipe_handle(int x)
 {
-UNUSED(x)}
+	UNUSED(x);
+}
 
 /******************************************************************************\
  *
@@ -552,14 +557,14 @@ UNUSED(x)}
 
 int gsi_plugin_credential_renew_callback(struct soap *soap, int lifetime)
 {
-	UNUSED(soap)
-	    UNUSED(lifetime)
-	    return 0;
+	UNUSED(soap);
+	UNUSED(lifetime);
+	return 0;
 }
 
 int gsi_authorization_callback(struct soap *soap, char *distinguished_name)
 {
-	UNUSED(soap)
-	    UNUSED(distinguished_name)
-	    return 0;
+	UNUSED(soap);
+	UNUSED(distinguished_name);
+	return 0;
 }

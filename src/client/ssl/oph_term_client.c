@@ -52,8 +52,8 @@ int soap_call_oph__ophExecuteMain_return;
 
 void *soapthread(void *ptr)
 {
-	UNUSED(ptr)
-	    pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
+	UNUSED(ptr);
+	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
 	soap_call_oph__ophExecuteMain_return = soap_call_oph__ophExecuteMain(&soap_global, server_global, "", query_global, &response_global);
 	return NULL;
 }
@@ -454,13 +454,17 @@ void oph_execute(struct soap *soap, xsd__string query, char *wps, char **newsess
 int oph_term_client(char *cmd_line, char *command, char **newsession, char *user, char *password, char *host, char *port, int *return_value, char **out_response, char **out_response_for_viewer,
 		    int workflow_wrap, HASHTBL * hashtbl)
 {
-	UNUSED(cmds) UNUSED(pre_defined_aliases_keys)
-	    UNUSED(pre_defined_aliases_values) UNUSED(env_vars)
-	    UNUSED(env_vars_ptr) UNUSED(alias_ptr)
-	    UNUSED(xml_defs) UNUSED(operators_list)
-	    UNUSED(operators_list_size)
+	UNUSED(cmds);
+	UNUSED(pre_defined_aliases_keys);
+	UNUSED(pre_defined_aliases_values);
+	UNUSED(env_vars);
+	UNUSED(env_vars_ptr);
+	UNUSED(alias_ptr);
+	UNUSED(xml_defs);
+	UNUSED(operators_list);
+	UNUSED(operators_list_size);
 
-	    snprintf(query_global, WORKFLOW_MAX_LEN, OPH_DEFAULT_QUERY);
+	snprintf(query_global, WORKFLOW_MAX_LEN, OPH_DEFAULT_QUERY);
 
 	char *username = user, *wps = 0;
 
@@ -543,7 +547,8 @@ static MUTEX_TYPE *mutex_buf;
 
 static struct CRYPTO_dynlock_value *dyn_create_function(const char *file, int line)
 {
-	UNUSED(file) UNUSED(line)
+	UNUSED(file);
+	UNUSED(line);
 	struct CRYPTO_dynlock_value *value;
 	value = (struct CRYPTO_dynlock_value *) malloc(sizeof(struct CRYPTO_dynlock_value));
 	if (value)
@@ -553,8 +558,9 @@ static struct CRYPTO_dynlock_value *dyn_create_function(const char *file, int li
 
 static void dyn_lock_function(int mode, struct CRYPTO_dynlock_value *l, const char *file, int line)
 {
-	UNUSED(file) UNUSED(line)
-	    if (mode & CRYPTO_LOCK)
+	UNUSED(file);
+	UNUSED(line);
+	if (mode & CRYPTO_LOCK)
 		MUTEX_LOCK(l->mutex);
 	else
 		MUTEX_UNLOCK(l->mutex);
@@ -562,15 +568,17 @@ static void dyn_lock_function(int mode, struct CRYPTO_dynlock_value *l, const ch
 
 static void dyn_destroy_function(struct CRYPTO_dynlock_value *l, const char *file, int line)
 {
-	UNUSED(file) UNUSED(line)
-	    MUTEX_CLEANUP(l->mutex);
+	UNUSED(file);
+	UNUSED(line);
+	MUTEX_CLEANUP(l->mutex);
 	free(l);
 }
 
 void locking_function(int mode, int n, const char *file, int line)
 {
-	UNUSED(file) UNUSED(line)
-	    if (mode & CRYPTO_LOCK)
+	UNUSED(file);
+	UNUSED(line);
+	if (mode & CRYPTO_LOCK)
 		MUTEX_LOCK(mutex_buf[n]);
 	else
 		MUTEX_UNLOCK(mutex_buf[n]);
@@ -636,4 +644,5 @@ void CRYPTO_thread_cleanup()
 
 void sigpipe_handle(int x)
 {
-UNUSED(x)}
+	UNUSED(x);
+}
