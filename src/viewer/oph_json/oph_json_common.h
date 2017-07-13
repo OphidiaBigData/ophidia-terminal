@@ -88,8 +88,23 @@ typedef struct _oph_json_source {
 } oph_json_source;
 
 /**
+ * \brief Structure that defines an OPH_JSON data extra
+ * \param keys List of other extra-specific parameters
+ * \param keys_num Number of keys
+ * \param values Values for all keys
+ * \param values_num Number of values
+ */
+typedef struct _oph_json_extra {
+	char **keys;
+	unsigned int keys_num;
+	char **values;
+	unsigned int values_num;
+} oph_json_extra;
+
+/**
  * \brief Structure that defines a complete OPH_JSON object
  * \param source Data source
+ * \param extra Additional metadata
  * \param consumers Users interested in data
  * \param consumers_num Number of consumers
  * \param responseKeyset Array of objkey within response
@@ -99,6 +114,7 @@ typedef struct _oph_json_source {
  */
 typedef struct _oph_json {
 	oph_json_source *source;
+	oph_json_extra *extra;
 	char **consumers;
 	unsigned int consumers_num;
 	char **responseKeyset;

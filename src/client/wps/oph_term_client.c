@@ -38,6 +38,8 @@
 
 #define UNUSED(x) {(void)(x);}
 
+extern pthread_mutex_t global_flag;
+
 void sigpipe_handle(int);
 
 struct oph__ophResponse {
@@ -49,7 +51,6 @@ struct oph__ophResponse {
 	size_t size;
 } response_global;
 
-//TODO
 char server_global[OPH_MAX_STRING_SIZE];
 char query_global[WORKFLOW_MAX_LEN];
 int wps_call_oph__ophExecuteMain_return;
@@ -783,6 +784,14 @@ void oph_execute(char *query, char **newsession, int *return_value, char **out_r
 	response_global.buffer = NULL;
 	response_global.size = 0;
 	response_global.error = OPH_SERVER_OK;
+
+	char _password[OPH_MAX_STRING_SIZE];
+	pthread_mutex_lock(&global_flag);
+	if (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TOKEN)) {
+		snprintf(_password, OPH_MAX_STRING_SIZE, "%s", hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TOKEN));
+		password = _password;
+	}
+	pthread_mutex_unlock(&global_flag);
 
 	snprintf(username_global, OPH_MAX_STRING_SIZE, "%s", username);
 	snprintf(password_global, OPH_MAX_STRING_SIZE, "%s", password);

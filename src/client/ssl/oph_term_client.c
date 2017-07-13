@@ -31,6 +31,8 @@
 
 #define UNUSED(x) {(void)(x);}
 
+extern pthread_mutex_t global_flag;
+
 int CRYPTO_thread_setup();
 void CRYPTO_thread_cleanup();
 void sigpipe_handle(int);
@@ -43,7 +45,6 @@ void cleanup(struct soap *soap)
 	CRYPTO_thread_cleanup();
 }
 
-//TODO
 struct soap soap_global;
 char server_global[OPH_MAX_STRING_SIZE];
 char query_global[WORKFLOW_MAX_LEN];
@@ -504,8 +505,17 @@ int oph_term_client(char *cmd_line, char *command, char **newsession, char *user
 	snprintf(server_global, OPH_MAX_STRING_SIZE, "http://%s:%s", host, port);
 #endif
 
+	char _password[OPH_MAX_STRING_SIZE];
+	pthread_mutex_lock(&global_flag);
+	if (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TOKEN)) {
+		snprintf(_password, OPH_MAX_STRING_SIZE, "%s", hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TOKEN));
+		password = _password;
+	}
+	pthread_mutex_unlock(&global_flag);
+
 	soap_global.userid = username;	// Username has to set for each serve
 	soap_global.passwd = password;	// Password has to set for each serve
+
 	oph_execute(&soap_global, query, wps, newsession, return_value, out_response, out_response_for_viewer, workflow_wrap, username, hashtbl, cmd_line);
 
 	cleanup(&soap_global);

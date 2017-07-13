@@ -226,6 +226,44 @@ int oph_json_free_source(oph_json * json)
 	return OPH_JSON_SUCCESS;
 }
 
+// Free extra
+int oph_json_free_extra(oph_json * json)
+{
+	if (!json) {
+		return OPH_JSON_BAD_PARAM_ERROR;
+	}
+	if (json->extra) {
+		if (json->extra->keys) {
+			int i;
+			for (i = 0; i < (int) json->extra->keys_num; i++) {
+				if (json->extra->keys[i]) {
+					free(json->extra->keys[i]);
+					json->extra->keys[i] = NULL;
+				}
+			}
+			free(json->extra->keys);
+			json->extra->keys = NULL;
+		}
+		json->extra->keys_num = 0;
+		if (json->extra->values) {
+			int i;
+			for (i = 0; i < (int) json->extra->values_num; i++) {
+				if (json->extra->values[i]) {
+					free(json->extra->values[i]);
+					json->extra->values[i] = NULL;
+				}
+			}
+			free(json->extra->values);
+			json->extra->values = NULL;
+		}
+		json->extra->values_num = 0;
+
+		free(json->extra);
+		json->extra = NULL;
+	}
+	return OPH_JSON_SUCCESS;
+}
+
 // Free response
 int oph_json_free_response(oph_json * json)
 {
@@ -293,6 +331,7 @@ int oph_json_alloc(oph_json ** json)
 	(*json)->responseKeyset_num = 0;
 	(*json)->response_num = 0;
 	(*json)->source = NULL;
+	(*json)->extra = NULL;
 	return OPH_JSON_SUCCESS;
 }
 
@@ -303,6 +342,7 @@ int oph_json_free(oph_json * json)
 		oph_json_free_response(json);
 		oph_json_free_responseKeyset(json);
 		oph_json_free_source(json);
+		oph_json_free_extra(json);
 		free(json);
 		json = NULL;
 	}
@@ -462,6 +502,76 @@ int oph_json_add_source_detail(oph_json * json, const char *key, const char *val
 	return OPH_JSON_SUCCESS;
 }
 
+int oph_json_add_extra_detail(oph_json * json, const char *key, const char *value)
+{
+	if (!json || !key || !value) {
+		return OPH_JSON_BAD_PARAM_ERROR;
+	}
+
+	if (!json->extra) {
+		json->extra = (oph_json_extra *) malloc(sizeof(oph_json_extra));
+		if (!json->extra) {
+			return OPH_JSON_MEMORY_ERROR;
+		}
+		json->extra->keys = NULL;
+		json->extra->keys_num = 0;
+		json->extra->values = NULL;
+		json->extra->values_num = 0;
+	}
+
+	if (json->extra->keys_num == 0) {
+		json->extra->keys = (char **) malloc(sizeof(char *));
+		if (!json->extra->keys) {
+			return OPH_JSON_MEMORY_ERROR;
+		}
+		json->extra->keys[0] = (char *) strdup(key);
+		if (!json->extra->keys[0]) {
+			return OPH_JSON_MEMORY_ERROR;
+		}
+		json->extra->keys_num++;
+		json->extra->values = (char **) malloc(sizeof(char *));
+		if (!json->extra->values) {
+			return OPH_JSON_MEMORY_ERROR;
+		}
+		json->extra->values[0] = (char *) strdup(value);
+		if (!json->extra->values[0]) {
+			return OPH_JSON_MEMORY_ERROR;
+		}
+		json->extra->values_num++;
+	} else {
+		int i;
+		for (i = 0; i < (int) json->extra->keys_num; i++) {
+			if (!strcmp(json->extra->keys[i], key)) {
+				return OPH_JSON_BAD_PARAM_ERROR;
+			}
+		}
+		char **tmp = json->extra->keys;
+		json->extra->keys = (char **) realloc(json->extra->keys, sizeof(char *) * (json->extra->keys_num + 1));
+		if (!json->extra->keys) {
+			json->extra->keys = tmp;
+			return OPH_JSON_MEMORY_ERROR;
+		}
+		json->extra->keys[json->extra->keys_num] = (char *) strdup(key);
+		if (!json->extra->keys[json->extra->keys_num]) {
+			return OPH_JSON_MEMORY_ERROR;
+		}
+		json->extra->keys_num++;
+		char **tmp2 = json->extra->values;
+		json->extra->values = (char **) realloc(json->extra->values, sizeof(char *) * (json->extra->values_num + 1));
+		if (!json->extra->values) {
+			json->extra->values = tmp2;
+			return OPH_JSON_MEMORY_ERROR;
+		}
+		json->extra->values[json->extra->values_num] = (char *) strdup(value);
+		if (!json->extra->values[json->extra->values_num]) {
+			return OPH_JSON_MEMORY_ERROR;
+		}
+		json->extra->values_num++;
+	}
+
+	return OPH_JSON_SUCCESS;
+}
+
 int oph_json_from_json_string(oph_json ** json, char **jstring)
 {
 	if (!jstring || !*jstring || !json) {
@@ -494,6 +604,7 @@ int oph_json_from_json_string(oph_json ** json, char **jstring)
 		*jstring = NULL;
 	}
 
+	json_t *extra = NULL;
 	json_t *source = NULL;
 	json_t *consumers = NULL;
 	json_t *response = NULL;
@@ -1501,6 +1612,29 @@ int oph_json_from_json_string(oph_json ** json, char **jstring)
 					return OPH_JSON_GENERIC_ERROR;
 				}
 			}
+		}
+	}
+	//GET EXTRA DATA FROM JSON_T
+	json_unpack(jansson, "{s?o}", "extra", &extra);
+	if (extra) {
+
+		json_t *keys = NULL;
+		json_t *values = NULL;
+		json_unpack(extra, "{s?o,s?o}", "keys", &keys, "values", &values);
+
+		if (keys && values) {
+			char *key = NULL, *value = NULL;
+			size_t index;
+			for (index = 0; index < json_array_size(keys); index++) {
+				json_unpack(json_array_get(keys, index), "s", &key);
+				json_unpack(json_array_get(values, index), "s", &value);
+				if (oph_json_add_extra_detail(*json, (const char *) key, (const char *) value))
+					break;
+			}
+		} else if ((keys && !values) || (!keys && values)) {
+			if (jansson)
+				json_decref(jansson);
+			return OPH_JSON_GENERIC_ERROR;
 		}
 	}
 

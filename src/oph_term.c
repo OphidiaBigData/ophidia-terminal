@@ -27,6 +27,9 @@
 extern int errno;
 extern int abort_view;
 
+char *_passwd = NULL;
+pthread_mutex_t global_flag;
+
 int watching = 0;
 char *stored_line = NULL;
 int signal_raise = 0;
@@ -1379,6 +1382,8 @@ int main(int argc, char **argv, char **envp)
 	signal(SIGTSTP, siginthandler);
 	signal(SIGQUIT, siginthandler);
 
+	pthread_mutex_init(&global_flag, NULL);
+
 	char *line = NULL;
 	char *linecopy = NULL;
 	char *cursor = NULL;
@@ -1444,13 +1449,18 @@ int main(int argc, char **argv, char **envp)
 	if (!print_json)
 		printf("\e[2m");
 
-	char *_user = hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_USER), *_passwd = hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_PASSWD);
+	char *_user = hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_USER);
 	char token_user[10], *_token = hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TOKEN);
+
+	pthread_mutex_lock(&global_flag);
+	_passwd = hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_PASSWD);
 	if (_token && strlen(_token)) {
 		strcpy(token_user, OPH_TERM_TOKEN_USER);
 		_user = token_user;
 		_passwd = _token;
 	}
+	pthread_mutex_unlock(&global_flag);
+
 	// Init OPH_SESSION_ID if empty
 	if (!hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SESSION_ID)) {
 #ifndef INTERFACE_TYPE_IS_GSI
@@ -1860,9 +1870,11 @@ int main(int argc, char **argv, char **envp)
 		}
 		// VISUALIZATION
 		if (response_for_viewer) {
+			char *newtoken = NULL;
 			int viewer_res = oph_term_viewer((const char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_VIEWER), &response_for_viewer,
 							 (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1)) ? ((const char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1)) : "red", 0, 0, 1, NULL,
-							 NULL, NULL, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_GRAPH_LAYOUT));
+							 NULL, NULL,
+							 &newtoken, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_GRAPH_LAYOUT));
 			if (viewer_res != 0 && viewer_res != OPH_TERM_ERROR_WITHIN_JSON) {
 				(print_json) ? my_fprintf(stderr, "Could not render result [CODE %d]\\n", OPH_TERM_GENERIC_ERROR) : fprintf(stderr, "\e[1;31mCould not render result [CODE %d]\e[0m\n",
 																	    OPH_TERM_GENERIC_ERROR);
@@ -1870,7 +1882,17 @@ int main(int argc, char **argv, char **envp)
 				oph_term_alias_clear(aliases);
 				if (print_json)
 					print_oph_term_output_json(hashtbl);
+				if (newtoken)
+					free(newtoken);
 				return OPH_TERM_GENERIC_ERROR;
+			}
+			if (newtoken) {
+				pthread_mutex_lock(&global_flag);
+				hashtbl_remove(hashtbl, OPH_TERM_ENV_OPH_TOKEN);
+				hashtbl_insert(hashtbl, OPH_TERM_ENV_OPH_TOKEN, newtoken, strlen(newtoken) + 1);
+				_passwd = _token = hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TOKEN);
+				pthread_mutex_unlock(&global_flag);
+				free(newtoken);
 			}
 		}
 		if (print_json)
@@ -2690,10 +2712,11 @@ int main(int argc, char **argv, char **envp)
 				if (response_for_viewer) {
 					int open_img = !strcmp((char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_IMGS), "open");
 					int save_img = open_img || !strcmp((char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_IMGS), "save");
-					int viewer_res = oph_term_viewer((const char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_VIEWER),
-									 &response_for_viewer,
+					char *newtoken = NULL;
+					int viewer_res = oph_term_viewer((const char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_VIEWER), &response_for_viewer,
 									 (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1)) ? ((const char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1)) : "red",
-									 save_img, open_img, 1, &newdatacube, &newcwd, &newcdd, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_GRAPH_LAYOUT));
+									 save_img,
+									 open_img, 1, &newdatacube, &newcwd, &newcdd, &newtoken, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_GRAPH_LAYOUT));
 					if (viewer_res != 0 && viewer_res != OPH_TERM_ERROR_WITHIN_JSON) {
 						(print_json) ? my_fprintf(stderr, "Could not render result [CODE %d]\\n", OPH_TERM_GENERIC_ERROR) : fprintf(stderr,
 																			    "\e[1;31mCould not render result [CODE %d]\e[0m\n",
@@ -2714,6 +2737,10 @@ int main(int argc, char **argv, char **envp)
 							free(newcdd);
 							newcdd = NULL;
 						}
+						if (newtoken) {
+							free(newtoken);
+							newtoken = NULL;
+						}
 						if (print_json)
 							print_oph_term_output_json(hashtbl);
 						if (exec_one_statement) {
@@ -2721,6 +2748,14 @@ int main(int argc, char **argv, char **envp)
 							break;
 						}
 						continue;
+					}
+					if (newtoken) {
+						pthread_mutex_lock(&global_flag);
+						hashtbl_remove(hashtbl, OPH_TERM_ENV_OPH_TOKEN);
+						hashtbl_insert(hashtbl, OPH_TERM_ENV_OPH_TOKEN, newtoken, strlen(newtoken) + 1);
+						_passwd = _token = hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TOKEN);
+						pthread_mutex_unlock(&global_flag);
+						free(newtoken);
 					}
 				}
 				//update OPH_SESSION_ID if necessary
@@ -3079,10 +3114,11 @@ int main(int argc, char **argv, char **envp)
 				if (response_for_viewer) {
 					int open_img = !strcmp((char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_IMGS), "open");
 					int save_img = open_img || !strcmp((char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_IMGS), "save");
-					int viewer_res = oph_term_viewer((const char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_VIEWER),
-									 &response_for_viewer,
+					char *newtoken = NULL;
+					int viewer_res = oph_term_viewer((const char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_VIEWER), &response_for_viewer,
 									 (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1)) ? ((const char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1)) : "red",
-									 save_img, open_img, 1, &newdatacube, &newcwd, &newcdd, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_GRAPH_LAYOUT));
+									 save_img,
+									 open_img, 1, &newdatacube, &newcwd, &newcdd, &newtoken, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_GRAPH_LAYOUT));
 					if (viewer_res != 0 && viewer_res != OPH_TERM_ERROR_WITHIN_JSON) {
 						(print_json) ? my_fprintf(stderr, "Could not render result [CODE %d]\\n", OPH_TERM_GENERIC_ERROR) : fprintf(stderr,
 																			    "\e[1;31mCould not render result [CODE %d]\e[0m\n",
@@ -3103,6 +3139,10 @@ int main(int argc, char **argv, char **envp)
 							free(newcdd);
 							newcdd = NULL;
 						}
+						if (newtoken) {
+							free(newtoken);
+							newtoken = NULL;
+						}
 						if (print_json)
 							print_oph_term_output_json(hashtbl);
 						if (exec_one_statement) {
@@ -3110,6 +3150,14 @@ int main(int argc, char **argv, char **envp)
 							break;
 						}
 						continue;
+					}
+					if (newtoken) {
+						pthread_mutex_lock(&global_flag);
+						hashtbl_remove(hashtbl, OPH_TERM_ENV_OPH_TOKEN);
+						hashtbl_insert(hashtbl, OPH_TERM_ENV_OPH_TOKEN, newtoken, strlen(newtoken) + 1);
+						_passwd = _token = hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TOKEN);
+						pthread_mutex_unlock(&global_flag);
+						free(newtoken);
 					}
 				}
 				//update OPH_SESSION_ID if necessary
@@ -4926,13 +4974,17 @@ int main(int argc, char **argv, char **envp)
 			}
 			// VISUALIZATION
 			if (response_for_viewer) {
+				char *newtoken = NULL;
 				int viewer_res = oph_term_viewer((const char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_VIEWER), &response_for_viewer,
 								 (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1)) ? ((const char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1)) : "red", 0, 0, 1,
-								 NULL, NULL, NULL, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_GRAPH_LAYOUT));
+								 NULL, NULL,
+								 NULL, &newtoken, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_GRAPH_LAYOUT));
 				if (viewer_res != 0 && viewer_res != OPH_TERM_ERROR_WITHIN_JSON) {
 					(print_json) ? my_fprintf(stderr, "Could not render result [CODE %d]\\n", OPH_TERM_GENERIC_ERROR) : fprintf(stderr,
 																		    "\e[1;31mCould not render result [CODE %d]\e[0m\n",
 																		    OPH_TERM_GENERIC_ERROR);
+					if (newtoken)
+						free(newtoken);
 					if (print_json)
 						print_oph_term_output_json(hashtbl);
 					if (exec_one_statement) {
@@ -4940,6 +4992,14 @@ int main(int argc, char **argv, char **envp)
 						break;
 					}
 					continue;
+				}
+				if (newtoken) {
+					pthread_mutex_lock(&global_flag);
+					hashtbl_remove(hashtbl, OPH_TERM_ENV_OPH_TOKEN);
+					hashtbl_insert(hashtbl, OPH_TERM_ENV_OPH_TOKEN, newtoken, strlen(newtoken) + 1);
+					_passwd = _token = hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TOKEN);
+					pthread_mutex_unlock(&global_flag);
+					free(newtoken);
 				}
 			}
 			if (print_json)
@@ -5874,6 +5934,8 @@ int main(int argc, char **argv, char **envp)
 		oph_term_env_end_xml_parser();
 		oph_term_env_xmlauto_clear(xml_defs, operators_list, operators_list_size);
 	}
+
+	pthread_mutex_destroy(&global_flag);
 
 	/* EXIT */
 	if (exec_one_statement)

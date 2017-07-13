@@ -43,6 +43,9 @@ GVC_t *gvc = NULL;
 char filename[OPH_WORKFLOW_BASIC_SIZE];
 int abort_view;
 
+extern char *_passwd;
+extern pthread_mutex_t global_flag;
+
 typedef struct _gtkstruct {
 	int iterations_num;
 	char *command_line;
@@ -867,12 +870,11 @@ void *main_loop(void *ptr)
 	if (!gtk_init_check(NULL, NULL))
 		open_img = 0;
 
-	char *_user = hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_USER), *_passwd = hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_PASSWD);
+	char *_user = hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_USER);
 	char token_user[10], *_token = hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TOKEN);
 	if (_token && strlen(_token)) {
 		strcpy(token_user, OPH_TERM_TOKEN_USER);
 		_user = token_user;
-		_passwd = _token;
 	}
 
 	if (wf) {
@@ -1005,14 +1007,19 @@ void *main_loop(void *ptr)
 			// VISUALIZATION
 			ended = oph_term_viewer_check_workflow_ended(response_for_viewer);
 			if (ended == 0) {
-				int viewer_res = oph_term_viewer((const char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_VIEWER),
-								 &response_for_viewer,
-								 (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1)) ? ((const char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1)) : "red",
-								 save_img, open_img, show_list, NULL, NULL, NULL, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_GRAPH_LAYOUT));
+				char *newtoken = NULL;
+				int viewer_res = oph_term_viewer((const char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_VIEWER), &response_for_viewer,
+								 (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1)) ? ((const char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1)) : "red", save_img,
+								 open_img,
+								 show_list, NULL, NULL, NULL, &newtoken, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_GRAPH_LAYOUT));
 				if (viewer_res != 0 && viewer_res != OPH_TERM_ERROR_WITHIN_JSON) {
 					(print_json) ? my_fprintf(stderr, "Could not render result [CODE %d]\\n", OPH_TERM_GENERIC_ERROR) : fprintf(stderr,
 																		    "\e[1;31mCould not render result [CODE %d]\e[0m\n",
 																		    OPH_TERM_GENERIC_ERROR);
+					if (newtoken) {
+						free(newtoken);
+						newtoken = NULL;
+					}
 					if (start_gtk) {
 						(print_json) ? my_printf("Close image to continue...\\n") : printf("Close image to continue...\n");
 						g_thread_join(Thread1);
@@ -1021,18 +1028,39 @@ void *main_loop(void *ptr)
 					}
 					return NULL;
 				}
+				if (newtoken) {
+					pthread_mutex_lock(&global_flag);
+					hashtbl_remove(hashtbl, OPH_TERM_ENV_OPH_TOKEN);
+					hashtbl_insert(hashtbl, OPH_TERM_ENV_OPH_TOKEN, newtoken, strlen(newtoken) + 1);
+					_passwd = hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TOKEN);
+					pthread_mutex_unlock(&global_flag);
+					free(newtoken);
+				}
 				break;
 			} else {
 				if (!start_gtk) {
-					int viewer_res = oph_term_viewer((const char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_VIEWER),
-									 &response_for_viewer,
+					char *newtoken = NULL;
+					int viewer_res = oph_term_viewer((const char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_VIEWER), &response_for_viewer,
 									 (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1)) ? ((const char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1)) : "red",
-									 save_img, open_img, show_list, NULL, NULL, NULL, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_GRAPH_LAYOUT));
+									 save_img,
+									 open_img, show_list, NULL, NULL, NULL, &newtoken, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_GRAPH_LAYOUT));
 					if (viewer_res != 0 && viewer_res != OPH_TERM_ERROR_WITHIN_JSON) {
 						(print_json) ? my_fprintf(stderr, "Could not render result [CODE %d]\\n", OPH_TERM_GENERIC_ERROR) : fprintf(stderr,
 																			    "\e[1;31mCould not render result [CODE %d]\e[0m\n",
 																			    OPH_TERM_GENERIC_ERROR);
+						if (newtoken) {
+							free(newtoken);
+							newtoken = NULL;
+						}
 						return NULL;
+					}
+					if (newtoken) {
+						pthread_mutex_lock(&global_flag);
+						hashtbl_remove(hashtbl, OPH_TERM_ENV_OPH_TOKEN);
+						hashtbl_insert(hashtbl, OPH_TERM_ENV_OPH_TOKEN, newtoken, strlen(newtoken) + 1);
+						_passwd = hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TOKEN);
+						pthread_mutex_unlock(&global_flag);
+						free(newtoken);
 					}
 				} else if (response_for_viewer) {
 					free(response_for_viewer);
