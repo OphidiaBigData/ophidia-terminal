@@ -1619,8 +1619,8 @@ int main(int argc, char **argv, char **envp)
 	}
 #ifdef CHDDIR
 	if (oph_term_env_oph_get_config
-	    (OPH_TERM_OPH_BASE_SRC_PATH_KEY, hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST), hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT), &oph_term_return, &oph_base_src_path,
-	     hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_USER), hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_PASSWD), 1, hashtbl)) {
+	    (OPH_TERM_OPH_BASE_SRC_PATH_KEY, hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST), hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT), &oph_term_return, &oph_base_src_path, _user,
+	     _passwd, 1, hashtbl)) {
 		(print_json) ? my_fprintf(stderr, "\\nWarning: Unable to resume base src path\\n") : fprintf(stderr, "\e[2m\nWarning: Unable to resume base src path\e[0m\n");
 		oph_term_return = OPH_TERM_SUCCESS;
 		if (oph_base_src_path) {
