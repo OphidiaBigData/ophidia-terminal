@@ -47,6 +47,7 @@ char oph_term_output[OUTPUT_MAX_LEN] = "\0";
 int oph_term_output_cur = 0;
 char oph_term_error[OUTPUT_MAX_LEN] = "\0";
 int oph_term_error_cur = 0;
+char *oph_base_src_path = NULL;
 
 /* Print Oph_Term version and copyright */
 void print_version()
@@ -1029,26 +1030,26 @@ char **oph_term_completion(char *text, int start, int end)
 	rl_attempted_completion_over = 1;
 
 	if (text[0] == '.' || text[0] == '/') {
-#ifdef CHDDIR
 		int i = 0;
 		char chddir[OPH_TERM_MAX_LEN];
-		if ((text[0] == '/') && (strlen(CHDDIR) > 1)) {
-			snprintf(chddir, OPH_TERM_MAX_LEN, CHDDIR "%s", text);
-			text = chddir;
-			i = 1;
-		}
-#endif
-		// completion over local filesystem
-		matches = rl_completion_matches(text, rl_filename_completion_function);
-#ifdef CHDDIR
-		if (i && matches) {
-			for (i = 0; matches[i]; i++) {
-				snprintf(chddir, OPH_TERM_MAX_LEN, "%s", matches[i] + strlen(CHDDIR));
-				free(matches[i]);
-				matches[i] = strdup(chddir);
+		if (oph_base_src_path) {
+			if ((text[0] == '/') && (strlen(oph_base_src_path) > 1)) {
+				snprintf(chddir, OPH_TERM_MAX_LEN, "%s%s", oph_base_src_path, text);
+				text = chddir;
+				i = 1;
 			}
 		}
-#endif
+		// completion over local filesystem
+		matches = rl_completion_matches(text, rl_filename_completion_function);
+		if (oph_base_src_path) {
+			if (i && matches) {
+				for (i = 0; matches[i]; i++) {
+					snprintf(chddir, OPH_TERM_MAX_LEN, "%s", matches[i] + strlen(oph_base_src_path));
+					free(matches[i]);
+					matches[i] = strdup(chddir);
+				}
+			}
+		}
 	} else if (rl_line_buffer[(start - 1 < 0) ? start : start - 1] == '$'
 		   || (rl_line_buffer[(start - 2 < 0) ? start : start - 2] == '$' && rl_line_buffer[(start - 1 < 0) ? start : start - 1] == '{')) {
 		// completion over env vars (def+user)
@@ -1616,20 +1617,31 @@ int main(int argc, char **argv, char **envp)
 			}
 		}
 	}
+#ifdef CHDDIR
+	if (oph_term_env_oph_get_config
+	    (OPH_TERM_OPH_BASE_SRC_PATH_KEY, hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST), hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT), &oph_term_return, &oph_base_src_path,
+	     hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_USER), hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_PASSWD), 1, hashtbl)) {
+		(print_json) ? my_fprintf(stderr, "\\nWarning: Unable to resume base src path\\n") : fprintf(stderr, "\e[2m\nWarning: Unable to resume base src path\e[0m\n");
+		oph_term_return = OPH_TERM_SUCCESS;
+		if (oph_base_src_path) {
+			free(oph_base_src_path);
+			oph_base_src_path = NULL;
+		}
+	}
+#endif
 	// OPH_CDD is not saved at server side
 	if (!hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CDD)) {
 		char oph_cdd[OPH_TERM_MAX_LEN], *_oph_cdd = oph_cdd;
-#ifdef CHDDIR
-		getcwd(oph_cdd, OPH_TERM_MAX_LEN);
-		char chddir[OPH_TERM_MAX_LEN], *_chddir = chddir;
-		snprintf(chddir, OPH_TERM_MAX_LEN, CHDDIR);
-		while (*_oph_cdd && *_chddir && (*_oph_cdd == *_chddir)) {
-			_oph_cdd++;
-			_chddir++;
-		}
-#else
-		strcpy(oph_cdd, "/");
-#endif
+		if (oph_base_src_path) {
+			getcwd(oph_cdd, OPH_TERM_MAX_LEN);
+			char chddir[OPH_TERM_MAX_LEN], *_chddir = chddir;
+			snprintf(chddir, OPH_TERM_MAX_LEN, oph_base_src_path);
+			while (*_oph_cdd && *_chddir && (*_oph_cdd == *_chddir)) {
+				_oph_cdd++;
+				_chddir++;
+			}
+		} else
+			strcpy(oph_cdd, "/");
 		if (oph_term_setenv(hashtbl, OPH_TERM_ENV_OPH_CDD, _oph_cdd)) {
 			oph_term_env_clear(hashtbl);
 			oph_term_alias_clear(aliases);
@@ -2668,17 +2680,16 @@ int main(int argc, char **argv, char **envp)
 				//cdd management
 				if (!hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CDD)) {
 					char oph_cdd[OPH_TERM_MAX_LEN], *_oph_cdd = oph_cdd;
-#ifdef CHDDIR
-					getcwd(oph_cdd, OPH_TERM_MAX_LEN);
-					char chddir[OPH_TERM_MAX_LEN], *_chddir = chddir;
-					snprintf(chddir, OPH_TERM_MAX_LEN, CHDDIR);
-					while (*_oph_cdd && *_chddir && (*_oph_cdd == *_chddir)) {
-						_oph_cdd++;
-						_chddir++;
-					}
-#else
-					strcpy(oph_cdd, "/");
-#endif
+					if (oph_base_src_path) {
+						getcwd(oph_cdd, OPH_TERM_MAX_LEN);
+						char chddir[OPH_TERM_MAX_LEN], *_chddir = chddir;
+						snprintf(chddir, OPH_TERM_MAX_LEN, oph_base_src_path);
+						while (*_oph_cdd && *_chddir && (*_oph_cdd == *_chddir)) {
+							_oph_cdd++;
+							_chddir++;
+						}
+					} else
+						strcpy(oph_cdd, "/");
 					if (oph_term_setenv(hashtbl, OPH_TERM_ENV_OPH_CDD, _oph_cdd)) {
 						(print_json) ? my_fprintf(stderr, "Could not set cdd [CODE %d]\\n", OPH_TERM_MEMORY_ERROR) : fprintf(stderr,
 																		     "\e[1;31mCould not set cdd [CODE %d]\e[0m\n",
@@ -2896,11 +2907,11 @@ int main(int argc, char **argv, char **envp)
 						}
 						continue;
 					}
-#ifdef CHDDIR
-					char chddir[OPH_TERM_MAX_LEN];
-					snprintf(chddir, OPH_TERM_MAX_LEN, CHDDIR "/%s", newcdd);
-					chdir(chddir);
-#endif
+					if (oph_base_src_path) {
+						char chddir[OPH_TERM_MAX_LEN];
+						snprintf(chddir, OPH_TERM_MAX_LEN, "%s/%s", oph_base_src_path, newcdd);
+						chdir(chddir);
+					}
 					free(newcdd);
 					newcdd = NULL;
 				}
@@ -3047,17 +3058,16 @@ int main(int argc, char **argv, char **envp)
 				if (!strstr(cursor, ";cdd=") && strncmp(cursor, "cdd=", 4)) {
 					if (!hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CDD)) {
 						char oph_cdd[OPH_TERM_MAX_LEN], *_oph_cdd = oph_cdd;
-#ifdef CHDDIR
-						getcwd(oph_cdd, OPH_TERM_MAX_LEN);
-						char chddir[OPH_TERM_MAX_LEN], *_chddir = chddir;
-						snprintf(chddir, OPH_TERM_MAX_LEN, CHDDIR);
-						while (*_oph_cdd && *_chddir && (*_oph_cdd == *_chddir)) {
-							_oph_cdd++;
-							_chddir++;
-						}
-#else
-						strcpy(oph_cdd, "/");
-#endif
+						if (oph_base_src_path) {
+							getcwd(oph_cdd, OPH_TERM_MAX_LEN);
+							char chddir[OPH_TERM_MAX_LEN], *_chddir = chddir;
+							snprintf(chddir, OPH_TERM_MAX_LEN, oph_base_src_path);
+							while (*_oph_cdd && *_chddir && (*_oph_cdd == *_chddir)) {
+								_oph_cdd++;
+								_chddir++;
+							}
+						} else
+							strcpy(oph_cdd, "/");
 						if (oph_term_setenv(hashtbl, OPH_TERM_ENV_OPH_CDD, _oph_cdd)) {
 							(print_json) ? my_fprintf(stderr, "Could not set cdd [CODE %d]\\n", OPH_TERM_MEMORY_ERROR) : fprintf(stderr,
 																			     "\e[1;31mCould not set cdd [CODE %d]\e[0m\n",
@@ -3302,11 +3312,11 @@ int main(int argc, char **argv, char **envp)
 						}
 						continue;
 					}
-#ifdef CHDDIR
-					char chddir[OPH_TERM_MAX_LEN];
-					snprintf(chddir, OPH_TERM_MAX_LEN, CHDDIR "/%s", newcdd);
-					chdir(chddir);
-#endif
+					if (oph_base_src_path) {
+						char chddir[OPH_TERM_MAX_LEN];
+						snprintf(chddir, OPH_TERM_MAX_LEN, "%s/%s", oph_base_src_path, newcdd);
+						chdir(chddir);
+					}
 					free(newcdd);
 					newcdd = NULL;
 				}
