@@ -342,13 +342,22 @@ if test "x${im_support}" = "xyes"; then
     OPT+=" -DWITH_IM_SUPPORT"
 fi
 
-#Enable chddir
-AC_ARG_WITH(base-src-path,
-       [  --with-base-src-path=BASE_SRC_PATH     Sets base_src_path for local folder switching. (Disabled by default)],
+base_src_path=
+AC_ARG_ENABLE(base_src_path,
+       [  --enable-base-src-path    Enable support for OPH_BASE_SRC_PATH. (Disabled by default)],
        [
-            OPT+=" -DCHDDIR=\\\"${withval}\\\""
-       ]
+            if test "x$enableval" = "xno"; then
+                base_src_path="no"
+            else
+                base_src_path="yes"
+            fi
+       ],
+       [ base_src_path="no"]
        )
+if test "x${base_src_path}" = "xyes"; then
+    AC_MSG_NOTICE("Enabled OPH_BASE_SRC_PATH support")
+    OPT+=" -DCHDDIR"
+fi
 
 xml_ssl_check=
 AC_ARG_ENABLE(xml_ssl_check,

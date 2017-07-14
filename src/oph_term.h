@@ -142,6 +142,7 @@ extern int oph_term_error_cur;
 #define OPH_TERM_SESSION_ID_KEY "OPH_SESSION_ID"
 #define OPH_TERM_OPH_DATACUBE_KEY "OPH_DATACUBE"
 #define OPH_TERM_OPH_CWD_KEY "OPH_CWD"
+#define OPH_TERM_OPH_BASE_SRC_PATH_KEY "OPH_BASE_SRC_PATH"
 #define OPH_TERM_GET_CONFIG_PROP "operator=oph_get_config;key=%s;"
 #define OPH_TERM_OPT_W_FILENAME "opt_w_filename"
 #define OPH_TERM_OPT_W_ARGS "opt_w_args"
