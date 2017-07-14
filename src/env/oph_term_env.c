@@ -22,16 +22,19 @@
 
 #define UNUSED(x) {(void)(x);}
 
+extern char *_passwd;
+extern pthread_mutex_t global_flag;
+
 //Alloc hashtable
 int oph_term_env_init(HASHTBL ** hashtbl)
 {
-	UNUSED(pre_defined_aliases_keys)
-	    UNUSED(pre_defined_aliases_values)
-	    UNUSED(env_vars_ptr) UNUSED(alias_ptr)
-	    UNUSED(xml_defs) UNUSED(operators_list)
-	    UNUSED(operators_list_size)
+	UNUSED(pre_defined_aliases_keys);
+	UNUSED(pre_defined_aliases_values);
+	UNUSED(env_vars_ptr) UNUSED(alias_ptr);
+	UNUSED(xml_defs) UNUSED(operators_list);
+	UNUSED(operators_list_size);
 
-	    if (!(*hashtbl = hashtbl_create((int) (env_vars_num * 1.3), NULL))) {
+	if (!(*hashtbl = hashtbl_create((int) (env_vars_num * 1.3), NULL))) {
 		(print_json) ? my_fprintf(stderr, "Error: env_init failed\\n") : fprintf(stderr, "\e[1;31mError: env_init failed\e[0m\n");
 		return OPH_TERM_MEMORY_ERROR;
 	}
@@ -975,11 +978,23 @@ int oph_term_env_oph_get_config(const char *key, const char *host, const char *p
 		return OPH_TERM_GENERIC_ERROR;
 	}
 
-	if (oph_term_viewer_retrieve_config(value, key, property)) {
+	char *newtoken = NULL;
+	if (oph_term_viewer_retrieve_config(value, key, property, &newtoken)) {
 		if (value)
 			free(value);
+		if (newtoken)
+			free(newtoken);
 		*return_value = OPH_TERM_GENERIC_ERROR;
 		return OPH_TERM_GENERIC_ERROR;
+	}
+
+	if (newtoken) {
+		pthread_mutex_lock(&global_flag);
+		hashtbl_remove(hashtbl, OPH_TERM_ENV_OPH_TOKEN);
+		hashtbl_insert(hashtbl, OPH_TERM_ENV_OPH_TOKEN, newtoken, strlen(newtoken) + 1);
+		_passwd = hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TOKEN);
+		pthread_mutex_unlock(&global_flag);
+		free(newtoken);
 	}
 
 	if (value)

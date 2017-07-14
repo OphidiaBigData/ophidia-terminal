@@ -2281,10 +2281,13 @@ int oph_term_viewer_is_session_switched(char *json_string)
 	return 0;
 }
 
-int oph_term_viewer_retrieve_config(char *json_string, const char *key, char **property)
+int oph_term_viewer_retrieve_config(char *json_string, const char *key, char **property, char **newtoken)
 {
 	if (!json_string || !key || !property)
 		return OPH_TERM_INVALID_PARAM_VALUE;
+
+	if (newtoken)
+		*newtoken = NULL;
 
 	char *tmp_json_string = strdup(json_string);
 	if (!tmp_json_string)
@@ -2295,6 +2298,19 @@ int oph_term_viewer_retrieve_config(char *json_string, const char *key, char **p
 		if (json)
 			oph_json_free(json);
 		return OPH_TERM_GENERIC_ERROR;
+	}
+
+	if (newtoken) {
+		*newtoken = NULL;
+		if (json->extra) {
+			unsigned int i;
+			for (i = 0; i < json->extra->keys_num; i++) {
+				if (!strcmp(json->extra->keys[i], "access_token")) {
+					*newtoken = (char *) strdup(json->extra->values[i]);
+					break;
+				}
+			}
+		}
 	}
 
 	int found = 0;
