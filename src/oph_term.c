@@ -2154,7 +2154,7 @@ int main(int argc, char **argv, char **envp)
 		print_welcome();
 	}
 
-	if (_passwd != _token)
+	if (_token && strlen(_token) && (_passwd != _token))
 		(print_json) ? my_printf("Access token is about to expire or expired.\\nNext time use the token just set in the environment variable.\\n\\n") :
 		    printf("\e[1;33mAccess token is about to expire or expired.\nNext time use the token just set in the environment variable.\e[0m\n\n");
 

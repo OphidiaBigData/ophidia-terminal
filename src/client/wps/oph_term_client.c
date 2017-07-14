@@ -787,8 +787,9 @@ void oph_execute(char *query, char **newsession, int *return_value, char **out_r
 
 	char _password[OPH_MAX_STRING_SIZE];
 	pthread_mutex_lock(&global_flag);
-	if (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TOKEN)) {
-		snprintf(_password, OPH_MAX_STRING_SIZE, "%s", hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TOKEN));
+	char *_token = hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TOKEN);
+	if (_token && strlen(_token)) {
+		snprintf(_password, OPH_MAX_STRING_SIZE, "%s", _token);
 		password = _password;
 	}
 	pthread_mutex_unlock(&global_flag);
