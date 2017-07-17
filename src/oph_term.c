@@ -1591,9 +1591,9 @@ int main(int argc, char **argv, char **envp)
 	if (!hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CDD)) {
 		char oph_cdd[OPH_TERM_MAX_LEN], *_oph_cdd = oph_cdd;
 		if (oph_base_src_path) {
-			getcwd(oph_cdd, OPH_TERM_MAX_LEN);
+			_oph_cdd = getcwd(oph_cdd, OPH_TERM_MAX_LEN);
 			char chddir[OPH_TERM_MAX_LEN], *_chddir = chddir;
-			snprintf(chddir, OPH_TERM_MAX_LEN, oph_base_src_path);
+			snprintf(chddir, OPH_TERM_MAX_LEN, "%s", oph_base_src_path);
 			while (*_oph_cdd && *_chddir && (*_oph_cdd == *_chddir)) {
 				_oph_cdd++;
 				_chddir++;
@@ -2625,9 +2625,9 @@ int main(int argc, char **argv, char **envp)
 				if (!hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CDD)) {
 					char oph_cdd[OPH_TERM_MAX_LEN], *_oph_cdd = oph_cdd;
 					if (oph_base_src_path) {
-						getcwd(oph_cdd, OPH_TERM_MAX_LEN);
+						_oph_cdd = getcwd(oph_cdd, OPH_TERM_MAX_LEN);
 						char chddir[OPH_TERM_MAX_LEN], *_chddir = chddir;
-						snprintf(chddir, OPH_TERM_MAX_LEN, oph_base_src_path);
+						snprintf(chddir, OPH_TERM_MAX_LEN, "%s", oph_base_src_path);
 						while (*_oph_cdd && *_chddir && (*_oph_cdd == *_chddir)) {
 							_oph_cdd++;
 							_chddir++;
@@ -2843,7 +2843,7 @@ int main(int argc, char **argv, char **envp)
 					if (oph_base_src_path) {
 						char chddir[OPH_TERM_MAX_LEN];
 						snprintf(chddir, OPH_TERM_MAX_LEN, "%s/%s", oph_base_src_path, newcdd);
-						chdir(chddir);
+						i = chdir(chddir);
 					}
 					free(newcdd);
 					newcdd = NULL;
@@ -2992,9 +2992,9 @@ int main(int argc, char **argv, char **envp)
 					if (!hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CDD)) {
 						char oph_cdd[OPH_TERM_MAX_LEN], *_oph_cdd = oph_cdd;
 						if (oph_base_src_path) {
-							getcwd(oph_cdd, OPH_TERM_MAX_LEN);
+							_oph_cdd = getcwd(oph_cdd, OPH_TERM_MAX_LEN);
 							char chddir[OPH_TERM_MAX_LEN], *_chddir = chddir;
-							snprintf(chddir, OPH_TERM_MAX_LEN, oph_base_src_path);
+							snprintf(chddir, OPH_TERM_MAX_LEN, "%s", oph_base_src_path);
 							while (*_oph_cdd && *_chddir && (*_oph_cdd == *_chddir)) {
 								_oph_cdd++;
 								_chddir++;
@@ -3237,7 +3237,7 @@ int main(int argc, char **argv, char **envp)
 					if (oph_base_src_path) {
 						char chddir[OPH_TERM_MAX_LEN];
 						snprintf(chddir, OPH_TERM_MAX_LEN, "%s/%s", oph_base_src_path, newcdd);
-						chdir(chddir);
+						i = chdir(chddir);
 					}
 					free(newcdd);
 					newcdd = NULL;
