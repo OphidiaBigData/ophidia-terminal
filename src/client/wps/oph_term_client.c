@@ -262,32 +262,23 @@ size_t _write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
 {
 	UNUSED(userdata);
 
-	size_t realsize = size * nmemb, totalsize = realsize;
+	size_t realsize = size * nmemb;
+	struct oph__ophResponse *mem = &response_global;
+	mem->buffer = (char *) realloc(mem->buffer, mem->size + realsize + 1);
+	if (mem->buffer == NULL)
+		return 0;
+	memcpy(mem->buffer + mem->size, ptr, realsize);
+	mem->size += realsize;
+	mem->buffer[mem->size] = 0;
+	return realsize;
+}
+
+int process_response()
+{
 	struct oph__ophResponse *mem = &response_global;
 
-	if (realsize >= CURL_MAX_WRITE_SIZE) {
-
-		// Response is divided in more chucks
-		if (mem->buffer) {
-			char *tmp = mem->buffer;
-			asprintf(&mem->buffer, "%s%s", tmp, ptr);
-			free(tmp);
-		} else
-			mem->buffer = strdup(ptr);
-		mem->size += realsize;
-
-		return realsize;
-	}
-
-	if (mem->buffer) {
-		char *tmp = mem->buffer;
-		asprintf(&mem->buffer, "%s%s", tmp, ptr);
-		free(tmp);
-		mem->size += realsize;
-
-		ptr = mem->buffer;
-		totalsize = mem->size;
-	}
+	if (!mem->size || !mem->buffer)
+		return 1;
 
 	if (mem->response)
 		free(mem->response);
@@ -296,6 +287,9 @@ size_t _write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
 		free(mem->jobid);
 	mem->jobid = NULL;
 	mem->error = OPH_SERVER_ERROR;
+	if (mem->xml)
+		free(mem->xml);
+	mem->xml = NULL;
 
 	xmlParserCtxtPtr ctxt;
 	xmlDocPtr doc;
@@ -307,10 +301,10 @@ size_t _write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
 	ctxt = xmlNewParserCtxt();
 	if (ctxt == NULL) {
 		(print_json) ? my_fprintf(stderr, "Failed to allocate parser context\\n") : fprintf(stderr, "\e[1;31mFailed to allocate parser context\e[0m\n");
-		return 0;
+		return 1;
 	}
 
-	doc = xmlCtxtReadMemory(ctxt, ptr, totalsize, NULL, NULL, 0);
+	doc = xmlCtxtReadMemory(ctxt, mem->buffer, mem->size, NULL, NULL, 0);
 
 	/* Create xpath evaluation context */
 	xpathCtx = xmlXPathNewContext(doc);
@@ -318,20 +312,20 @@ size_t _write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
 		(print_json) ? my_fprintf(stderr, "Error: unable to create new XPath context\\n") : fprintf(stderr, "\e[1;31mError: unable to create new XPath context\e[0m\n");
 		xmlFreeDoc(doc);
 		xmlFreeParserCtxt(ctxt);
-		return 0;
+		return 1;
 	}
 
 	if (xmlXPathRegisterNs(xpathCtx, (const xmlChar *) "wps", (const xmlChar *) "http://www.opengis.net/wps/1.0.0")) {
 		(print_json) ? my_fprintf(stderr, "Error: unable to add namespace\\n") : fprintf(stderr, "\e[1;31mError: unable to add namespace\e[0m\n");
 		xmlFreeDoc(doc);
 		xmlFreeParserCtxt(ctxt);
-		return 0;
+		return 1;
 	}
 	if (xmlXPathRegisterNs(xpathCtx, (const xmlChar *) "ows", (const xmlChar *) "http://www.opengis.net/ows/1.1")) {
 		(print_json) ? my_fprintf(stderr, "Error: unable to add namespace\\n") : fprintf(stderr, "\e[1;31mError: unable to add namespace\e[0m\n");
 		xmlFreeDoc(doc);
 		xmlFreeParserCtxt(ctxt);
-		return 0;
+		return 1;
 	}
 	// Check for exceptions
 	char processFailed = 0;
@@ -341,7 +335,7 @@ size_t _write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
 		xmlXPathFreeContext(xpathCtx);
 		xmlFreeDoc(doc);
 		xmlFreeParserCtxt(ctxt);
-		return 0;
+		return 1;
 	}
 	if (xpathObj->nodesetval && xpathObj->nodesetval->nodeNr)
 		processFailed = 1;
@@ -355,7 +349,7 @@ size_t _write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
 			xmlXPathFreeContext(xpathCtx);
 			xmlFreeDoc(doc);
 			xmlFreeParserCtxt(ctxt);
-			return 0;
+			return 1;
 		}
 
 		node = xpathObj->nodesetval->nodeTab[0];
@@ -382,7 +376,7 @@ size_t _write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
 			xmlXPathFreeContext(xpathCtx);
 			xmlFreeDoc(doc);
 			xmlFreeParserCtxt(ctxt);
-			return 0;
+			return 1;
 		}
 		if (xpathObj->nodesetval)
 			mem->error = OPH_SERVER_OK;
@@ -394,7 +388,7 @@ size_t _write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
 			xmlXPathFreeContext(xpathCtx);
 			xmlFreeDoc(doc);
 			xmlFreeParserCtxt(ctxt);
-			return 0;
+			return 1;
 		}
 		node = xpathObj->nodesetval->nodeTab[0];
 		if (node) {
@@ -411,7 +405,7 @@ size_t _write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
 			xmlXPathFreeContext(xpathCtx);
 			xmlFreeDoc(doc);
 			xmlFreeParserCtxt(ctxt);
-			return 0;
+			return 1;
 		}
 
 		node = xpathObj->nodesetval->nodeTab[0];
@@ -433,7 +427,7 @@ size_t _write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
 				xmlXPathFreeContext(xpathCtx);
 				xmlFreeDoc(doc);
 				xmlFreeParserCtxt(ctxt);
-				return 0;
+				return 1;
 			}
 			if (xpathObj->nodesetval && xpathObj->nodesetval->nodeNr) {
 				node = xpathObj->nodesetval->nodeTab[0];
@@ -445,8 +439,8 @@ size_t _write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
 						xmlFree(content);
 					}
 				}
-				xmlXPathFreeObject(xpathObj);
 			}
+			xmlXPathFreeObject(xpathObj);
 
 			xpathObj =
 			    xmlXPathEvalExpression((const xmlChar *) "/wps:ExecuteResponse/wps:ProcessOutputs/wps:Output[ows:Identifier/text()='response']/wps:Data/wps:ComplexData/text()", xpathCtx);
@@ -455,7 +449,7 @@ size_t _write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
 				xmlXPathFreeContext(xpathCtx);
 				xmlFreeDoc(doc);
 				xmlFreeParserCtxt(ctxt);
-				return 0;
+				return 1;
 			}
 			node = xpathObj->nodesetval->nodeTab[0];
 			if (node) {
@@ -477,7 +471,7 @@ size_t _write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
 	/* free up the parser context */
 	xmlFreeParserCtxt(ctxt);
 
-	return realsize;
+	return 0;
 }
 
 int wps_call_oph__ophExecuteMain(char *server_global, char *query_global, char *username, char *password, int store_result)
@@ -503,7 +497,7 @@ int wps_call_oph__ophExecuteMain(char *server_global, char *query_global, char *
 	curl_easy_setopt(hnd, CURLOPT_DIRLISTONLY, 0);
 	curl_easy_setopt(hnd, CURLOPT_APPEND, 0);
 	curl_easy_setopt(hnd, CURLOPT_NETRC, 0);
-	curl_easy_setopt(hnd, CURLOPT_FOLLOWLOCATION, 0);
+	curl_easy_setopt(hnd, CURLOPT_FOLLOWLOCATION, 1L);
 	curl_easy_setopt(hnd, CURLOPT_UNRESTRICTED_AUTH, 0);
 	curl_easy_setopt(hnd, CURLOPT_TRANSFERTEXT, 0);
 	curl_easy_setopt(hnd, CURLOPT_USERPWD, NULL);
@@ -569,15 +563,16 @@ int wps_call_oph__ophExecuteMain(char *server_global, char *query_global, char *
 	curl_easy_cleanup(hnd);
 	if (ret)
 		return ret;
-
-	return 0;
+	return process_response();
 }
 
 void *wpsthread(void *ptr)
 {
 	UNUSED(ptr);
+
 	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
 	wps_call_oph__ophExecuteMain_return = wps_call_oph__ophExecuteMain(server_global, query_global, username_global, password_global, store_result_global);
+
 	return NULL;
 }
 
@@ -781,8 +776,8 @@ void oph_execute(char *query, char **newsession, int *return_value, char **out_r
 	response_global.response = NULL;
 	response_global.jobid = NULL;
 	response_global.xml = NULL;
-	response_global.buffer = NULL;
-	response_global.size = 0;
+	response_global.buffer = (char *) malloc(1);
+	*response_global.buffer = response_global.size = 0;
 	response_global.error = OPH_SERVER_OK;
 
 	char _password[OPH_MAX_STRING_SIZE];
