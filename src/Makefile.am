@@ -92,7 +92,7 @@ bin_PROGRAMS=oph_term
 bindir=${prefix}/bin
 
 oph_term_SOURCES= oph_term.c
-oph_term_CFLAGS= $(OPT) -I. -Iclient -Ienv -Ihelp -Iviewer -Iworkflow ${lib_CFLAGS} $(LIBZ_INCLUDE) $(LIBXML_INCLUDE) $(FLAG)
+oph_term_CFLAGS= $(OPT) -I. -Iclient -Ienv -Ihelp -Iviewer -Iworkflow ${lib_CFLAGS} $(LIBZ_INCLUDE) $(LIBXML_INCLUDE) $(FLAG) -DPACKAGE_VERSION=\"@PACKAGE_VERSION@\"
 oph_term_LDADD= -L. -loph_term_client -loph_term_env -loph_term_help -loph_term_viewer -loph_term_workflow -lreadline -lhistory $(LIBZ_LIB) -lncurses -lm -lpthread
 
 distclean-local:
