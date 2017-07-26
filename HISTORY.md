@@ -1,4 +1,22 @@
 
+## v1.1.0 - 2017-07-28
+
+### Fixed:
+
+- Hide OPH_PASSWD
+
+### Added:
+
+- New aliases
+- Support for OpenId Connect (INDIGO-DataCloud Project)
+- Support for OPH_FS: setting and automatic update of OPH_CDD
+- Configuration option to disable SSL certificates check for XML download
+- Support for WPS interface
+
+### Changed:
+
+- Exploit OPH_BASE_SRC_PATH to set the parameter automatically
+
 ## v1.0.0 - 2017-03-23
 
 ### Changed:
