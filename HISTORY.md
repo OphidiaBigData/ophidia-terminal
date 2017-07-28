@@ -7,7 +7,7 @@
 
 ### Added:
 
-- New aliases
+- New aliases: getprogress, show, new, drop, jobs, ncdump
 - Support for OpenId Connect (INDIGO-DataCloud Project)
 - Support for OPH_FS: setting and automatic update of OPH_CDD
 - Configuration option to disable SSL certificates check for XML download
