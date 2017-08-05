@@ -137,6 +137,7 @@ typedef struct _oph_workflow_task {
  * \param exec_mode Execution mode for the entire workflow
  * \param ncores Number of cores for the entire workflow
  * \param cwd CWD for the entire workflow
+ * \param cdd CDD for the entire workflow
  * \param command Original command submitted by the user
  * \param cube Cube PID for the entire workflow
  * \param callback_url Callback URL for the entire workflow
@@ -162,6 +163,7 @@ typedef struct _oph_workflow {
 	int ncores;
 	char *command;
 	char *cwd;
+	char *cdd;
 	char *cube;
 	char *callback_url;
 	oph_workflow_task *tasks;

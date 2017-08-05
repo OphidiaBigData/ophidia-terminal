@@ -65,11 +65,11 @@ int oph_workflow_load(char *json_string, char *username, oph_workflow ** workflo
 		return OPH_WORKFLOW_EXIT_GENERIC_ERROR;
 	}
 	//unpack global vars
-	char *name = NULL, *author = NULL, *abstract = NULL, *sessionid = NULL, *exec_mode = NULL, *ncores = NULL, *cwd = NULL, *cube = NULL, *callback_url = NULL, *on_error = NULL, *command =
-	    NULL, *on_exit = NULL, *run = NULL, *output_format = NULL;
-	json_unpack(jansson, "{s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s}", "name", &name, "author", &author, "abstract", &abstract, "sessionid", &sessionid, "exec_mode", &exec_mode,
-		    "ncores", &ncores, "cwd", &cwd, "cube", &cube, "callback_url", &callback_url, "on_error", &on_error, "command", &command, "on_exit", &on_exit, "run", &run, "output_format",
-		    &output_format);
+	char *name = NULL, *author = NULL, *abstract = NULL, *sessionid = NULL, *exec_mode = NULL, *ncores = NULL, *cwd = NULL, *cdd = NULL, *cube = NULL, *callback_url = NULL, *on_error =
+	    NULL, *command = NULL, *on_exit = NULL, *run = NULL, *output_format = NULL;
+	json_unpack(jansson, "{s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s}", "name", &name, "author", &author, "abstract", &abstract, "sessionid", &sessionid, "exec_mode", &exec_mode,
+		    "ncores", &ncores, "cwd", &cwd, "cdd", &cdd, "cube", &cube, "callback_url", &callback_url, "on_error", &on_error, "command", &command, "on_exit", &on_exit, "run", &run,
+		    "output_format", &output_format);
 
 	//add global vars
 	if (!name || !author || !abstract) {
@@ -133,6 +133,16 @@ int oph_workflow_load(char *json_string, char *username, oph_workflow ** workflo
 			if (jansson)
 				json_decref(jansson);
 			(print_json) ? my_fprintf(stderr, "Error: cwd allocation\\n\\n") : fprintf(stderr, "\e[1;31mError: cwd allocation\e[0m\n\n");
+			return OPH_WORKFLOW_EXIT_MEMORY_ERROR;
+		}
+	}
+	if (cdd && strlen(cdd)) {
+		(*workflow)->cdd = (char *) strdup((const char *) cdd);
+		if (!((*workflow)->cdd)) {
+			oph_workflow_free(*workflow);
+			if (jansson)
+				json_decref(jansson);
+			(print_json) ? my_fprintf(stderr, "Error: cdd allocation\\n\\n") : fprintf(stderr, "\e[1;31mError: cdd allocation\e[0m\n\n");
 			return OPH_WORKFLOW_EXIT_MEMORY_ERROR;
 		}
 	}
@@ -601,6 +611,14 @@ int oph_workflow_load(char *json_string, char *username, oph_workflow ** workflo
 		(print_json) ? my_fprintf(stderr, "Error: cwd global substitution\\n\\n") : fprintf(stderr, "\e[1;31mError: cwd global substitution\e[0m\n\n");
 		return OPH_WORKFLOW_EXIT_GENERIC_ERROR;
 	}
+	//cdd
+	if (!(*workflow)->cdd)
+		(*workflow)->cdd = strdup(OPH_WORKFLOW_ROOT_FOLDER);
+	if (_oph_workflow_substitute_var("cdd", (*workflow)->cdd, (*workflow)->tasks, (*workflow)->tasks_num)) {
+		oph_workflow_free(*workflow);
+		(print_json) ? my_fprintf(stderr, "Error: cdd global substitution\\n\\n") : fprintf(stderr, "\e[1;31mError: cdd global substitution\e[0m\n\n");
+		return OPH_WORKFLOW_EXIT_GENERIC_ERROR;
+	}
 	//cube
 	if ((*workflow)->cube) {
 		if (_oph_workflow_substitute_cube((*workflow)->cube, (*workflow)->tasks, (*workflow)->tasks_num)) {
@@ -631,6 +649,7 @@ int _oph_workflow_alloc(oph_workflow ** workflow)
 	(*workflow)->callback_url = NULL;
 	(*workflow)->cube = NULL;
 	(*workflow)->cwd = NULL;
+	(*workflow)->cdd = NULL;
 	(*workflow)->exec_mode = NULL;
 	(*workflow)->idjob = -1;
 	(*workflow)->markerid = -1;
