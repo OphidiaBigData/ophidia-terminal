@@ -1462,6 +1462,19 @@ int main(int argc, char **argv, char **envp)
 	}
 	pthread_mutex_unlock(&global_flag);
 
+#ifdef CHDDIR
+	if (oph_term_env_oph_get_config
+	    (OPH_TERM_OPH_BASE_SRC_PATH_KEY, hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST), hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT), &oph_term_return, &oph_base_src_path, _user,
+	     _passwd, 1, hashtbl)) {
+		(print_json) ? my_fprintf(stderr, "\\nWarning: Unable to resume base src path\\n") : fprintf(stderr, "\e[2m\nWarning: Unable to resume base src path\e[0m\n");
+		oph_term_return = OPH_TERM_SUCCESS;
+		if (oph_base_src_path) {
+			free(oph_base_src_path);
+			oph_base_src_path = NULL;
+		}
+	}
+#endif
+
 	// Init OPH_SESSION_ID if empty
 	if (!hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SESSION_ID)) {
 #ifndef INTERFACE_TYPE_IS_GSI
@@ -1503,6 +1516,7 @@ int main(int argc, char **argv, char **envp)
 				}
 				(print_json) ? my_printf(" Done.\\nCurrent session is now \\\"%s\\\".\\n", last_sessionid) : printf(" Done.\nCurrent session is now \"%s\".\n", last_sessionid);
 				free(last_sessionid);
+				last_sessionid = NULL;
 
 				// Init OPH_CWD if empty
 				if (!hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CWD)) {
@@ -1538,6 +1552,8 @@ int main(int argc, char **argv, char **envp)
 						}
 						(print_json) ? my_printf("Last working directory was \\\"%s\\\".\\n", last_cwd) : printf("Last working directory was \"%s\".\n", last_cwd);
 						free(last_cwd);
+						last_cwd = NULL;
+
 					} else {
 						if (last_cwd) {
 							free(last_cwd);
@@ -1599,6 +1615,8 @@ int main(int argc, char **argv, char **envp)
 						}
 						(print_json) ? my_printf("Last produced datacube was \\\"%s\\\".\\n", last_cube) : printf("Last produced datacube was \"%s\".\n", last_cube);
 						free(last_cube);
+						last_cube = NULL;
+
 					} else {
 						if (last_cube) {
 							free(last_cube);
@@ -1615,48 +1633,70 @@ int main(int argc, char **argv, char **envp)
 					last_sessionid = NULL;
 				}
 			}
-		}
-	}
-#ifdef CHDDIR
-	if (oph_term_env_oph_get_config
-	    (OPH_TERM_OPH_BASE_SRC_PATH_KEY, hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST), hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT), &oph_term_return, &oph_base_src_path, _user,
-	     _passwd, 1, hashtbl)) {
-		(print_json) ? my_fprintf(stderr, "\\nWarning: Unable to resume base src path\\n") : fprintf(stderr, "\e[2m\nWarning: Unable to resume base src path\e[0m\n");
-		oph_term_return = OPH_TERM_SUCCESS;
-		if (oph_base_src_path) {
-			free(oph_base_src_path);
-			oph_base_src_path = NULL;
-		}
-	}
-#endif
-	// OPH_CDD is not saved at server side
-	if (!hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CDD)) {
-		char oph_cdd[OPH_TERM_MAX_LEN], *_oph_cdd = oph_cdd;
-		if (oph_base_src_path) {
-			_oph_cdd = getcwd(oph_cdd, OPH_TERM_MAX_LEN);
-			char chddir[OPH_TERM_MAX_LEN], *_chddir = chddir;
-			snprintf(chddir, OPH_TERM_MAX_LEN, "%s", oph_base_src_path);
-			while (*_oph_cdd && *_chddir && (*_oph_cdd == *_chddir)) {
-				_oph_cdd++;
-				_chddir++;
+
+			// Init OPH_CDD if empty
+			if (!hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CDD)) {
+
+				char oph_cdd[OPH_TERM_MAX_LEN], *_oph_cdd = oph_cdd;
+				if (oph_base_src_path) {
+					_oph_cdd = getcwd(oph_cdd, OPH_TERM_MAX_LEN);
+					char chddir[OPH_TERM_MAX_LEN], *_chddir = chddir, step = 0;
+					snprintf(chddir, OPH_TERM_MAX_LEN, "%s", oph_base_src_path);
+					while (*_oph_cdd && *_chddir && (*_oph_cdd == *_chddir)) {
+						_oph_cdd++;
+						_chddir++;
+						step++;
+					}
+					while (step && (*_oph_cdd != '/')) {
+						_oph_cdd--;
+						step--;
+					}
+					(print_json) ? my_printf("Current data directory is \\\"%s\\\".\\n", _oph_cdd) : printf("Current data directory is \"%s\".\n", _oph_cdd);
+				} else {
+					char *last_cdd = NULL;
+					if (oph_term_env_oph_get_config
+					    (OPH_TERM_OPH_CDD_KEY, hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST), hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT), &oph_term_return, &last_cdd,
+					     _user, _passwd, 1, hashtbl)) {
+						(print_json) ? my_fprintf(stderr, "\\nWarning: Unable to resume last data directory\\n") : fprintf(stderr,
+																		   "\e[2m\nWarning: Unable to resume last data directory\e[0m\n");
+						oph_term_return = OPH_TERM_SUCCESS;
+						if (last_cdd) {
+							free(last_cdd);
+							last_cdd = NULL;
+						}
+					}
+					if (last_cdd && strlen(last_cdd)) {
+						snprintf(oph_cdd, OPH_TERM_MAX_LEN, "%s", last_cdd);
+						(print_json) ? my_printf("Last data directory was \\\"%s\\\".\\n", last_cdd) : printf("Last data directory was \"%s\".\n", last_cdd);
+					} else {
+						strcpy(oph_cdd, "/");
+						(print_json) ? my_printf("There is no cdd to resume. Current data directory is now \\\"/\\\".\\n") :
+						    printf("There is no cdd to resume. Current data directory is now \"/\".\n");
+					}
+					if (last_cdd) {
+						free(last_cdd);
+						last_cdd = NULL;
+					}
+				}
+
+				if (oph_term_setenv(hashtbl, OPH_TERM_ENV_OPH_CDD, _oph_cdd)) {
+					oph_term_env_clear(hashtbl);
+					oph_term_alias_clear(aliases);
+					(print_json) ? my_fprintf(stderr, "Could not set variable %s [CODE %d]\\n", OPH_TERM_ENV_OPH_CDD, OPH_TERM_MEMORY_ERROR) : fprintf(stderr,
+																					   "\e[1;31mCould not set variable %s [CODE %d]\e[0m\n",
+																					   OPH_TERM_ENV_OPH_CDD,
+																					   OPH_TERM_MEMORY_ERROR);
+					if (!print_json)
+						printf("\e[0m");
+					if (exec_statement) {
+						free(exec_statement);
+						exec_statement = NULL;
+					}
+					if (print_json)
+						print_oph_term_output_json(hashtbl);
+					return OPH_TERM_MEMORY_ERROR;
+				}
 			}
-		} else
-			strcpy(oph_cdd, "/");
-		if (oph_term_setenv(hashtbl, OPH_TERM_ENV_OPH_CDD, _oph_cdd)) {
-			oph_term_env_clear(hashtbl);
-			oph_term_alias_clear(aliases);
-			(print_json) ? my_fprintf(stderr, "Could not set variable %s [CODE %d]\\n", OPH_TERM_ENV_OPH_CDD, OPH_TERM_MEMORY_ERROR) : fprintf(stderr,
-																			   "\e[1;31mCould not set variable %s [CODE %d]\e[0m\n",
-																			   OPH_TERM_ENV_OPH_CDD, OPH_TERM_MEMORY_ERROR);
-			if (!print_json)
-				printf("\e[0m");
-			if (exec_statement) {
-				free(exec_statement);
-				exec_statement = NULL;
-			}
-			if (print_json)
-				print_oph_term_output_json(hashtbl);
-			return OPH_TERM_MEMORY_ERROR;
 		}
 	}
 
