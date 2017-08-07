@@ -2281,11 +2281,13 @@ int oph_term_viewer_is_session_switched(char *json_string)
 	return 0;
 }
 
-int oph_term_viewer_retrieve_config(char *json_string, const char *key, char **property, char **newtoken)
+int oph_term_viewer_retrieve_config(char *json_string, const char *key, char ***keys, char ***props, unsigned int *nprops, char **newtoken)
 {
-	if (!json_string || !key || !property)
+	if (!json_string || !key || !keys || !props || !nprops)
 		return OPH_TERM_INVALID_PARAM_VALUE;
 
+	*keys = *props = NULL;
+	*nprops = 0;
 	if (newtoken)
 		*newtoken = NULL;
 
@@ -2313,38 +2315,55 @@ int oph_term_viewer_retrieve_config(char *json_string, const char *key, char **p
 		}
 	}
 
-	int found = 0;
 	if (json->response_num >= 1) {
-		size_t i, j;
+		unsigned int i, j;
 		for (i = 0; i < json->response_num; i++) {
 			if (!strcmp(json->response[i].objkey, "get_config")) {
 				if (json->response[i].objcontent_num >= 1) {
-					for (j = 0; j < (((oph_json_obj_grid *) json->response[i].objcontent)[0]).values_num1; j++) {
-						if (!strcmp((((oph_json_obj_grid *) json->response[i].objcontent)[0]).values[j][0], key)) {
-							*property = (char *) strdup((((oph_json_obj_grid *) json->response[i].objcontent)[0]).values[j][1]);
-							if (!*property) {
-								if (json)
-									oph_json_free(json);
-								return OPH_TERM_MEMORY_ERROR;
+					*nprops = (((oph_json_obj_grid *) json->response[i].objcontent)[0]).values_num1;
+					*keys = (char **) calloc(*nprops, sizeof(char *));
+					*props = (char **) calloc(*nprops, sizeof(char *));
+					if (!*keys || !*props) {
+						if (json)
+							oph_json_free(json);
+						if (*keys)
+							free(*keys);
+						if (*props)
+							free(*props);
+						*nprops = 0;
+						return OPH_TERM_MEMORY_ERROR;
+					}
+					for (j = 0; j < *nprops; j++) {
+						(*keys)[j] = (char *) strdup((((oph_json_obj_grid *) json->response[i].objcontent)[0]).values[j][0]);
+						(*props)[j] = (char *) strdup((((oph_json_obj_grid *) json->response[i].objcontent)[0]).values[j][1]);
+						if (!(*keys)[j] || !(*props)[j]) {
+							if (json)
+								oph_json_free(json);
+							if (*keys) {
+								for (j = 0; j < *nprops; j++)
+									if ((*keys)[j])
+										free((*keys)[j]);
+								free(*keys);
 							}
-							found = 1;
-							break;
+							if (*props) {
+								for (j = 0; j < *nprops; j++)
+									if ((*props)[j])
+										free((*props)[j]);
+								free(*props);
+							}
+							*nprops = 0;
+							return OPH_TERM_MEMORY_ERROR;
 						}
 					}
 				}
-			}
-			if (found)
 				break;
+			}
 		}
-	}
-	if (!found) {
-		if (json)
-			oph_json_free(json);
-		return OPH_TERM_GENERIC_ERROR;
 	}
 
 	if (json)
 		oph_json_free(json);
+
 	return OPH_TERM_SUCCESS;
 }
 

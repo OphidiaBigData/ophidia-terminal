@@ -22,29 +22,36 @@
 
 #define UNUSED(x) {(void)(x);}
 
+HASHTBL *conf_hashtbl = NULL;
+
 extern char *_passwd;
 extern pthread_mutex_t global_flag;
+extern char get_config;
 
 //Alloc hashtable
-int oph_term_env_init(HASHTBL ** hashtbl)
+int _oph_term_env_init(HASHTBL ** hashtbl, int hashtbl_size)
 {
-	UNUSED(pre_defined_aliases_keys);
-	UNUSED(pre_defined_aliases_values);
-	UNUSED(env_vars_ptr) UNUSED(alias_ptr);
-	UNUSED(xml_defs) UNUSED(operators_list);
-	UNUSED(operators_list_size);
-
-	if (!(*hashtbl = hashtbl_create((int) (env_vars_num * 1.3), NULL))) {
+	if (!(*hashtbl = hashtbl_create(hashtbl_size, NULL))) {
 		(print_json) ? my_fprintf(stderr, "Error: env_init failed\\n") : fprintf(stderr, "\e[1;31mError: env_init failed\e[0m\n");
 		return OPH_TERM_MEMORY_ERROR;
 	}
 	return OPH_TERM_SUCCESS;
 }
 
+int oph_term_env_init(HASHTBL ** hashtbl)
+{
+	return _oph_term_env_init(hashtbl, env_vars_num * 2);
+}
+
 //Free hashtable
 int oph_term_env_clear(HASHTBL * hashtbl)
 {
 	hashtbl_destroy(hashtbl);
+	if (conf_hashtbl) {
+		hashtbl_destroy(conf_hashtbl);
+		conf_hashtbl = NULL;
+		get_config = 1;
+	}
 	return OPH_TERM_SUCCESS;
 }
 
@@ -962,30 +969,53 @@ int oph_term_env_oph_get_config(const char *key, const char *host, const char *p
 		return OPH_TERM_GENERIC_ERROR;
 	}
 	char query[OPH_TERM_MAX_LEN];
-	snprintf(query, OPH_TERM_MAX_LEN, OPH_TERM_GET_CONFIG_PROP, key);
+	snprintf(query, OPH_TERM_MAX_LEN, OPH_TERM_GET_CONFIG_PROP);
 	char *value = NULL;
 
-	if (oph_term_client(query, query, NULL, (char *) user, (char *) passwd, (char *) host, (char *) port, return_value, &value, NULL, workflow_wrap, hashtbl)) {
+	if (get_config && oph_term_client(query, query, NULL, (char *) user, (char *) passwd, (char *) host, (char *) port, return_value, &value, NULL, workflow_wrap, hashtbl)) {
 		if (value)
 			free(value);
 		*return_value = OPH_TERM_GENERIC_ERROR;
 		return OPH_TERM_GENERIC_ERROR;
 	}
-
 	if (*return_value) {
 		if (value)
 			free(value);
 		return OPH_TERM_GENERIC_ERROR;
 	}
 
-	char *newtoken = NULL;
-	if (oph_term_viewer_retrieve_config(value, key, property, &newtoken)) {
+	unsigned int i, nprops = 0;
+	char **keys = NULL, **props = NULL, *newtoken = NULL;
+	if (get_config && oph_term_viewer_retrieve_config(value, key, &keys, &props, &nprops, &newtoken)) {
 		if (value)
 			free(value);
 		if (newtoken)
 			free(newtoken);
 		*return_value = OPH_TERM_GENERIC_ERROR;
 		return OPH_TERM_GENERIC_ERROR;
+	}
+
+	if (keys && props) {
+		if (!_oph_term_env_init(&conf_hashtbl, nprops) && conf_hashtbl) {
+			for (i = 0; i < nprops; i++) {
+				hashtbl_remove(conf_hashtbl, keys[i]);
+				hashtbl_insert(conf_hashtbl, keys[i], props[i], strlen(props[i]) + 1);
+			}
+			get_config = 0;	// No other request will be sent
+		} else
+			*return_value = OPH_TERM_GENERIC_ERROR;
+	}
+	if (keys) {
+		for (i = 0; i < nprops; i++)
+			if (keys[i])
+				free(keys[i]);
+		free(keys);
+	}
+	if (props) {
+		for (i = 0; i < nprops; i++)
+			if (props[i])
+				free(props[i]);
+		free(props);
 	}
 
 	if (newtoken) {
@@ -1000,6 +1030,20 @@ int oph_term_env_oph_get_config(const char *key, const char *host, const char *p
 	if (value)
 		free(value);
 
+	if (*return_value)
+		return *return_value;
+
+	char *current_property = hashtbl_get(conf_hashtbl, key);
+	if (!*current_property) {
+		*return_value = OPH_TERM_GENERIC_ERROR;
+		return OPH_TERM_GENERIC_ERROR;
+	}
+
+	*property = strdup(current_property);
+	if (!*property) {
+		*return_value = OPH_TERM_MEMORY_ERROR;
+		return OPH_TERM_MEMORY_ERROR;
+	}
 	return OPH_TERM_SUCCESS;
 }
 

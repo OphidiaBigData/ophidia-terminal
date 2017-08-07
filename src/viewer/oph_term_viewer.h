@@ -88,7 +88,7 @@ int oph_term_viewer_retrieve_session_size(char *json_string, int *session_size, 
 int oph_term_viewer_is_session_switched(char *json_string);
 
 //Retrieve config value corresponding to a key after a call to oph_get_config
-int oph_term_viewer_retrieve_config(char *json_string, const char *key, char **property, char **newtoken);
+int oph_term_viewer_retrieve_config(char *json_string, const char *key, char ***keys, char ***props, unsigned int *nprops, char **newtoken);
 
 //Check if wid#mkid is a valid pair in json
 int oph_term_viewer_check_wid_mkid(char *json_string, char *wid, char *mkid);

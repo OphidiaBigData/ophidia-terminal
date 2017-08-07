@@ -29,6 +29,7 @@ extern int abort_view;
 
 char *_passwd = NULL;
 pthread_mutex_t global_flag;
+char get_config = 1;
 
 int watching = 0;
 char *stored_line = NULL;
@@ -4245,6 +4246,9 @@ int main(int argc, char **argv, char **envp)
 				}
 				(print_json) ? my_printf("\\nCurrent session is now \\\"%s\\\".\\n", tmp_session) : printf("\n\e[2mCurrent session is now \"%s\".\e[0m\n", tmp_session);
 
+				// Force to update configuration parameters
+				get_config = 1;
+
 				// Init OPH_CWD
 				char *last_cwd = NULL;
 				if (oph_term_env_oph_get_config
@@ -4511,6 +4515,9 @@ int main(int argc, char **argv, char **envp)
 #else
 				if (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST) && hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT)) {
 #endif
+					// Force to update configuration parameters
+					get_config = 1;
+
 					// Retrieve correct URL from oph_server here
 					char *tmpurl = NULL;
 					if (oph_term_env_oph_get_config
@@ -4600,6 +4607,9 @@ int main(int argc, char **argv, char **envp)
 #else
 				if (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST) && hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT)) {
 #endif
+					// Force to update configuration parameters
+					get_config = 1;
+
 					// Retrieve correct URL from oph_server here
 					char *tmpurl = NULL;
 					if (oph_term_env_oph_get_config
