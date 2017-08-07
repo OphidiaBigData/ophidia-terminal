@@ -190,6 +190,9 @@ extern int oph_term_error_cur;
 #define OPH_TERM_DEFAULT_ALIAS_KEY_22 	"drop"
 #define OPH_TERM_DEFAULT_ALIAS_KEY_23 	"jobs"
 #define OPH_TERM_DEFAULT_ALIAS_KEY_24 	"ncdump"
+#define OPH_TERM_DEFAULT_ALIAS_KEY_25 	"mkdird"
+#define OPH_TERM_DEFAULT_ALIAS_KEY_26 	"mvd"
+#define OPH_TERM_DEFAULT_ALIAS_KEY_27 	"rmd"
 
 #define OPH_TERM_DEFAULT_ALIAS_VAL_1 	"oph_list path=$1;"
 #define OPH_TERM_DEFAULT_ALIAS_VAL_2 	"oph_folder command=cd;path=$1;"
@@ -215,8 +218,11 @@ extern int oph_term_error_cur;
 #define OPH_TERM_DEFAULT_ALIAS_VAL_22 	"del [*]"
 #define OPH_TERM_DEFAULT_ALIAS_VAL_23 	"oph_loggingbk job_level=1;mask=010;session_filter=@OPH_SESSION_ID;parent_job_filter=%;"
 #define OPH_TERM_DEFAULT_ALIAS_VAL_24 	"oph_explorenc src_path=$1;"
+#define OPH_TERM_DEFAULT_ALIAS_VAL_25 	"oph_fs command=mkdir;dpath=$1;"
+#define OPH_TERM_DEFAULT_ALIAS_VAL_26 	"oph_fs command=mv;dpath=$1|$2;"
+#define OPH_TERM_DEFAULT_ALIAS_VAL_27 	"oph_fs command=rm;dpath=$1;"
 
-#define OPH_TERM_DEFAULT_ALIAS_NUM 24
+#define OPH_TERM_DEFAULT_ALIAS_NUM 27
 
 static char *pre_defined_aliases_keys[OPH_TERM_DEFAULT_ALIAS_NUM] = {
 	OPH_TERM_DEFAULT_ALIAS_KEY_1,
@@ -242,7 +248,10 @@ static char *pre_defined_aliases_keys[OPH_TERM_DEFAULT_ALIAS_NUM] = {
 	OPH_TERM_DEFAULT_ALIAS_KEY_21,
 	OPH_TERM_DEFAULT_ALIAS_KEY_22,
 	OPH_TERM_DEFAULT_ALIAS_KEY_23,
-	OPH_TERM_DEFAULT_ALIAS_KEY_24
+	OPH_TERM_DEFAULT_ALIAS_KEY_24,
+	OPH_TERM_DEFAULT_ALIAS_KEY_25,
+	OPH_TERM_DEFAULT_ALIAS_KEY_26,
+	OPH_TERM_DEFAULT_ALIAS_KEY_27
 };
 
 static char *pre_defined_aliases_values[OPH_TERM_DEFAULT_ALIAS_NUM] = {
@@ -269,7 +278,10 @@ static char *pre_defined_aliases_values[OPH_TERM_DEFAULT_ALIAS_NUM] = {
 	OPH_TERM_DEFAULT_ALIAS_VAL_21,
 	OPH_TERM_DEFAULT_ALIAS_VAL_22,
 	OPH_TERM_DEFAULT_ALIAS_VAL_23,
-	OPH_TERM_DEFAULT_ALIAS_VAL_24
+	OPH_TERM_DEFAULT_ALIAS_VAL_24,
+	OPH_TERM_DEFAULT_ALIAS_VAL_25,
+	OPH_TERM_DEFAULT_ALIAS_VAL_26,
+	OPH_TERM_DEFAULT_ALIAS_VAL_27
 };
 
 static const int pre_defined_aliases_num = OPH_TERM_DEFAULT_ALIAS_NUM;
