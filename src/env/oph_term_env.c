@@ -1034,7 +1034,7 @@ int oph_term_env_oph_get_config(const char *key, const char *host, const char *p
 		return *return_value;
 
 	char *current_property = hashtbl_get(conf_hashtbl, key);
-	if (!*current_property) {
+	if (!current_property) {
 		*return_value = OPH_TERM_GENERIC_ERROR;
 		return OPH_TERM_GENERIC_ERROR;
 	}
