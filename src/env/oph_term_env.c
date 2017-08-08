@@ -27,6 +27,7 @@ HASHTBL *conf_hashtbl = NULL;
 extern char *_passwd;
 extern pthread_mutex_t global_flag;
 extern char get_config;
+extern char *oph_base_src_path;
 
 //Alloc hashtable
 int _oph_term_env_init(HASHTBL ** hashtbl, int hashtbl_size)
@@ -1054,8 +1055,14 @@ int oph_term_read_file(char *filename, char **buffer)
 		return OPH_TERM_INVALID_PARAM_VALUE;
 	}
 
+	char _filename[OPH_TERM_MAX_LEN];
+	if (oph_base_src_path && (strlen(oph_base_src_path) > 1) && (*filename == '/'))
+		snprintf(_filename, OPH_TERM_MAX_LEN, "%s%s", oph_base_src_path, filename);
+	else
+		snprintf(_filename, OPH_TERM_MAX_LEN, "%s", filename);
+
 	FILE *file;
-	file = fopen(filename, "rb");
+	file = fopen(_filename, "rb");
 	if (!file) {
 		(print_json) ? my_fprintf(stderr, "Unable to open file %s\\n", filename) : fprintf(stderr, "Unable to open file %s\n", filename);
 		return OPH_TERM_GENERIC_ERROR;
@@ -1086,8 +1093,14 @@ int oph_term_read_file_with_len(char *filename, char **buffer, long *alloc_size)
 		return OPH_TERM_INVALID_PARAM_VALUE;
 	}
 
+	char _filename[OPH_TERM_MAX_LEN];
+	if (oph_base_src_path && (strlen(oph_base_src_path) > 1) && (*filename == '/'))
+		snprintf(_filename, OPH_TERM_MAX_LEN, "%s%s", oph_base_src_path, filename);
+	else
+		snprintf(_filename, OPH_TERM_MAX_LEN, "%s", filename);
+
 	FILE *file;
-	file = fopen(filename, "rb");
+	file = fopen(_filename, "rb");
 	if (!file) {
 		(print_json) ? my_fprintf(stderr, "Unable to open file %s\\n", filename) : fprintf(stderr, "Unable to open file %s\n", filename);
 		return OPH_TERM_GENERIC_ERROR;

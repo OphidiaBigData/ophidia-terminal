@@ -1033,22 +1033,18 @@ char **oph_term_completion(char *text, int start, int end)
 	if (text[0] == '.' || text[0] == '/') {
 		int i = 0;
 		char chddir[OPH_TERM_MAX_LEN];
-		if (oph_base_src_path) {
-			if ((text[0] == '/') && (strlen(oph_base_src_path) > 1)) {
-				snprintf(chddir, OPH_TERM_MAX_LEN, "%s%s", oph_base_src_path, text);
-				text = chddir;
-				i = 1;
-			}
+		if (oph_base_src_path && (strlen(oph_base_src_path) > 1) && (*text == '/')) {
+			snprintf(chddir, OPH_TERM_MAX_LEN, "%s%s", oph_base_src_path, text);
+			text = chddir;
+			i = 1;
 		}
 		// completion over local filesystem
 		matches = rl_completion_matches(text, rl_filename_completion_function);
-		if (oph_base_src_path) {
-			if (i && matches) {
-				for (i = 0; matches[i]; i++) {
-					snprintf(chddir, OPH_TERM_MAX_LEN, "%s", matches[i] + strlen(oph_base_src_path));
-					free(matches[i]);
-					matches[i] = strdup(chddir);
-				}
+		if (oph_base_src_path && i && matches) {
+			for (i = 0; matches[i]; i++) {
+				snprintf(chddir, OPH_TERM_MAX_LEN, "%s", matches[i] + strlen(oph_base_src_path));
+				free(matches[i]);
+				matches[i] = strdup(chddir);
 			}
 		}
 	} else if (rl_line_buffer[(start - 1 < 0) ? start : start - 1] == '$'
