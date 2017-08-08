@@ -1578,7 +1578,7 @@ int main(int argc, char **argv, char **envp)
 							return OPH_TERM_MEMORY_ERROR;
 						}
 						(print_json) ? my_printf("There is no cwd to resume. Current working directory is now \\\"/\\\" (session's root folder).\\n") :
-						    printf("There is no cwd to resume. Current working directory is now \"/\" (session's root folder).\n");
+						    printf("\e[2mThere is no cwd to resume. Current working directory is now \"/\" (session's root folder).\e[0m\n");
 					}
 				}
 				// Init OPH_DATACUBE if empty
@@ -1672,7 +1672,7 @@ int main(int argc, char **argv, char **envp)
 					} else {
 						strcpy(oph_cdd, "/");
 						(print_json) ? my_printf("There is no cdd to resume. Current data directory is now \\\"/\\\".\\n") :
-						    printf("There is no cdd to resume. Current data directory is now \"/\".\n");
+						    printf("\e[2mThere is no cdd to resume. Current data directory is now \"/\".\e[0m\n");
 					}
 					if (last_cdd) {
 						free(last_cdd);
