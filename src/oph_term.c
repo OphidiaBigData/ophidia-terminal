@@ -1649,7 +1649,7 @@ int main(int argc, char **argv, char **envp)
 						oph_term_env_clear(hashtbl);
 						oph_term_alias_clear(aliases);
 						(print_json) ? my_fprintf(stderr, "Directory \\\"%s\\\" cannot be used as data directory [CODE %d]\\n", oph_cdd,
-									  OPH_TERM_GENERIC_ERROR) : fprintf(stderr, "\e[1;31mDirectory \\\"%s\\\" cannot be used as data directory [CODE %d]\e[0m\n",
+									  OPH_TERM_GENERIC_ERROR) : fprintf(stderr, "\e[1;31mDirectory \"%s\" cannot be used as data directory [CODE %d]\e[0m\n",
 													    oph_cdd, OPH_TERM_GENERIC_ERROR);
 						if (!print_json)
 							printf("\e[0m");
