@@ -42,6 +42,8 @@
 #define WRAPPING_WORKFLOW4d_1 "\","
 #define WRAPPING_WORKFLOW4e "\n  \"cube\":\""
 #define WRAPPING_WORKFLOW4e_1 "\","
+#define WRAPPING_WORKFLOW4f "\n  \"cdd\":\""
+#define WRAPPING_WORKFLOW4f_1 "\","
 #define WRAPPING_WORKFLOW5 "\n  \"tasks\": [\n    {\n      \"name\":\"Task 0\",\n      \"operator\":\""
 #define WRAPPING_WORKFLOW5_1 "\",\n      \"arguments\": ["
 #define WRAPPING_WORKFLOW6 "\"%s\""

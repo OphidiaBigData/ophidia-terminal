@@ -1424,7 +1424,7 @@ int oph_term_full_var_expansion(char *param_string, HASHTBL * hashtbl, char **ex
 	snprintf(*expanded_string, OPH_TERM_WF_MAX_LEN, "%s", param_string);
 
 	z = 0;
-	while (strchr(*expanded_string, '$') && z < OPH_TERM_SUBSTITUTION_MAX_CYCLES) {
+	while (strchr(*expanded_string, '$') && (z < OPH_TERM_SUBSTITUTION_MAX_CYCLES)) {
 		for (i = 0; i < (int) strlen(*expanded_string); i++) {
 			if ((*expanded_string)[i] == '$' && (*expanded_string)[i + 1] != '{') {
 				for (j = i + 1; j < (int) strlen(*expanded_string); j++) {
@@ -1484,7 +1484,7 @@ int oph_term_full_var_expansion(char *param_string, HASHTBL * hashtbl, char **ex
 			}
 		}
 	}
-	if (z == OPH_TERM_SUBSTITUTION_MAX_CYCLES) {
+	if (z >= OPH_TERM_SUBSTITUTION_MAX_CYCLES) {
 		if (*expanded_string) {
 			free(*expanded_string);
 			*expanded_string = NULL;

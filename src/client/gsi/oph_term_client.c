@@ -233,6 +233,11 @@ void oph_execute(struct soap *soap, xsd__string query, char *wps, char **newsess
 						      WRAPPING_WORKFLOW4e_1);
 				}
 			}
+			if (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CDD)) {
+				if (!strstr(query, "\"cdd\"")) {
+					n += snprintf(fixed_query + n, WORKFLOW_MAX_LEN - n, "%s%s%s", WRAPPING_WORKFLOW4f, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CDD), WRAPPING_WORKFLOW4f_1);
+				}
+			}
 			if (cmd_line) {
 				if (!strstr(query, "\"command\"")) {
 					n += snprintf(fixed_query + n, WORKFLOW_MAX_LEN - n, "%s%s%s", WRAPPING_WORKFLOW4b, cmd_line, WRAPPING_WORKFLOW4b_1);
