@@ -1632,7 +1632,8 @@ int main(int argc, char **argv, char **envp)
 			}
 
 			// Init OPH_CDD if empty
-			if (!hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CDD)) {
+			char *is_cdd_already_set = hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CDD);
+			if (!is_cdd_already_set || oph_base_src_path) {
 
 				char oph_cdd[OPH_TERM_MAX_LEN], *_oph_cdd = oph_cdd;
 				if (oph_base_src_path) {
@@ -1644,11 +1645,31 @@ int main(int argc, char **argv, char **envp)
 						_chddir++;
 						step++;
 					}
-					while (step && (*_oph_cdd != '/')) {
-						_oph_cdd--;
-						step--;
+					if (*_chddir) {
+						oph_term_env_clear(hashtbl);
+						oph_term_alias_clear(aliases);
+						(print_json) ? my_fprintf(stderr, "Directory \\\"%s\\\" cannot be used as data directory [CODE %d]\\n", oph_cdd,
+									  OPH_TERM_GENERIC_ERROR) : fprintf(stderr, "\e[1;31mDirectory \\\"%s\\\" cannot be used as data directory [CODE %d]\e[0m\n",
+													    oph_cdd, OPH_TERM_GENERIC_ERROR);
+						if (!print_json)
+							printf("\e[0m");
+						if (exec_statement) {
+							free(exec_statement);
+							exec_statement = NULL;
+						}
+						if (print_json)
+							print_oph_term_output_json(hashtbl);
+						return OPH_TERM_MEMORY_ERROR;
 					}
+					if (*_oph_cdd)
+						while (step && (*_oph_cdd != '/')) {
+							_oph_cdd--;
+							step--;
+					} else
+						_oph_cdd = strcpy(oph_cdd, "/");
 					(print_json) ? my_printf("Current data directory is \\\"%s\\\".\\n", _oph_cdd) : printf("Current data directory is \"%s\".\n", _oph_cdd);
+					if (is_cdd_already_set)
+						oph_term_unsetenv(hashtbl, OPH_TERM_ENV_OPH_CDD);
 				} else {
 					char *last_cdd = NULL;
 					if (oph_term_env_oph_get_config
