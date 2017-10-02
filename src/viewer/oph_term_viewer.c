@@ -43,6 +43,9 @@
 #define OPH_TERM_VIEWER_TITLE_FOR_CWD 	"Current Working Directory"
 #define OPH_TERM_VIEWER_TITLE_FOR_CDD 	"Current Data Directory"
 
+#define OPH_TERM_TOKEN_JSON	"access_token"
+#define OPH_TERM_EXEC_TIME "execution_time"
+
 int oph_viewer_get_ranks_string(oph_json_links * nodelinks, unsigned int nodelinks_num, char **ranks_string)
 {
 	if (!nodelinks || nodelinks_num < 1 || !ranks_string) {
@@ -1434,7 +1437,7 @@ void print_graph(oph_json_obj_graph * obj, const char *color_string, int save_im
 	return;
 }
 
-void oph_term_viewer_retrieve_info(oph_json * json, char *txtstring, char **newdatacube, char **newcwd, char **newcdd, char **newtoken)
+void oph_term_viewer_retrieve_info(oph_json * json, char *txtstring, char **newdatacube, char **newcwd, char **newcdd, char **newtoken, char **exectime)
 {
 	if (!json && !txtstring) {
 		if (newdatacube)
@@ -1445,6 +1448,8 @@ void oph_term_viewer_retrieve_info(oph_json * json, char *txtstring, char **newd
 			*newcdd = NULL;
 		if (newtoken)
 			*newtoken = NULL;
+		if (exectime)
+			*exectime = NULL;
 		return;
 	}
 
@@ -1506,13 +1511,26 @@ void oph_term_viewer_retrieve_info(oph_json * json, char *txtstring, char **newd
 			}
 		}
 
+		unsigned int i;
+
 		if (newtoken) {
 			*newtoken = NULL;
 			if (json->extra) {
-				unsigned int i;
 				for (i = 0; i < json->extra->keys_num; i++) {
-					if (!strcmp(json->extra->keys[i], "access_token")) {
+					if (!strcmp(json->extra->keys[i], OPH_TERM_TOKEN_JSON)) {
 						*newtoken = (char *) strdup(json->extra->values[i]);
+						break;
+					}
+				}
+			}
+		}
+
+		if (exectime) {
+			*exectime = NULL;
+			if (json->extra) {
+				for (i = 0; i < json->extra->keys_num; i++) {
+					if (!strcmp(json->extra->keys[i], OPH_TERM_EXEC_TIME)) {
+						*exectime = (char *) strdup(json->extra->values[i]);
 						break;
 					}
 				}
@@ -1598,10 +1616,10 @@ void oph_term_viewer_retrieve_info(oph_json * json, char *txtstring, char **newd
 }
 
 /* DUMP VIEWER */
-int oph_term_viewer_dump(char **json_string, char **newdatacube, char **newcwd, char **newcdd, char **newtoken)
+int oph_term_viewer_dump(char **json_string, char **newdatacube, char **newcwd, char **newcdd, char **newtoken, char **exectime)
 {
 	if (!json_string || !*json_string) {
-		oph_term_viewer_retrieve_info(NULL, NULL, newdatacube, newcwd, newcdd, newtoken);
+		oph_term_viewer_retrieve_info(NULL, NULL, newdatacube, newcwd, newcdd, newtoken, exectime);
 		return OPH_TERM_INVALID_PARAM_VALUE;
 	}
 
@@ -1614,7 +1632,7 @@ int oph_term_viewer_dump(char **json_string, char **newdatacube, char **newcwd, 
 	//fflush(stdout);
 
 	// attempt 1: let json_string be TXT
-	oph_term_viewer_retrieve_info(NULL, *json_string, newdatacube, newcwd, newcdd, newtoken);
+	oph_term_viewer_retrieve_info(NULL, *json_string, newdatacube, newcwd, newcdd, newtoken, exectime);
 
 	// attempt 2: perhaps json_string is indeed JSON
 	if (!((newdatacube && *newdatacube) || (newcwd && *newcwd))) {
@@ -1622,7 +1640,7 @@ int oph_term_viewer_dump(char **json_string, char **newdatacube, char **newcwd, 
 		oph_json *json = NULL;
 		if (!oph_json_from_json_string(&json, json_string)) {
 			// parse JSON
-			oph_term_viewer_retrieve_info(json, NULL, newdatacube, newcwd, newcdd, newtoken);
+			oph_term_viewer_retrieve_info(json, NULL, newdatacube, newcwd, newcdd, newtoken, exectime);
 		}
 		if (json)
 			oph_json_free(json);
@@ -1637,10 +1655,11 @@ int oph_term_viewer_dump(char **json_string, char **newdatacube, char **newcwd, 
 }
 
 /* BASIC VIEWER */
-int oph_term_viewer_basic(char **json_string, const char *color, int save_img, int open_img, int show_list, char **newdatacube, char **newcwd, char **newcdd, char **newtoken, char *layout)
+int oph_term_viewer_basic(char **json_string, const char *color, int save_img, int open_img, int show_list, char **newdatacube, char **newcwd, char **newcdd, char **newtoken, char **exectime,
+			  char *layout)
 {
 	if (!json_string || !*json_string) {
-		oph_term_viewer_retrieve_info(NULL, NULL, newdatacube, newcwd, newcdd, newtoken);
+		oph_term_viewer_retrieve_info(NULL, NULL, newdatacube, newcwd, newcdd, newtoken, exectime);
 		return OPH_TERM_INVALID_PARAM_VALUE;
 	}
 	// Set right color or no color
@@ -1669,7 +1688,7 @@ int oph_term_viewer_basic(char **json_string, const char *color, int save_img, i
 	if (oph_json_from_json_string(&json, json_string)) {
 		if (json)
 			oph_json_free(json);
-		oph_term_viewer_retrieve_info(NULL, NULL, newdatacube, newcwd, newcdd, newtoken);
+		oph_term_viewer_retrieve_info(NULL, NULL, newdatacube, newcwd, newcdd, newtoken, exectime);
 		return OPH_TERM_GENERIC_ERROR;
 	}
 	// Check for status. In case of ERROR print and exit
@@ -1683,7 +1702,7 @@ int oph_term_viewer_basic(char **json_string, const char *color, int save_img, i
 	if (!valid) {
 		if (json)
 			oph_json_free(json);
-		oph_term_viewer_retrieve_info(NULL, NULL, newdatacube, newcwd, newcdd, newtoken);
+		oph_term_viewer_retrieve_info(NULL, NULL, newdatacube, newcwd, newcdd, newtoken, exectime);
 		return OPH_TERM_GENERIC_ERROR;
 	}
 	valid = 0;
@@ -1707,7 +1726,7 @@ int oph_term_viewer_basic(char **json_string, const char *color, int save_img, i
 				}
 				if (json)
 					oph_json_free(json);
-				oph_term_viewer_retrieve_info(NULL, NULL, newdatacube, newcwd, newcdd, newtoken);
+				oph_term_viewer_retrieve_info(NULL, NULL, newdatacube, newcwd, newcdd, newtoken, exectime);
 				return OPH_TERM_ERROR_WITHIN_JSON;	//needed to track framework ERROR
 			}
 		}
@@ -1715,11 +1734,11 @@ int oph_term_viewer_basic(char **json_string, const char *color, int save_img, i
 	if (!valid) {
 		if (json)
 			oph_json_free(json);
-		oph_term_viewer_retrieve_info(NULL, NULL, newdatacube, newcwd, newcdd, newtoken);
+		oph_term_viewer_retrieve_info(NULL, NULL, newdatacube, newcwd, newcdd, newtoken, exectime);
 		return OPH_TERM_GENERIC_ERROR;
 	}
 	// retrieve new cube or new cwd if any
-	oph_term_viewer_retrieve_info(json, NULL, newdatacube, newcwd, newcdd, newtoken);
+	oph_term_viewer_retrieve_info(json, NULL, newdatacube, newcwd, newcdd, newtoken, exectime);
 
 	// needed for image filename
 	char *session_code = NULL;
@@ -1813,10 +1832,11 @@ int oph_term_viewer_basic(char **json_string, const char *color, int save_img, i
 }
 
 /* EXTENDED VIEWER */
-int oph_term_viewer_extended(char **json_string, const char *color, int save_img, int open_img, int show_list, char **newdatacube, char **newcwd, char **newcdd, char **newtoken, char *layout)
+int oph_term_viewer_extended(char **json_string, const char *color, int save_img, int open_img, int show_list, char **newdatacube, char **newcwd, char **newcdd, char **newtoken, char **exectime,
+			     char *layout)
 {
 	if (!json_string || !*json_string) {
-		oph_term_viewer_retrieve_info(NULL, NULL, newdatacube, newcwd, newcdd, newtoken);
+		oph_term_viewer_retrieve_info(NULL, NULL, newdatacube, newcwd, newcdd, newtoken, exectime);
 		return OPH_TERM_INVALID_PARAM_VALUE;
 	}
 	// Set right color or no color
@@ -1845,7 +1865,7 @@ int oph_term_viewer_extended(char **json_string, const char *color, int save_img
 	if (oph_json_from_json_string(&json, json_string)) {
 		if (json)
 			oph_json_free(json);
-		oph_term_viewer_retrieve_info(NULL, NULL, newdatacube, newcwd, newcdd, newtoken);
+		oph_term_viewer_retrieve_info(NULL, NULL, newdatacube, newcwd, newcdd, newtoken, exectime);
 		return OPH_TERM_GENERIC_ERROR;
 	}
 	// Check for status. In case of ERROR print and exit
@@ -1859,7 +1879,7 @@ int oph_term_viewer_extended(char **json_string, const char *color, int save_img
 	if (!valid) {
 		if (json)
 			oph_json_free(json);
-		oph_term_viewer_retrieve_info(NULL, NULL, newdatacube, newcwd, newcdd, newtoken);
+		oph_term_viewer_retrieve_info(NULL, NULL, newdatacube, newcwd, newcdd, newtoken, exectime);
 		return OPH_TERM_GENERIC_ERROR;
 	}
 	valid = 0;
@@ -1883,7 +1903,7 @@ int oph_term_viewer_extended(char **json_string, const char *color, int save_img
 				}
 				if (json)
 					oph_json_free(json);
-				oph_term_viewer_retrieve_info(NULL, NULL, newdatacube, newcwd, newcdd, newtoken);
+				oph_term_viewer_retrieve_info(NULL, NULL, newdatacube, newcwd, newcdd, newtoken, exectime);
 				return OPH_TERM_ERROR_WITHIN_JSON;	//needed to track framework ERROR
 			}
 		}
@@ -1891,11 +1911,11 @@ int oph_term_viewer_extended(char **json_string, const char *color, int save_img
 	if (!valid) {
 		if (json)
 			oph_json_free(json);
-		oph_term_viewer_retrieve_info(NULL, NULL, newdatacube, newcwd, newcdd, newtoken);
+		oph_term_viewer_retrieve_info(NULL, NULL, newdatacube, newcwd, newcdd, newtoken, exectime);
 		return OPH_TERM_GENERIC_ERROR;
 	}
 	// retrieve new cube or new cwd if any
-	oph_term_viewer_retrieve_info(json, NULL, newdatacube, newcwd, newcdd, newtoken);
+	oph_term_viewer_retrieve_info(json, NULL, newdatacube, newcwd, newcdd, newtoken, exectime);
 
 	// needed for image filename
 	char *session_code = NULL;
@@ -2085,31 +2105,31 @@ int oph_term_viewer_extended(char **json_string, const char *color, int save_img
 
 /* VIEWER CONTROLLER */
 int oph_term_viewer(const char *viewer_type, char **json_string, const char *color, int save_img, int open_img, int show_list, char **newdatacube, char **newcwd, char **newcdd, char **newtoken,
-		    char *layout)
+		    char **exectime, char *layout)
 {
 	if (!viewer_type || !json_string || !*json_string || !color) {
 		if (json_string && *json_string) {
 			free(*json_string);
 			*json_string = NULL;
 		}
-		oph_term_viewer_retrieve_info(NULL, NULL, newdatacube, newcwd, newcdd, newtoken);
+		oph_term_viewer_retrieve_info(NULL, NULL, newdatacube, newcwd, newcdd, newtoken, exectime);
 		return OPH_TERM_INVALID_PARAM_VALUE;
 	}
 
 	if (!strcmp(viewer_type, OPH_TERM_VIEWER_TYPE_DUMP) || print_json) {
-		return oph_term_viewer_dump(json_string, newdatacube, newcwd, newcdd, newtoken);
+		return oph_term_viewer_dump(json_string, newdatacube, newcwd, newcdd, newtoken, exectime);
 	} else if (!strcmp(viewer_type, OPH_TERM_VIEWER_TYPE_BASIC)) {
-		return oph_term_viewer_basic(json_string, NULL, save_img, open_img, show_list, newdatacube, newcwd, newcdd, newtoken, layout);
+		return oph_term_viewer_basic(json_string, NULL, save_img, open_img, show_list, newdatacube, newcwd, newcdd, newtoken, exectime, layout);
 	} else if (!strcmp(viewer_type, OPH_TERM_VIEWER_TYPE_COLOURED)) {
-		return oph_term_viewer_basic(json_string, color, save_img, open_img, show_list, newdatacube, newcwd, newcdd, newtoken, layout);
+		return oph_term_viewer_basic(json_string, color, save_img, open_img, show_list, newdatacube, newcwd, newcdd, newtoken, exectime, layout);
 	} else if (!strcmp(viewer_type, OPH_TERM_VIEWER_TYPE_EXTENDED)) {
-		return oph_term_viewer_extended(json_string, NULL, save_img, open_img, show_list, newdatacube, newcwd, newcdd, newtoken, layout);
+		return oph_term_viewer_extended(json_string, NULL, save_img, open_img, show_list, newdatacube, newcwd, newcdd, newtoken, exectime, layout);
 	} else if (!strcmp(viewer_type, OPH_TERM_VIEWER_TYPE_EXTENDED_COLOURED)) {
-		return oph_term_viewer_extended(json_string, color, save_img, open_img, show_list, newdatacube, newcwd, newcdd, newtoken, layout);
+		return oph_term_viewer_extended(json_string, color, save_img, open_img, show_list, newdatacube, newcwd, newcdd, newtoken, exectime, layout);
 	} else {
 		free(*json_string);
 		*json_string = NULL;
-		oph_term_viewer_retrieve_info(NULL, NULL, newdatacube, newcwd, newcdd, newtoken);
+		oph_term_viewer_retrieve_info(NULL, NULL, newdatacube, newcwd, newcdd, newtoken, exectime);
 		return OPH_TERM_INVALID_PARAM_VALUE;
 	}
 }
@@ -2302,12 +2322,13 @@ int oph_term_viewer_retrieve_config(char *json_string, const char *key, char ***
 		return OPH_TERM_GENERIC_ERROR;
 	}
 
+	unsigned int i;
+
 	if (newtoken) {
 		*newtoken = NULL;
 		if (json->extra) {
-			unsigned int i;
 			for (i = 0; i < json->extra->keys_num; i++) {
-				if (!strcmp(json->extra->keys[i], "access_token")) {
+				if (!strcmp(json->extra->keys[i], OPH_TERM_TOKEN_JSON)) {
 					*newtoken = (char *) strdup(json->extra->values[i]);
 					break;
 				}

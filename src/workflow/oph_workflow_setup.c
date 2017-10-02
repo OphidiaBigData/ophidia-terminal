@@ -1005,13 +1005,13 @@ void *main_loop(void *ptr)
 				filename[0] = '\0';
 
 			// VISUALIZATION
+			char *newtoken = NULL, *exectime = NULL;
 			ended = oph_term_viewer_check_workflow_ended(response_for_viewer);
 			if (ended == 0) {
-				char *newtoken = NULL;
 				int viewer_res = oph_term_viewer((const char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_VIEWER), &response_for_viewer,
 								 (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1)) ? ((const char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1)) : "red", save_img,
 								 open_img,
-								 show_list, NULL, NULL, NULL, &newtoken, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_GRAPH_LAYOUT));
+								 show_list, NULL, NULL, NULL, &newtoken, &exectime, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_GRAPH_LAYOUT));
 				if (viewer_res != 0 && viewer_res != OPH_TERM_ERROR_WITHIN_JSON) {
 					(print_json) ? my_fprintf(stderr, "Could not render result [CODE %d]\\n", OPH_TERM_GENERIC_ERROR) : fprintf(stderr,
 																		    "\e[1;31mCould not render result [CODE %d]\e[0m\n",
@@ -1019,6 +1019,10 @@ void *main_loop(void *ptr)
 					if (newtoken) {
 						free(newtoken);
 						newtoken = NULL;
+					}
+					if (exectime) {
+						free(exectime);
+						exectime = NULL;
 					}
 					if (start_gtk) {
 						(print_json) ? my_printf("Close image to continue...\\n") : printf("Close image to continue...\n");
@@ -1036,14 +1040,17 @@ void *main_loop(void *ptr)
 					pthread_mutex_unlock(&global_flag);
 					free(newtoken);
 				}
+				if (exectime) {
+					(print_json) ? my_printf("Execution time: %s sec\\n", exectime) : printf("Execution time: %s sec\n", exectime);
+					free(exectime);
+				}
 				break;
 			} else {
 				if (!start_gtk) {
-					char *newtoken = NULL;
 					int viewer_res = oph_term_viewer((const char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_VIEWER), &response_for_viewer,
 									 (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1)) ? ((const char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1)) : "red",
 									 save_img,
-									 open_img, show_list, NULL, NULL, NULL, &newtoken, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_GRAPH_LAYOUT));
+									 open_img, show_list, NULL, NULL, NULL, &newtoken, &exectime, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_GRAPH_LAYOUT));
 					if (viewer_res != 0 && viewer_res != OPH_TERM_ERROR_WITHIN_JSON) {
 						(print_json) ? my_fprintf(stderr, "Could not render result [CODE %d]\\n", OPH_TERM_GENERIC_ERROR) : fprintf(stderr,
 																			    "\e[1;31mCould not render result [CODE %d]\e[0m\n",
@@ -1051,6 +1058,10 @@ void *main_loop(void *ptr)
 						if (newtoken) {
 							free(newtoken);
 							newtoken = NULL;
+						}
+						if (exectime) {
+							free(exectime);
+							exectime = NULL;
 						}
 						return NULL;
 					}
@@ -1061,6 +1072,10 @@ void *main_loop(void *ptr)
 						_passwd = hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TOKEN);
 						pthread_mutex_unlock(&global_flag);
 						free(newtoken);
+					}
+					if (exectime) {
+						(print_json) ? my_printf("Execution time: %s sec\\n", exectime) : printf("Execution time: %s sec\n", exectime);
+						free(exectime);
 					}
 				} else if (response_for_viewer) {
 					free(response_for_viewer);

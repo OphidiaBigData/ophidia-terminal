@@ -76,7 +76,7 @@ extern int oph_term_error_cur;
 // newcdd : retrieved new cdd if any or NULL
 // layout : layout of graph or NULL
 int oph_term_viewer(const char *viewer_type, char **json_string, const char *color, int save_img, int open_img, int show_list, char **newdatacube, char **newcwd, char **newccd, char **newtoken,
-		    char *layout);
+		    char **exectime, char *layout);
 
 //Retrieve command and/or jobid in request after a call to oph_resume
 int oph_term_viewer_retrieve_command_jobid(char *json_string, char **command, char **jobid);
