@@ -1517,7 +1517,7 @@ int oph_term_get_session_code(char *sessionid, char *code)
 	return OPH_TERM_SUCCESS;
 }
 
-int oph_term_get_request(char *session, char *wid, char *user, char *passwd, char *host, char *port, int *return_value, char **command, char **jobid, HASHTBL * hashtbl)
+int oph_term_get_request(char *session, char *wid, char *user, char *passwd, char *host, char *port, int *return_value, char **command, char **jobid, char **request_time, HASHTBL * hashtbl)
 {
 	if (!session || !wid || !host || !port || !return_value) {
 		(print_json) ? my_fprintf(stderr, "NULL parameters.\\n") : fprintf(stderr, "\e[1;31mNULL parameters.\e[0m\n");
@@ -1542,7 +1542,7 @@ int oph_term_get_request(char *session, char *wid, char *user, char *passwd, cha
 		return OPH_TERM_GENERIC_ERROR;
 	}
 
-	if (oph_term_viewer_retrieve_command_jobid(value, command, jobid)) {
+	if (oph_term_viewer_retrieve_command_jobid_creation(value, command, jobid, request_time)) {
 		(print_json) ? my_fprintf(stderr, "Unable to get command and/or jobid from json.\\n") : fprintf(stderr, "\e[1;31mUnable to get command and/or jobid from json.\e[0m\n");
 		if (value)
 			free(value);

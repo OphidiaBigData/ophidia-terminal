@@ -2134,7 +2134,7 @@ int oph_term_viewer(const char *viewer_type, char **json_string, const char *col
 	}
 }
 
-int oph_term_viewer_retrieve_command_jobid(char *json_string, char **command, char **jobid)
+int oph_term_viewer_retrieve_command_jobid_creation(char *json_string, char **command, char **jobid, char **creation_time)
 {
 	if (!json_string)
 		return OPH_TERM_INVALID_PARAM_VALUE;
@@ -2160,9 +2160,31 @@ int oph_term_viewer_retrieve_command_jobid(char *json_string, char **command, ch
 						if (jobid) {
 							*jobid = (char *) strdup((((oph_json_obj_grid *) json->response[i].objcontent)[0]).values[0][0]);
 							if (!(*jobid)) {
-								if (*command) {
+								if (command && *command) {
 									free(*command);
 									*command = NULL;
+								}
+								if (creation_time && *creation_time) {
+									free(*creation_time);
+									*creation_time = NULL;
+								}
+								if (json)
+									oph_json_free(json);
+								return OPH_TERM_MEMORY_ERROR;
+							}
+						}
+					}
+					if ((((oph_json_obj_grid *) json->response[i].objcontent)[0]).values[0][4]) {
+						if (creation_time) {
+							*creation_time = (char *) strdup((((oph_json_obj_grid *) json->response[i].objcontent)[0]).values[0][4]);
+							if (!(*creation_time)) {
+								if (command && *command) {
+									free(*command);
+									*command = NULL;
+								}
+								if (jobid && *jobid) {
+									free(*jobid);
+									*jobid = NULL;
 								}
 								if (json)
 									oph_json_free(json);
@@ -2174,7 +2196,11 @@ int oph_term_viewer_retrieve_command_jobid(char *json_string, char **command, ch
 						if (command) {
 							*command = (char *) strdup((((oph_json_obj_grid *) json->response[i].objcontent)[0]).values[0][5]);
 							if (!(*command)) {
-								if (*jobid) {
+								if (creation_time && *creation_time) {
+									free(*creation_time);
+									*creation_time = NULL;
+								}
+								if (jobid && *jobid) {
 									free(*jobid);
 									*jobid = NULL;
 								}
@@ -2191,11 +2217,15 @@ int oph_term_viewer_retrieve_command_jobid(char *json_string, char **command, ch
 		}
 	}
 	if (!found) {
-		if (*command) {
+		if (command && *command) {
 			free(*command);
 			*command = NULL;
 		}
-		if (*jobid) {
+		if (creation_time && *creation_time) {
+			free(*creation_time);
+			*creation_time = NULL;
+		}
+		if (jobid && *jobid) {
 			free(*jobid);
 			*jobid = NULL;
 		}
@@ -2207,6 +2237,11 @@ int oph_term_viewer_retrieve_command_jobid(char *json_string, char **command, ch
 	if (json)
 		oph_json_free(json);
 	return OPH_TERM_SUCCESS;
+}
+
+int oph_term_viewer_retrieve_command_jobid(char *json_string, char **command, char **jobid)
+{
+	return oph_term_viewer_retrieve_command_jobid_creation(json_string, command, jobid, NULL);
 }
 
 int oph_term_viewer_retrieve_session_size(char *json_string, int *session_size, char ***exit_status)

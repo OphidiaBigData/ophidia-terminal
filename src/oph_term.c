@@ -3893,7 +3893,7 @@ int main(int argc, char **argv, char **envp)
 						if (oph_term_get_request
 						    ((hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SESSION_ID)) ? ((char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SESSION_ID)) : "", tmp_workflow, _user,
 						     _passwd, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST), (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT),
-						     &oph_term_return, &tmp_command, &tmp_jobid, hashtbl)) {
+						     &oph_term_return, &tmp_command, &tmp_jobid, NULL, hashtbl)) {
 							if (print_json)
 								print_oph_term_output_json(hashtbl);
 							if (exec_one_statement)
@@ -4191,6 +4191,7 @@ int main(int argc, char **argv, char **envp)
 				char *tmp_command = NULL;
 				char *tmp_jobid = NULL;
 				char *tmp_status = NULL;
+				char *tmp_request_time = NULL;
 				char buf[OPH_TERM_MAX_LEN];
 
 				for (i = last_njobs - 1; i >= 0; i--) {
@@ -4198,7 +4199,7 @@ int main(int argc, char **argv, char **envp)
 					snprintf(buf, OPH_TERM_MAX_LEN, "%d", end - i);
 					if (oph_term_get_request
 					    (tmp_session, buf, _user, _passwd, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST), (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT),
-					     &oph_term_return, &tmp_command, &tmp_jobid, hashtbl)) {
+					     &oph_term_return, &tmp_command, &tmp_jobid, &tmp_request_time, hashtbl)) {
 						stop = 1;
 						break;
 					}
@@ -4222,14 +4223,20 @@ int main(int argc, char **argv, char **envp)
 					}
 
 					if (is_verbose)
-						(print_json) ? my_printf("[%s] [%s]\t%s\\n%*s[%s]\\n", buf, tmp_status ? tmp_status : "", (tmp_command) ? tmp_command : "", (int) (strlen(buf) + 3),
-									 " ", (tmp_jobid) ? tmp_jobid : "") : printf("\e[1;34m[%s]\e[0m \e[1;3%dm[%s]\e[0m\t%s\n%*s\e[1;34m[%s]\e[0m\n", buf, format,
-														     tmp_status ? tmp_status : "", (tmp_command) ? tmp_command : "",
-														     (int) (strlen(buf) + 3), " ", (tmp_jobid) ? tmp_jobid : "");
-					else
-						(print_json) ? my_printf("[%s] [%s]\t%s\\n", buf, tmp_status ? tmp_status : "",
-									 (tmp_command) ? tmp_command : "") : printf("\e[1;34m[%s]\e[0m \e[1;3%dm[%s]\e[0m\t%s\n", buf, format,
-														    tmp_status ? tmp_status : "", (tmp_command) ? tmp_command : "");
+						(print_json) ? my_printf("[%s] %s [%s]\\n%*s%s\\n%*s[%s]\\n", buf, tmp_request_time ? tmp_request_time : "", tmp_status ? tmp_status : "",
+									 (int) (strlen(buf) + 3), " ", (tmp_command) ? tmp_command : "", (int) (strlen(buf) + 3), " ",
+									 (tmp_jobid) ? tmp_jobid : "") : printf("\e[1;34m[%s]\e[0m %s \e[1;3%dm[%s]\e[0m\n%*s%s\n%*s\e[1;34m[%s]\e[0m\n", buf,
+														tmp_request_time ? tmp_request_time : "", format, tmp_status ? tmp_status : "",
+														(int) (strlen(buf) + 3), " ", (tmp_command) ? tmp_command : "", (int) (strlen(buf) + 3),
+														" ", (tmp_jobid) ? tmp_jobid : "");
+					else {
+						if (tmp_command && (strlen(tmp_command) > OPH_TERM_CMD_MAX_LEN))
+							snprintf(tmp_command + OPH_TERM_CMD_MAX_LEN - 5, 5, " ...");
+						(print_json) ? my_printf("[%s] %s [%s]\t%s\\n", buf, tmp_request_time ? tmp_request_time : "", tmp_status ? tmp_status : "",
+									 (tmp_command) ? tmp_command : "") : printf("\e[1;34m[%s]\e[0m %s \e[1;3%dm[%s]\e[0m\t%s\n", buf,
+														    tmp_request_time ? tmp_request_time : "", format, tmp_status ? tmp_status : "",
+														    (tmp_command) ? tmp_command : "");
+					}
 
 					if (tmp_command) {
 						free(tmp_command);

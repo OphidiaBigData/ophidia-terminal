@@ -46,6 +46,7 @@
 #define OPH_TERM_ENV_OPH_MASSIVE		"oph_massive"
 #define OPH_TERM_ENV_OPH_MASSIVE_LEN	11
 
+#define OPH_TERM_CMD_MAX_LEN			100
 #define OPH_TERM_WF_MAX_LEN				100*1024
 
 //Variables keys
@@ -191,7 +192,7 @@ int oph_term_full_var_expansion(char *param_string, HASHTBL * hashtbl, char **ex
 int oph_term_get_session_code(char *sessionid, char *code);
 
 // Get the command and jobid of a request identified by a wid
-int oph_term_get_request(char *session, char *wid, char *user, char *passwd, char *host, char *port, int *return_value, char **command, char **jobid, HASHTBL * hashtbl);
+int oph_term_get_request(char *session, char *wid, char *user, char *passwd, char *host, char *port, int *return_value, char **command, char **jobid, char **request_time, HASHTBL * hashtbl);
 
 // Get the command and jobid of a request identified by a mkid
 int oph_term_get_request_with_marker(char *session, char *mkid, char *user, char *passwd, char *host, char *port, int *return_value, char **command, char **jobid, HASHTBL * hashtbl);

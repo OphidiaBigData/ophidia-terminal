@@ -79,6 +79,9 @@ int oph_term_viewer(const char *viewer_type, char **json_string, const char *col
 		    char **exectime, char *layout);
 
 //Retrieve command and/or jobid in request after a call to oph_resume
+int oph_term_viewer_retrieve_command_jobid_creation(char *json_string, char **command, char **jobid, char **creation_time);
+
+//Retrieve command and/or jobid in request after a call to oph_resume
 int oph_term_viewer_retrieve_command_jobid(char *json_string, char **command, char **jobid);
 
 //Retrieve number of jobs in session after a call to oph_resume
