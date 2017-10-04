@@ -46,7 +46,7 @@
 #define OPH_TERM_ENV_OPH_MASSIVE		"oph_massive"
 #define OPH_TERM_ENV_OPH_MASSIVE_LEN	11
 
-#define OPH_TERM_CMD_MAX_LEN			100
+#define OPH_TERM_CMD_MAX_LEN			72
 #define OPH_TERM_WF_MAX_LEN				100*1024
 
 //Variables keys
