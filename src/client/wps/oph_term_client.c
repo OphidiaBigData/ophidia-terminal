@@ -35,6 +35,8 @@
 #define OPH_DEFAULT_NLOOPS 1
 #define OPH_DEFAULT_QUERY "OPH_NULL"
 #define OPH_WPS_BASE_DIR "wps/"
+#define OPH_WPS_TITLE "<title>"
+#define OPH_WPS_TITLE_END "</title>"
 
 #define UNUSED(x) {(void)(x);}
 
@@ -296,6 +298,17 @@ int process_response()
 	xmlNodePtr node;
 	xmlXPathContextPtr xpathCtx;
 	xmlXPathObjectPtr xpathObj;
+
+	/* Try for HTML pages */
+	char *title = strstr(mem->buffer, OPH_WPS_TITLE);
+	if (title) {
+		char *etitle = strstr(title, OPH_WPS_TITLE_END);
+		if (etitle) {
+			*etitle = 0;
+			(print_json) ? my_fprintf(stderr, "Error: %s\\n", title + strlen(OPH_WPS_TITLE)) : fprintf(stderr, "\e[1;31mError: %s\e[0m\n", title + strlen(OPH_WPS_TITLE));
+			return 1;
+		}
+	}
 
 	/* create a parser context */
 	ctxt = xmlNewParserCtxt();
