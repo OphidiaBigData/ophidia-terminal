@@ -327,6 +327,29 @@ int process_response()
 		xmlFreeParserCtxt(ctxt);
 		return 1;
 	}
+
+	xmlChar *content = NULL;
+
+	// Check for errors
+	xpathObj = xmlXPathEvalExpression((const xmlChar *) "/html/head/title", xpathCtx);
+	if (!xpathObj) {
+		(print_json) ? my_fprintf(stderr, "Error: unable to evaluate xpath expression\\n") : fprintf(stderr, "\e[1;31mError: unable to evaluate xpath expression\e[0m\n");
+		xmlXPathFreeContext(xpathCtx);
+		xmlFreeDoc(doc);
+		xmlFreeParserCtxt(ctxt);
+		return 1;
+	}
+	if (xpathObj->nodesetval && xpathObj->nodesetval->nodeNr && (node = xpathObj->nodesetval->nodeTab[0]) && (content = xmlNodeGetContent(node))) {
+		(print_json) ? my_fprintf(stderr, "Error: %s\\n", content) : fprintf(stderr, "\e[1;31mError: %s\e[0m\n", content);
+		xmlFree(content);
+		xmlXPathFreeObject(xpathObj);
+		xmlXPathFreeContext(xpathCtx);
+		xmlFreeDoc(doc);
+		xmlFreeParserCtxt(ctxt);
+		return 1;
+	}
+	xmlXPathFreeObject(xpathObj);
+
 	// Check for exceptions
 	char processFailed = 0;
 	xpathObj = xmlXPathEvalExpression((const xmlChar *) "/wps:ExecuteResponse/wps:Status/wps:ProcessFailed", xpathCtx);
@@ -341,7 +364,6 @@ int process_response()
 		processFailed = 1;
 	xmlXPathFreeObject(xpathObj);
 
-	xmlChar *content = NULL;
 	if (processFailed) {
 		xpathObj = xmlXPathEvalExpression((const xmlChar *) "/wps:ExecuteResponse/wps:Status/wps:ProcessFailed/wps:ExceptionReport/ows:Exception/ows:ExceptionText/text()", xpathCtx);
 		if (!xpathObj || !xpathObj->nodesetval || !xpathObj->nodesetval->nodeNr) {
