@@ -89,4 +89,6 @@ int view_status(int iterations_num, char *command_line, char *tmp_submission_str
 
 int oph_workflow_get_ranks_string(oph_workflow_task * tasks, int tasks_num, char **ranks_string);
 
+char *oph_print_exectime(char **exectime);
+
 #endif				//__OPH_WORKFLOW_FUNCTIONS_H

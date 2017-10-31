@@ -1967,7 +1967,7 @@ int main(int argc, char **argv, char **envp)
 				free(newtoken);
 			}
 			if (exectime) {
-				(print_json) ? my_printf("Execution time: %s sec\\n", exectime) : printf("Execution time: %s sec\n", exectime);
+				(print_json) ? my_printf("Execution time: %s\\n", oph_print_exectime(&exectime)) : printf("Execution time: %s\n", oph_print_exectime(&exectime));
 				free(exectime);
 			}
 		}
@@ -2842,7 +2842,7 @@ int main(int argc, char **argv, char **envp)
 						free(newtoken);
 					}
 					if (exectime) {
-						(print_json) ? my_printf("Execution time: %s sec\\n", exectime) : printf("Execution time: %s sec\n", exectime);
+						(print_json) ? my_printf("Execution time: %s\\n", oph_print_exectime(&exectime)) : printf("Execution time: %s\n", oph_print_exectime(&exectime));
 						free(exectime);
 					}
 				}
@@ -3252,7 +3252,7 @@ int main(int argc, char **argv, char **envp)
 						free(newtoken);
 					}
 					if (exectime) {
-						(print_json) ? my_printf("Execution time: %s sec\\n", exectime) : printf("Execution time: %s sec\n", exectime);
+						(print_json) ? my_printf("Execution time: %s\\n", oph_print_exectime(&exectime)) : printf("Execution time: %s\n", oph_print_exectime(&exectime));
 						free(exectime);
 					}
 				}
@@ -5116,7 +5116,7 @@ int main(int argc, char **argv, char **envp)
 					free(newtoken);
 				}
 				if (exectime) {
-					(print_json) ? my_printf("Execution time: %s sec\\n", exectime) : printf("Execution time: %s sec\n", exectime);
+					(print_json) ? my_printf("Execution time: %s\\n", oph_print_exectime(&exectime)) : printf("Execution time: %s\n", oph_print_exectime(&exectime));
 					free(exectime);
 				}
 			}

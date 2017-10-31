@@ -97,6 +97,28 @@ int workflow_validate_fco(oph_workflow * wf);
 
 // API functions
 
+char *oph_print_exectime(char **exectime)
+{
+	if (!exectime)
+		return NULL;
+	char _exectime[OPH_WORKFLOW_BASIC_SIZE];
+	double n_exectime = strtod(*exectime, NULL);
+	if (n_exectime < 60.0)
+		snprintf(_exectime, OPH_WORKFLOW_BASIC_SIZE, "%.2f seconds", n_exectime);
+	else {
+		n_exectime /= 60.0;
+		if (n_exectime < 60.0)
+			snprintf(_exectime, OPH_WORKFLOW_BASIC_SIZE, "%.2f minutes", n_exectime);
+		else {
+			n_exectime /= 60.0;
+			snprintf(_exectime, OPH_WORKFLOW_BASIC_SIZE, "%.2f hours", n_exectime);
+		}
+	}
+	free(*exectime);
+	*exectime = strdup(_exectime);
+	return *exectime;
+}
+
 int oph_workflow_indexing(oph_workflow_task * tasks, int tasks_num)
 {
 	if (!tasks || tasks_num < 1) {
@@ -1041,7 +1063,7 @@ void *main_loop(void *ptr)
 					free(newtoken);
 				}
 				if (exectime) {
-					(print_json) ? my_printf("Execution time: %s sec\\n", exectime) : printf("Execution time: %s sec\n", exectime);
+					(print_json) ? my_printf("Execution time: %s\\n", oph_print_exectime(&exectime)) : printf("Execution time: %s\n", oph_print_exectime(&exectime));
 					free(exectime);
 				}
 				break;
@@ -1074,7 +1096,7 @@ void *main_loop(void *ptr)
 						free(newtoken);
 					}
 					if (exectime) {
-						(print_json) ? my_printf("Execution time: %s sec\\n", exectime) : printf("Execution time: %s sec\n", exectime);
+						(print_json) ? my_printf("Execution time: %s\\n", oph_print_exectime(&exectime)) : printf("Execution time: %s\n", oph_print_exectime(&exectime));
 						free(exectime);
 					}
 				} else if (response_for_viewer) {
