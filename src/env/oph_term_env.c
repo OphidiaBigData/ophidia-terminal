@@ -764,7 +764,13 @@ int oph_term_env_load_xml(const char *xmlfilename, char **operator_name, operato
 		return OPH_TERM_GENERIC_ERROR;
 	}
 
+	/* open the file */
 	doc = xmlCtxtReadFile(ctxt, xmlfilename, NULL, 0);
+	if (doc == NULL) {
+		(print_json) ? my_fprintf(stderr, "Error: unable to parse '%s'\\n", xmlfilename) : fprintf(stderr, "\e[1;31mError: unable to parse '%s'\e[0m\n", xmlfilename);
+		xmlFreeParserCtxt(ctxt);
+		return OPH_TERM_GENERIC_ERROR;
+	}
 
 	/* Create xpath evaluation context */
 	xpathCtx = xmlXPathNewContext(doc);
@@ -783,8 +789,25 @@ int oph_term_env_load_xml(const char *xmlfilename, char **operator_name, operato
 		xmlFreeParserCtxt(ctxt);
 		return OPH_TERM_GENERIC_ERROR;
 	}
+
 	node = xpathObj->nodesetval->nodeTab[0];
+	if (node == NULL) {
+		(print_json) ? my_fprintf(stderr, "Error: unable to extract node\\n") : fprintf(stderr, "\e[1;31mError: unable to extract node\e[0m\n");
+		xmlXPathFreeContext(xpathCtx);
+		xmlFreeDoc(doc);
+		xmlFreeParserCtxt(ctxt);
+		return OPH_TERM_GENERIC_ERROR;
+	}
+
 	content = xmlGetProp(node, (const xmlChar *) "name");
+	if (content == NULL) {
+		(print_json) ? my_fprintf(stderr, "Error: unable to extract content\\n") : fprintf(stderr, "\e[1;31mError: unable to extract content\e[0m\n");
+		xmlXPathFreeContext(xpathCtx);
+		xmlFreeDoc(doc);
+		xmlFreeParserCtxt(ctxt);
+		return OPH_TERM_GENERIC_ERROR;
+	}
+
 	oph_term_env_strtolower((char **) &content);
 	snprintf(*operator_name, OPH_TERM_MAX_LEN, "%s", content);
 	xmlFree(content);
@@ -818,7 +841,17 @@ int oph_term_env_load_xml(const char *xmlfilename, char **operator_name, operato
 	// SET ARGS
 	for (n = 0; n < xpathObj->nodesetval->nodeNr; n++) {
 		node = xpathObj->nodesetval->nodeTab[n];
-
+		if (!node) {
+			(print_json) ? my_fprintf(stderr, "Error: argument %d is empty\\n", n) : fprintf(stderr, "\e[1;31mError: argument %d is empty\e[0m\n", n);
+			xmlXPathFreeObject(xpathObj);
+			xmlXPathFreeContext(xpathCtx);
+			xmlFreeDoc(doc);
+			xmlFreeParserCtxt(ctxt);
+			if (*operator_args)
+				free(*operator_args);
+			*operator_args = NULL;
+			return OPH_TERM_GENERIC_ERROR;
+		}
 		// SET NAME
 		content = xmlNodeGetContent(node);
 		if (!content) {
@@ -827,7 +860,9 @@ int oph_term_env_load_xml(const char *xmlfilename, char **operator_name, operato
 			xmlXPathFreeContext(xpathCtx);
 			xmlFreeDoc(doc);
 			xmlFreeParserCtxt(ctxt);
-			free(*operator_args);
+			if (*operator_args)
+				free(*operator_args);
+			*operator_args = NULL;
 			return OPH_TERM_GENERIC_ERROR;
 		}
 		snprintf((*operator_args)[n].name, 30, "%s", content);
@@ -835,6 +870,18 @@ int oph_term_env_load_xml(const char *xmlfilename, char **operator_name, operato
 
 		// SET TYPE
 		content = xmlGetProp(node, (const xmlChar *) "type");
+		if (!content) {
+			(print_json) ? my_fprintf(stderr, "Error: unable to extract content\\n") : fprintf(stderr, "\e[1;31mError: unable to extract content\e[0m\n");
+			xmlXPathFreeObject(xpathObj);
+			xmlXPathFreeContext(xpathCtx);
+			xmlFreeDoc(doc);
+			xmlFreeParserCtxt(ctxt);
+			if (*operator_args)
+				free(*operator_args);
+			*operator_args = NULL;
+			return OPH_TERM_GENERIC_ERROR;
+		}
+
 		snprintf((*operator_args)[n].type, 15, "%s", content);
 		xmlFree(content);
 
