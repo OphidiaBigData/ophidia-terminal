@@ -106,12 +106,13 @@ char *oph_print_exectime(char **exectime)
 	if (n_exectime < 60.0)
 		snprintf(_exectime, OPH_WORKFLOW_BASIC_SIZE, "%.2f seconds", n_exectime);
 	else {
-		n_exectime /= 60.0;
+		n_exectime /= 60.0;	// minutes
 		if (n_exectime < 60.0)
-			snprintf(_exectime, OPH_WORKFLOW_BASIC_SIZE, "%.2f minutes", n_exectime);
+			snprintf(_exectime, OPH_WORKFLOW_BASIC_SIZE, "%.0f minutes %.2f seconds", n_exectime, (n_exectime - floor(n_exectime)) * 60.0);
 		else {
-			n_exectime /= 60.0;
-			snprintf(_exectime, OPH_WORKFLOW_BASIC_SIZE, "%.2f hours", n_exectime);
+			n_exectime /= 60.0;	// hours
+			double s_exectime = (n_exectime - floor(n_exectime)) * 60.0;	// minutes
+			snprintf(_exectime, OPH_WORKFLOW_BASIC_SIZE, "%.0f hours %.0f minutes %.2f seconds", n_exectime, s_exectime, (s_exectime - floor(s_exectime)) * 60.0);
 		}
 	}
 	free(*exectime);
