@@ -107,12 +107,16 @@ char *oph_print_exectime(char **exectime)
 		snprintf(_exectime, OPH_WORKFLOW_BASIC_SIZE, "%.2f seconds", n_exectime);
 	else {
 		n_exectime /= 60.0;	// minutes
-		if (n_exectime < 60.0)
-			snprintf(_exectime, OPH_WORKFLOW_BASIC_SIZE, "%.0f minutes %.2f seconds", n_exectime, (n_exectime - floor(n_exectime)) * 60.0);
-		else {
+		if (n_exectime < 60.0) {
+			double f_n_exectime = floor(n_exectime);
+			snprintf(_exectime, OPH_WORKFLOW_BASIC_SIZE, "%.0f minute%s %.2f seconds", f_n_exectime, f_n_exectime == 1 ? "" : "s", (n_exectime - floor(n_exectime)) * 60.0);
+		} else {
 			n_exectime /= 60.0;	// hours
+			double f_n_exectime = floor(n_exectime);
 			double s_exectime = (n_exectime - floor(n_exectime)) * 60.0;	// minutes
-			snprintf(_exectime, OPH_WORKFLOW_BASIC_SIZE, "%.0f hours %.0f minutes %.2f seconds", n_exectime, s_exectime, (s_exectime - floor(s_exectime)) * 60.0);
+			double f_s_exectime = floor(s_exectime);
+			snprintf(_exectime, OPH_WORKFLOW_BASIC_SIZE, "%.0f hour%s %.0f minute%s %.2f seconds", f_n_exectime, f_n_exectime == 1 ? "" : "s", f_s_exectime, f_s_exectime == 1 ? "" : "s",
+				 (s_exectime - floor(s_exectime)) * 60.0);
 		}
 	}
 	free(*exectime);
