@@ -1154,7 +1154,7 @@ void print_tree(oph_json_obj_tree * obj, const char *color_string, int save_img,
 		}
 	}
 
-	cc += snprintf(dot_string + cc, OPH_TERM_VIEWER_DOT_MAX_LEN - cc, "}");
+	cc += snprintf(dot_string + cc, OPH_TERM_VIEWER_DOT_MAX_LEN - cc, "}\n");
 	ccc += snprintf(printable_dot_string + ccc, OPH_TERM_VIEWER_DOT_MAX_LEN - ccc, "}");
 
 	// print output DOT
@@ -1170,19 +1170,32 @@ void print_tree(oph_json_obj_tree * obj, const char *color_string, int save_img,
 		snprintf(filename, 256, "%s_%s.svg", (session_code) ? (session_code) : "undefined", (markerid) ? (markerid) : "undefined");
 		fp = fopen(filename, "w");
 		if (!fp) {
-			fprintf(stderr, "Unable to create the new image file %s.\n", filename);
+			fprintf(stderr, "\n\e[1;31mUnable to create the new image file %s.\e[0m\n", filename);
 			return;
 		}
-		gvc = gvContext();
 
+		gvc = gvContext();
+		if (!gvc) {
+			fclose(fp);
+			fprintf(stderr, "\n\e[1;31mUnable to create the image.\e[0m\n");
+			return;
+		}
 		// create tree
 		g = agmemread(dot_string);
+		if (!g) {
+			fclose(fp);
+			gvFreeContext(gvc);
+			fprintf(stderr, "\n\e[1;31mUnable to create the image.\e[0m\n");
+			return;
+		}
+
 		gvLayout(gvc, g, "dot");
 		gvRender(gvc, g, "svg:cairo", fp);
 		gvFreeLayout(gvc, g);
 		agclose(g);
-		fclose(fp);
 		gvFreeContext(gvc);
+
+		fclose(fp);
 
 		// print output filename
 		printf(color_string, "\nImage File");
@@ -1272,7 +1285,7 @@ void print_digraph(oph_json_obj_graph * obj, const char *color_string, int save_
 		}
 	}
 
-	cc += snprintf(dot_string + cc, OPH_TERM_VIEWER_DOT_MAX_LEN - cc, "}");
+	cc += snprintf(dot_string + cc, OPH_TERM_VIEWER_DOT_MAX_LEN - cc, "}\n");
 	ccc += snprintf(printable_dot_string + ccc, OPH_TERM_VIEWER_DOT_MAX_LEN - ccc, "}");
 
 	// print output DOT
@@ -1288,19 +1301,32 @@ void print_digraph(oph_json_obj_graph * obj, const char *color_string, int save_
 		snprintf(filename, 256, "%s_%s.svg", (session_code) ? (session_code) : "undefined", (markerid) ? (markerid) : "undefined");
 		fp = fopen(filename, "w");
 		if (!fp) {
-			fprintf(stderr, "Unable to create the new image file %s.\n", filename);
+			fprintf(stderr, "\n\e[1;31mUnable to create the new image file %s.\n", filename);
 			return;
 		}
-		gvc = gvContext();
 
+		gvc = gvContext();
+		if (!gvc) {
+			fclose(fp);
+			fprintf(stderr, "\n\e[1;31mUnable to create the image.\e[0m\n");
+			return;
+		}
 		// create digraph
 		g = agmemread(dot_string);
+		if (!g) {
+			fclose(fp);
+			gvFreeContext(gvc);
+			fprintf(stderr, "\n\e[1;31mUnable to create the image.\e[0m\n");
+			return;
+		}
+
 		gvLayout(gvc, g, "dot");
 		gvRender(gvc, g, "svg:cairo", fp);
 		gvFreeLayout(gvc, g);
 		agclose(g);
-		fclose(fp);
 		gvFreeContext(gvc);
+
+		fclose(fp);
 
 		// print output filename
 		printf(color_string, "\nImage File");
@@ -1390,7 +1416,7 @@ void print_graph(oph_json_obj_graph * obj, const char *color_string, int save_im
 		}
 	}
 
-	cc += snprintf(dot_string + cc, OPH_TERM_VIEWER_DOT_MAX_LEN - cc, "}");
+	cc += snprintf(dot_string + cc, OPH_TERM_VIEWER_DOT_MAX_LEN - cc, "}\n");
 	ccc += snprintf(printable_dot_string + ccc, OPH_TERM_VIEWER_DOT_MAX_LEN - ccc, "}");
 
 	// print output DOT
@@ -1406,19 +1432,32 @@ void print_graph(oph_json_obj_graph * obj, const char *color_string, int save_im
 		snprintf(filename, 256, "%s_%s.svg", (session_code) ? (session_code) : "undefined", (markerid) ? (markerid) : "undefined");
 		fp = fopen(filename, "w");
 		if (!fp) {
-			fprintf(stderr, "Unable to create the new image file %s.\n", filename);
+			fprintf(stderr, "\n\e[1;31mUnable to create the new image file %s.\e[0m\n", filename);
 			return;
 		}
-		gvc = gvContext();
 
+		gvc = gvContext();
+		if (!gvc) {
+			fclose(fp);
+			fprintf(stderr, "\n\e[1;31mUnable to create the image.\e[0m\n");
+			return;
+		}
 		// create graph
 		g = agmemread(dot_string);
+		if (!g) {
+			fclose(fp);
+			gvFreeContext(gvc);
+			fprintf(stderr, "\n\e[1;31mUnable to create the image.\e[0m\n");
+			return;
+		}
+
 		gvLayout(gvc, g, "dot");
 		gvRender(gvc, g, "svg:cairo", fp);
 		gvFreeLayout(gvc, g);
 		agclose(g);
-		fclose(fp);
 		gvFreeContext(gvc);
+
+		fclose(fp);
 
 		// print output filename
 		printf(color_string, "\nImage File");
