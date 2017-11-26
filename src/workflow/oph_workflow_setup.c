@@ -591,8 +591,15 @@ int oph_workflow_print(oph_workflow * workflow, int save_img, int open_img, char
 
 		// create digraph
 		g = agmemread(dot_string);
+		if (!g) {
+			fclose(fp);
+			(print_json) ? my_fprintf(stderr, "Unable to create the image.\\n") : fprintf(stderr, "\n\e[1;31mUnable to create the image.\e[0m\n");
+			return OPH_WORKFLOW_EXIT_GENERIC_ERROR;
+		}
+
 		gvLayout(gvc, g, "dot");
 		gvRender(gvc, g, "svg:cairo", fp);
+
 		gvFreeLayout(gvc, g);
 		agclose(g);
 		fclose(fp);
@@ -763,6 +770,14 @@ int oph_workflow_print_status(oph_workflow * workflow, int save_img, int open_im
 
 		// create digraph
 		g = agmemread(dot_string);
+		if (!g) {
+			fclose(fp);
+			if (json)
+				oph_json_free(json);
+			(print_json) ? my_fprintf(stderr, "Unable to create the image.\\n") : fprintf(stderr, "\n\e[1;31mUnable to create the image.\e[0m\n");
+			return OPH_WORKFLOW_EXIT_GENERIC_ERROR;
+		}
+
 		gvLayout(gvc, g, "dot");
 		gvRender(gvc, g, "svg:cairo", fp);
 		gvFreeLayout(gvc, g);
