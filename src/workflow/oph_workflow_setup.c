@@ -574,7 +574,7 @@ int oph_workflow_print(oph_workflow * workflow, int save_img, int open_img, char
 		free(subgraphs_string);
 		subgraphs_string = NULL;
 
-		cc += snprintf(dot_string + cc, OPH_WORKFLOW_DOT_MAX_LEN - cc, "} ");
+		cc += snprintf(dot_string + cc, OPH_WORKFLOW_DOT_MAX_LEN - cc, "}\n");
 
 		Agraph_t *g;
 		FILE *fp;
@@ -750,7 +750,7 @@ int oph_workflow_print_status(oph_workflow * workflow, int save_img, int open_im
 		free(subgraphs_string);
 		subgraphs_string = NULL;
 
-		cc += snprintf(dot_string + cc, OPH_WORKFLOW_DOT_MAX_LEN - cc, "} \n");
+		cc += snprintf(dot_string + cc, OPH_WORKFLOW_DOT_MAX_LEN - cc, "}\n");
 
 
 		Agraph_t *g;
