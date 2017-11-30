@@ -342,6 +342,26 @@ if test "x${im_support}" = "xyes"; then
     OPT+=" -DWITH_IM_SUPPORT"
 fi
 
+
+pit_support=
+AC_ARG_ENABLE(pit-support,
+       [  --enable-pit-support    Enable support for PIT-related commands. (Disabled by default)],
+       [
+            if test "x$enableval" = "xno"; then
+                pit_support="no"
+            else
+                pit_support="yes"
+            fi
+       ],
+       [ pit_support="no"]
+       )
+if test "x${pit_support}" = "xyes"; then
+    AC_MSG_NOTICE("Enabled PIT support")
+    OPT+=" -DWITH_PIT_SUPPORT"
+fi
+
+
+
 base_src_path=
 AC_ARG_ENABLE(base_src_path,
        [  --enable-base-src-path    Enable support for OPH_BASE_SRC_PATH. (Disabled by default)],

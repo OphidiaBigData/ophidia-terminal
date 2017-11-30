@@ -33,6 +33,7 @@
 #include <libxml/xmlmemory.h>
 #include <libxml/xpath.h>
 #include <libxml/xpathInternals.h>
+#include <jansson.h>
 
 //Environment management
 #include "hashtbl.h"
@@ -68,13 +69,24 @@
 #define OPH_TERM_ENV_OPH_RESPONSE_BUFFER	"OPH_RESPONSE_BUFFER"
 #define OPH_TERM_ENV_OPH_WORKFLOW_AUTOVIEW	"OPH_WORKFLOW_AUTOVIEW"
 #define OPH_TERM_ENV_OPH_TOKEN				"OPH_TOKEN"
+
+#ifdef WITH_PIT_SUPPORT
+#define pit_env_vars_num 3
+#define OPH_TERM_ENV_PIT_SERVER_HOST    	"PIT_SERVER_HOST"
+#define OPH_TERM_ENV_PIT_SERVER_PORT    	"PIT_SERVER_PORT"
+#define OPH_TERM_ENV_PIT_HANDLE_SERVER_PREFIX   	"PIT_HANDLE_SERVER_PREFIX"
+#else
+#define pit_env_vars_num 0
+#endif
+
 #ifdef WITH_IM_SUPPORT
 #define OPH_TERM_ENV_OPH_INFRASTRUCTURE_URL	"OPH_INFRASTRUCTURE_URL"
 #define OPH_TERM_ENV_OPH_AUTH_HEADER		"OPH_AUTH_HEADER"
-#define env_vars_num 20
+#define env_vars_num 20+pit_env_vars_num
 #else
-#define env_vars_num 18
+#define env_vars_num 18+pit_env_vars_num
 #endif
+
 
 static char *env_vars[env_vars_num] = {
 	OPH_TERM_ENV_OPH_TERM_PS1,
@@ -99,6 +111,12 @@ static char *env_vars[env_vars_num] = {
 	    ,
 	OPH_TERM_ENV_OPH_INFRASTRUCTURE_URL,
 	OPH_TERM_ENV_OPH_AUTH_HEADER
+#endif
+#ifdef WITH_PIT_SUPPORT
+	    ,
+	OPH_TERM_ENV_PIT_SERVER_HOST,
+	OPH_TERM_ENV_PIT_SERVER_PORT,
+	OPH_TERM_ENV_PIT_HANDLE_SERVER_PREFIX
 #endif
 };
 
@@ -222,6 +240,36 @@ int oph_term_get_aliases(HASHTBL * hashtbl, char ***aliases, int *aliases_num);
 int is_alias_ok(const char *key);
 // Check if key is an alias
 int is_alias(HASHTBL * hashtbl, const char *key);
+
+#ifdef WITH_PIT_SUPPORT
+#define OPH_PIT_MAX_LEN 102400
+#define OPH_PIT_UUID_SIZE 46
+int oph_term_search_pit(char *pit_server_host, char *pit_server_port, char *pit_handle_server_prefix, char **params, HASHTBL * hashtbl);
+int oph_term_lookup_pit(char *pit_server_host, char *pit_server_port, char **params, HASHTBL * hashtbl);
+int oph_term_insert_pit(char *pit_server_host, char *pit_server_port, char **params, HASHTBL * hashtbl);
+static char *pit_types[] = {
+	"21.T11148/388da36a3d045e1b029a",
+	"21.T11148/ec5125d411135ed263de",
+	"21.T11148/d6532ef6dc2b2a4ea01e",
+	"21.T11148/a045f55e2a7fc9d60a5b",
+	"21.T11148/e0efc41346cda4ba84ca",
+	"21.T11148/38330bcc6a40ca85e5b4",
+	"21.T11148/e117a4a29bfd07438c1e",
+	"21.T11148/1bba2359c61cfee6948c"
+};
+
+static char *pit_types_names[] = {
+	"creatorName",
+	"title",
+	"description",
+	"date-time",
+	"URL",
+	"identifier-general",
+	"email-address",
+	"location"
+};
+#endif
+
 
 #ifdef WITH_IM_SUPPORT
 /*IM related functions*/

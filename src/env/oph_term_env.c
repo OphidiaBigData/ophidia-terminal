@@ -17,6 +17,7 @@
 */
 
 #include "oph_term_env.h"
+#include "oph_term.h"
 
 #include <ctype.h>
 
@@ -28,6 +29,40 @@ extern char *_passwd;
 extern pthread_mutex_t global_flag;
 extern char get_config;
 extern char *oph_base_src_path;
+
+
+struct url_data {
+	size_t size;
+	char *data;
+};
+
+size_t write_data(void *ptr, size_t size, size_t nmemb, struct url_data *data)
+{
+	size_t index = data->size;
+	size_t n = (size * nmemb);
+	char *tmp;
+
+	data->size += (size * nmemb);
+
+	tmp = realloc(data->data, data->size + 1);	/* +1 for '\0' */
+
+	if (tmp) {
+		data->data = tmp;
+	} else {
+		if (data->data) {
+			free(data->data);
+		}
+		fprintf(stderr, "Failed to allocate memory.\n");
+		return 0;
+	}
+
+	memcpy((data->data + index), ptr, n);
+	data->data[data->size] = '\0';
+
+	return size * nmemb;
+}
+
+
 
 //Alloc hashtable
 int _oph_term_env_init(HASHTBL ** hashtbl, int hashtbl_size)
@@ -2248,6 +2283,420 @@ int oph_term_env_deploy_vms_list(const char *auth_header, const char *infrastruc
 
 	if (mybuf.buffer)
 		free(mybuf.buffer);
+
+	return OPH_TERM_SUCCESS;
+}
+#endif
+
+#ifdef WITH_PIT_SUPPORT
+int oph_term_insert_pit(char *pit_server_host, char *pit_server_port, char **params, HASHTBL * hashtbl)
+{
+	if (!pit_server_host || !pit_server_port || !params || !hashtbl) {
+		(print_json) ? my_fprintf(stderr, "Null parameters\\n") : fprintf(stderr, "\e[1;31mNull parameters\e[0m\n");
+		return OPH_TERM_INVALID_PARAM_VALUE;
+	}
+
+	size_t i;
+
+	char *post_data = malloc(4096);
+	char *cur = post_data;
+
+	// current datetime
+	time_t timer;
+	char buffer_time[26];
+	struct tm *tm_info;
+	time(&timer);
+	tm_info = localtime(&timer);
+	strftime(buffer_time, 26, "%Y-%m-%d %H:%M:%S", tm_info);
+
+	cur += sprintf(cur, "{\"21.T11148/a045f55e2a7fc9d60a5b\":\"%s\",", buffer_time);
+
+	for (i = 0; i < OPH_INSERT_PIT_ARGS - OPH_INSERT_PIT_ARGS_NOT_REQUIRED; i++) {
+		char *ptr_begin, *ptr_end;
+		ptr_begin = params[i];
+		ptr_end = strchr(params[i], '=');
+
+		char *arg_type;
+		char *arg_value;
+
+		arg_type = (char *) malloc(sizeof(char) * (strlen(ptr_begin) - strlen(ptr_end)) + 1);
+		strncpy(arg_type, ptr_begin, strlen(ptr_begin) - strlen(ptr_end));
+
+		arg_type[strlen(ptr_begin) - strlen(ptr_end)] = 0;
+
+		if (strstr(ptr_end, "\"") != NULL)
+			arg_value = strndup(ptr_end + 2, strlen(ptr_end) - 3);
+		else
+			arg_value = strdup(ptr_end + 1);
+
+		char *arg_type_pid = NULL;
+
+		if (strcmp(arg_type, "creatorName") == 0)
+			arg_type_pid = "21.T11148/388da36a3d045e1b029a";
+		if (strcmp(arg_type, "title") == 0)
+			arg_type_pid = "21.T11148/ec5125d411135ed263de";
+		if (strcmp(arg_type, "description") == 0)
+			arg_type_pid = "21.T11148/d6532ef6dc2b2a4ea01e";
+		if (strcmp(arg_type, "URL") == 0)
+			arg_type_pid = "21.T11148/e0efc41346cda4ba84ca";
+		if (strcmp(arg_type, "location") == 0)
+			arg_type_pid = "21.T11148/1bba2359c61cfee6948c";
+		if (strcmp(arg_type, "email-address") == 0)
+			arg_type_pid = "21.T11148/e117a4a29bfd07438c1e";
+		if (strcmp(arg_type, "identifier-general") == 0)
+			arg_type_pid = "21.T11148/38330bcc6a40ca85e5b4";
+
+		if (i < OPH_INSERT_PIT_ARGS - OPH_INSERT_PIT_ARGS_NOT_REQUIRED - 1)
+			cur += sprintf(cur, "\"%s\":\"%s\",", arg_type_pid, arg_value);
+		else
+			cur += sprintf(cur, "\"%s\":\"%s\"}", arg_type_pid, arg_value);
+
+		if (arg_type)
+			free(arg_type);
+
+		if (arg_value)
+			free(arg_value);
+
+	}
+
+	(print_json) ? my_fprintf(stderr, "%s\\n", post_data) : fprintf(stderr, "\e[1;31m%s\e[0m\n", post_data);
+
+	CURL *curl = NULL;
+	struct url_data data;
+	data.size = 0;
+	data.data = malloc(4096);
+	data.data[0] = '\0';
+
+	curl = curl_easy_init();
+
+	struct curl_slist *headerlist = NULL;
+	headerlist = curl_slist_append(headerlist, "Content-Type: application/json");
+	headerlist = curl_slist_append(headerlist, "Accept: application/json");
+
+	char *url = (char *) malloc(strlen(pit_server_host) + 1 + strlen(pit_server_port) + strlen("/ophidia_pit/pitapi/pid") + 1);
+	sprintf(url, "%s:%s/ophidia_pit/pitapi/pid", pit_server_host, pit_server_port);
+
+	if (curl) {
+		curl_easy_setopt(curl, CURLOPT_URL, url);
+		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, post_data);
+		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headerlist);
+		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
+		curl_easy_setopt(curl, CURLOPT_WRITEDATA, &data);
+		CURLcode res = curl_easy_perform(curl);
+
+		if (res != CURLE_OK)
+			fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+		;
+		curl_easy_cleanup(curl);
+
+	}
+
+	if (url)
+		free(url);
+
+	if (headerlist)
+		curl_slist_free_all(headerlist);
+
+	if (post_data)
+		free(post_data);
+
+	(print_json) ? my_printf("New PID successfully created: %s \n", data.data) : printf("New PIT successfully created: %s \n", data.data);
+	if (data.data) {
+		free(data.data);
+		data.data = NULL;
+	}
+
+	return OPH_TERM_SUCCESS;
+}
+
+int oph_term_lookup_pit(char *pit_server_host, char *pit_server_port, char **params, HASHTBL * hashtbl)
+{
+
+	if (!pit_server_host || !pit_server_port || !params || !hashtbl) {
+		(print_json) ? my_fprintf(stderr, "Null parameters\\n") : fprintf(stderr, "\e[1;31mNull parameters\e[0m\n");
+		return OPH_TERM_INVALID_PARAM_VALUE;
+	}
+
+	char *ptr_begin, *ptr_end;
+	ptr_begin = params[0];
+	ptr_end = strchr(params[0], '=');
+
+	char *arg_type;
+	char *arg_value;
+
+	arg_type = (char *) malloc(sizeof(char) * (strlen(ptr_begin) - strlen(ptr_end)) + 1);
+	strncpy(arg_type, ptr_begin, strlen(ptr_begin) - strlen(ptr_end));
+	arg_type[strlen(ptr_begin) - strlen(ptr_end)] = 0;
+
+	if (strstr(ptr_end, "\"") != NULL)
+		arg_value = strndup(ptr_end + 2, strlen(ptr_end) - 3);
+	else
+		arg_value = strdup(ptr_end + 1);
+
+	CURL *curl = NULL;
+	struct url_data data;
+	data.size = 0;
+	data.data = malloc(4096);
+	data.data[0] = '\0';
+
+	curl = curl_easy_init();
+
+	char *url = (char *) malloc(strlen(pit_server_host) + 1 + strlen(pit_server_port) + strlen("/ophidia_pit/pitapi/pid/") + strlen(arg_value) + strlen("?include_property_names=true") + 1);
+	sprintf(url, "%s:%s/ophidia_pit/pitapi/pid/%s?include_property_names=true", pit_server_host, pit_server_port, arg_value);
+
+	if (curl) {
+		curl_easy_setopt(curl, CURLOPT_URL, url);
+		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
+		curl_easy_setopt(curl, CURLOPT_WRITEDATA, &data);
+		CURLcode res = curl_easy_perform(curl);
+
+		if (res != CURLE_OK)
+			fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+
+		curl_easy_cleanup(curl);
+
+	}
+
+	if (url)
+		free(url);
+
+	json_t *jansson = json_loads(data.data, 0, NULL);
+	if (data.data) {
+		free(data.data);
+		data.data = NULL;
+	}
+
+	json_t *values = NULL;
+	json_unpack(jansson, "{s?o}", "values", &values);
+
+	char *output = malloc(4096);
+	char *cur = output;
+
+	size_t index_pit_types;
+	for (index_pit_types = 0; index_pit_types < OPH_INSERT_PIT_ARGS; index_pit_types++) {
+		json_t *value = NULL;
+		json_unpack(values, "{s?o}", pit_types[index_pit_types], &value);
+		char *data_value = NULL;
+		char *data_type = NULL;
+		json_unpack(value, "{s?s}", "name", &data_type);
+		json_unpack(value, "{s?s}", "value", &data_value);
+
+		cur += sprintf(cur, "%-20s | %s\n", data_type, data_value);
+	}
+
+	(print_json) ? my_printf("%s \n", output) : printf("%s \n", output);
+
+	if (output)
+		free(output);
+
+	if (jansson)
+		json_decref(jansson);
+
+	if (arg_type)
+		free(arg_type);
+
+	if (arg_value)
+		free(arg_value);
+
+	return OPH_TERM_SUCCESS;
+}
+
+int oph_term_search_pit(char *pit_server_host, char *pit_server_port, char *pit_handle_server_prefix, char **params, HASHTBL * hashtbl)
+{
+
+	if (!pit_server_host || !pit_server_port || !pit_handle_server_prefix || !params || !hashtbl) {
+		(print_json) ? my_fprintf(stderr, "Null parameters\\n") : fprintf(stderr, "\e[1;31mNull parameters\e[0m\n");
+		return OPH_TERM_INVALID_PARAM_VALUE;
+	}
+
+	(print_json) ? my_printf("Searching for handles...\n") : printf("Searching for handles...\n");
+
+	int filters = 0;
+	size_t j;
+	for (j = 0; j < OPH_INSERT_PIT_ARGS; j++) {
+		if (params[j] != '\0')
+			filters++;
+	}
+
+	// Get all DKRZ Handles
+	CURL *curl = NULL;
+	struct url_data data;
+	data.size = 0;
+	data.data = malloc(4096);
+	data.data[0] = '\0';
+
+	curl = curl_easy_init();
+
+	struct curl_slist *headerlist = NULL;
+	headerlist = curl_slist_append(headerlist, "Content-Type: application/json");
+	headerlist = curl_slist_append(headerlist, "Accept: application/json");
+
+	char *url = (char *) malloc(strlen(pit_server_host) + 1 + strlen(pit_server_port) + strlen("/ophidia_pit/pitapi/all/") + strlen(pit_handle_server_prefix) + 1);
+	sprintf(url, "%s:%s/ophidia_pit/pitapi/all/%s", pit_server_host, pit_server_port, pit_handle_server_prefix);
+
+	if (curl) {
+		curl_easy_setopt(curl, CURLOPT_URL, url);
+		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headerlist);
+		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
+		curl_easy_setopt(curl, CURLOPT_WRITEDATA, &data);
+		CURLcode res = curl_easy_perform(curl);
+
+		if (res != CURLE_OK)
+			fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+
+		curl_easy_cleanup(curl);
+
+	}
+
+	if (url)
+		free(url);
+
+	if (headerlist)
+		curl_slist_free_all(headerlist);
+
+	json_t *jansson = json_loads(data.data, 0, NULL);
+	if (data.data) {
+		free(data.data);
+		data.data = NULL;
+	}
+
+	json_t *handles = json_object_get(jansson, "handles");
+	size_t i;
+
+	char *output = malloc(4096);
+	output[0] = '\0';
+
+	for (i = 0; i < json_array_size(handles); i++) {
+		const char *pid;
+		json_t *obj_txt = json_array_get(handles, i);
+		if (NULL == obj_txt || !json_is_string(obj_txt))
+			continue;
+		pid = json_string_value(obj_txt);
+
+		if (strlen(pid) == OPH_PIT_UUID_SIZE) {	// Get only uuid-compliant PIDs
+
+			int hit = 0;
+
+			// START Look-up PID
+			CURL *curl = NULL;
+			struct url_data data;
+			data.size = 0;
+			data.data = malloc(4096);
+			data.data[0] = '\0';
+
+			curl = curl_easy_init();
+
+			char *url =
+			    (char *) malloc(strlen(pit_server_host) + 1 + strlen(pit_server_port) + strlen("/ophidia_pit/pitapi/pid/") + strlen(pid) + strlen("?include_property_names=true") + 1);
+			sprintf(url, "%s:%s/ophidia_pit/pitapi/pid/%s?include_property_names=true", pit_server_host, pit_server_port, pid);
+
+			if (curl) {
+				curl_easy_setopt(curl, CURLOPT_URL, url);
+				curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
+				curl_easy_setopt(curl, CURLOPT_WRITEDATA, &data);
+				CURLcode res = curl_easy_perform(curl);
+
+				if (res != CURLE_OK)
+					fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+
+				curl_easy_cleanup(curl);
+
+			}
+
+			if (url)
+				free(url);
+
+			json_t *jansson2 = json_loads(data.data, 0, NULL);
+			if (data.data) {
+				free(data.data);
+				data.data = NULL;
+			}
+
+			json_t *values = NULL;
+			json_unpack(jansson2, "{s?o}", "values", &values);
+
+			size_t index_args;
+			for (index_args = 0; index_args < OPH_INSERT_PIT_ARGS; index_args++) {
+				if (params[index_args] != '\0') {
+
+					// Get key (type name) and value (target type value) of input arg
+					char *ptr_begin, *ptr_end;
+					ptr_begin = params[index_args];
+					ptr_end = strchr(params[index_args], '=');
+
+					char *arg_type;
+					char *arg_value;
+
+					arg_type = (char *) malloc(sizeof(char) * (strlen(ptr_begin) - strlen(ptr_end)) + 1);
+					strncpy(arg_type, ptr_begin, strlen(ptr_begin) - strlen(ptr_end));
+					arg_type[strlen(ptr_begin) - strlen(ptr_end)] = 0;
+
+					if (strstr(ptr_end, "\"") != NULL)
+						arg_value = strndup(ptr_end + 2, strlen(ptr_end) - 3);
+					else
+						arg_value = strdup(ptr_end + 1);
+
+					// Get PID of type name
+					size_t k;
+					char *target_pid_type;
+					for (k = 0; k < OPH_INSERT_PIT_ARGS; k++) {
+
+						if (strcmp(pit_types_names[k], arg_type) == 0) {
+							target_pid_type = pit_types[k];
+
+							// check value
+							json_t *value = NULL;
+							json_unpack(values, "{s?o}", target_pid_type, &value);
+
+							if (value != NULL) {
+								char *data_value = NULL;
+								json_unpack(value, "{s?s}", "value", &data_value);
+
+								if (strcmp(arg_value, data_value) == 0) {
+									hit++;
+								} else {
+									k = OPH_INSERT_PIT_ARGS;
+									index_args = OPH_INSERT_PIT_ARGS;
+									break;
+								}
+							} else {
+								k = OPH_INSERT_PIT_ARGS;
+								index_args = OPH_INSERT_PIT_ARGS;
+								break;
+							}
+						}
+					}
+
+					if (arg_value)
+						free(arg_value);
+					if (arg_type)
+						free(arg_type);
+
+				}
+			}
+
+			if (jansson2)
+				json_decref(jansson2);
+
+			if (hit == filters) {
+				strcat(output, pid);
+				strcat(output, "\n");
+			}
+		}
+// END Look-up PID
+
+	}
+
+	if (jansson)
+		json_decref(jansson);
+
+	if (*output != 0)
+		(print_json) ? my_printf("%s \n", output) : printf("%s \n", output);
+	else
+		(print_json) ? my_printf("No Handle Records found\n") : printf("No Handle Records found\n");
+
+	if (output)
+		free(output);
 
 	return OPH_TERM_SUCCESS;
 }

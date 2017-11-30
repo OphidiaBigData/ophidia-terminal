@@ -5999,6 +5999,248 @@ int main(int argc, char **argv, char **envp)
 			continue;
 		}
 #endif
+
+#ifdef WITH_PIT_SUPPORT
+		else if (!strcmp(cursor, OPH_SEARCH_PIT)) {	// OPH_SEARCH_PIT
+
+			alias_substitutions = 0;
+
+			if (!hashtbl_get(hashtbl, OPH_TERM_ENV_PIT_SERVER_HOST)) {
+				(print_json) ? my_fprintf(stderr, "PIT_SERVER_HOST not set [CODE %d]\\n", OPH_TERM_INVALID_PARAM_VALUE) : fprintf(stderr,
+																		  "\e[1;31mPIT_SERVER_HOST not set [CODE %d]\e[0m\n",
+																		  OPH_TERM_INVALID_PARAM_VALUE);
+				if (print_json)
+					print_oph_term_output_json(hashtbl);
+				if (exec_one_statement) {
+					oph_term_return = OPH_TERM_INVALID_PARAM_VALUE;
+					break;
+				}
+				continue;
+			}
+			if (!hashtbl_get(hashtbl, OPH_TERM_ENV_PIT_SERVER_PORT)) {
+				(print_json) ? my_fprintf(stderr, "PIT_SERVER_PORT not set [CODE %d]\\n", OPH_TERM_INVALID_PARAM_VALUE) : fprintf(stderr,
+																		  "\e[1;31mPIT_SERVER_PORT not set [CODE %d]\e[0m\n",
+																		  OPH_TERM_INVALID_PARAM_VALUE);
+				if (print_json)
+					print_oph_term_output_json(hashtbl);
+				if (exec_one_statement) {
+					oph_term_return = OPH_TERM_INVALID_PARAM_VALUE;
+					break;
+				}
+				continue;
+			}
+
+			if (!hashtbl_get(hashtbl, OPH_TERM_ENV_PIT_HANDLE_SERVER_PREFIX)) {
+				(print_json) ? my_fprintf(stderr, "PIT_HANDLE_SERVER_PREFIX not set [CODE %d]\\n", OPH_TERM_INVALID_PARAM_VALUE) : fprintf(stderr,
+																			   "\e[1;31mPPIT_HANDLE_SERVER_PREFIX not set [CODE %d]\e[0m\n",
+																			   OPH_TERM_INVALID_PARAM_VALUE);
+				if (print_json)
+					print_oph_term_output_json(hashtbl);
+				if (exec_one_statement) {
+					oph_term_return = OPH_TERM_INVALID_PARAM_VALUE;
+					break;
+				}
+				continue;
+			}
+
+			char *params[OPH_INSERT_PIT_ARGS] = { '\0' };
+
+			int size = 0;
+
+			while (cursor = strtok_r(NULL, ";\t\n", &saveptr)) {
+				size++;
+				if (size <= OPH_INSERT_PIT_ARGS)
+					params[size - 1] = cursor;
+				else
+					break;
+			}
+
+			if (size < 1) {
+				(print_json) ? my_fprintf(stderr, "No argument(s) provided\\n") : fprintf(stderr, "\e[1;31mNo argument(s) provided\e[0m\n");
+
+
+				if (print_json)
+					print_oph_term_output_json(hashtbl);
+				if (exec_one_statement) {
+					oph_term_return = OPH_TERM_INVALID_PARAM_VALUE;
+					break;
+				}
+				continue;
+			} else {	// Input argument OK ---> call function implemented in oph_term_env.c passing all the intput (env vars + cursor) and the hash tables containing the output
+				if (oph_term_search_pit
+				    (hashtbl_get(hashtbl, OPH_TERM_ENV_PIT_SERVER_HOST), hashtbl_get(hashtbl, OPH_TERM_ENV_PIT_SERVER_PORT),
+				     hashtbl_get(hashtbl, OPH_TERM_ENV_PIT_HANDLE_SERVER_PREFIX), params, hashtbl)) {
+					if (print_json)
+						print_oph_term_output_json(hashtbl);
+					if (exec_one_statement) {
+						oph_term_return = OPH_TERM_GENERIC_ERROR;
+						break;
+					}
+					continue;
+				}
+				if (print_json)
+					print_oph_term_output_json(hashtbl);
+				if (exec_one_statement)
+					break;
+				continue;
+			}
+
+
+
+
+		} else if (!strcmp(cursor, OPH_LOOKUP_PIT)) {	// OPH_LOOKUP_PIT
+			alias_substitutions = 0;
+
+			if (!hashtbl_get(hashtbl, OPH_TERM_ENV_PIT_SERVER_HOST)) {
+				(print_json) ? my_fprintf(stderr, "PIT_SERVER_HOST not set [CODE %d]\\n", OPH_TERM_INVALID_PARAM_VALUE) : fprintf(stderr,
+																		  "\e[1;31mPIT_SERVER_HOST not set [CODE %d]\e[0m\n",
+																		  OPH_TERM_INVALID_PARAM_VALUE);
+				if (print_json)
+					print_oph_term_output_json(hashtbl);
+				if (exec_one_statement) {
+					oph_term_return = OPH_TERM_INVALID_PARAM_VALUE;
+					break;
+				}
+				continue;
+			}
+			if (!hashtbl_get(hashtbl, OPH_TERM_ENV_PIT_SERVER_PORT)) {
+				(print_json) ? my_fprintf(stderr, "PIT_SERVER_PORT not set [CODE %d]\\n", OPH_TERM_INVALID_PARAM_VALUE) : fprintf(stderr,
+																		  "\e[1;31mPIT_SERVER_PORT not set [CODE %d]\e[0m\n",
+																		  OPH_TERM_INVALID_PARAM_VALUE);
+				if (print_json)
+					print_oph_term_output_json(hashtbl);
+				if (exec_one_statement) {
+					oph_term_return = OPH_TERM_INVALID_PARAM_VALUE;
+					break;
+				}
+				continue;
+			}
+
+			char *params[OPH_LOOKUP_PIT_ARGS] = { '\0' };
+
+			int size = 0;
+
+			while (cursor = strtok_r(NULL, " \t\n", &saveptr)) {
+				size++;
+				if (size <= OPH_LOOKUP_PIT_ARGS)
+					params[size - 1] = cursor;
+				else
+					break;
+			}
+
+			if (size != OPH_LOOKUP_PIT_ARGS) {
+
+				if (size < OPH_LOOKUP_PIT_ARGS) {
+					(print_json) ? my_fprintf(stderr, "One or more arguments not provided\\n") : fprintf(stderr, "\e[1;31mOne or more arguments not provided\e[0m\n");
+				} else {
+					(print_json) ? my_fprintf(stderr, "Too many arguments provided") : fprintf(stderr, "\e[1;31mToo many arguments provided\e[0m\n");
+				}
+
+				if (print_json)
+					print_oph_term_output_json(hashtbl);
+				if (exec_one_statement) {
+					oph_term_return = OPH_TERM_INVALID_PARAM_VALUE;
+					break;
+				}
+				continue;
+			} else {	// Input argument OK ---> call function implemented in oph_term_env.c passing all the intput (env vars + cursor) and the hash tables containing the output
+				if (oph_term_lookup_pit(hashtbl_get(hashtbl, OPH_TERM_ENV_PIT_SERVER_HOST), hashtbl_get(hashtbl, OPH_TERM_ENV_PIT_SERVER_PORT), params, hashtbl)) {
+					if (print_json)
+						print_oph_term_output_json(hashtbl);
+					if (exec_one_statement) {
+						oph_term_return = OPH_TERM_GENERIC_ERROR;
+						break;
+					}
+					continue;
+				}
+				if (print_json)
+					print_oph_term_output_json(hashtbl);
+				if (exec_one_statement)
+					break;
+				continue;
+			}
+
+
+
+
+
+		} else if (!strcmp(cursor, OPH_INSERT_PIT)) {	// OPH_INSERT_PIT
+
+			alias_substitutions = 0;
+
+			if (!hashtbl_get(hashtbl, OPH_TERM_ENV_PIT_SERVER_HOST)) {
+				(print_json) ? my_fprintf(stderr, "PIT_SERVER_HOST not set [CODE %d]\\n", OPH_TERM_INVALID_PARAM_VALUE) : fprintf(stderr,
+																		  "\e[1;31mPIT_SERVER_HOST not set [CODE %d]\e[0m\n",
+																		  OPH_TERM_INVALID_PARAM_VALUE);
+				if (print_json)
+					print_oph_term_output_json(hashtbl);
+				if (exec_one_statement) {
+					oph_term_return = OPH_TERM_INVALID_PARAM_VALUE;
+					break;
+				}
+				continue;
+			}
+			if (!hashtbl_get(hashtbl, OPH_TERM_ENV_PIT_SERVER_PORT)) {
+				(print_json) ? my_fprintf(stderr, "PIT_SERVER_PORT not set [CODE %d]\\n", OPH_TERM_INVALID_PARAM_VALUE) : fprintf(stderr,
+																		  "\e[1;31mPIT_SERVER_PORT not set [CODE %d]\e[0m\n",
+																		  OPH_TERM_INVALID_PARAM_VALUE);
+				if (print_json)
+					print_oph_term_output_json(hashtbl);
+				if (exec_one_statement) {
+					oph_term_return = OPH_TERM_INVALID_PARAM_VALUE;
+					break;
+				}
+				continue;
+			}
+
+			char *params[OPH_INSERT_PIT_ARGS - OPH_INSERT_PIT_ARGS_NOT_REQUIRED] = { '\0' };
+
+			int size = 0;
+
+			while (cursor = strtok_r(NULL, ";", &saveptr)) {
+				size++;
+				if (size <= OPH_INSERT_PIT_ARGS - OPH_INSERT_PIT_ARGS_NOT_REQUIRED)
+					params[size - 1] = cursor;
+				else
+					break;
+			}
+
+			if (size != OPH_INSERT_PIT_ARGS - OPH_INSERT_PIT_ARGS_NOT_REQUIRED) {
+
+				if (size < OPH_INSERT_PIT_ARGS - OPH_INSERT_PIT_ARGS_NOT_REQUIRED) {
+					(print_json) ? my_fprintf(stderr, "One or more arguments not provided\\n") : fprintf(stderr, "\e[1;31mOne or more arguments not provided\e[0m\n");
+				} else {
+					(print_json) ? my_fprintf(stderr, "Too many arguments provided") : fprintf(stderr, "\e[1;31mToo many arguments provided\e[0m\n");
+				}
+
+				if (print_json)
+					print_oph_term_output_json(hashtbl);
+				if (exec_one_statement) {
+					oph_term_return = OPH_TERM_INVALID_PARAM_VALUE;
+					break;
+				}
+				continue;
+			} else {	// Input argument OK ---> call function implemented in oph_term_env.c passing all the intput (env vars + cursor) and the hash tables containing the output
+				if (oph_term_insert_pit(hashtbl_get(hashtbl, OPH_TERM_ENV_PIT_SERVER_HOST), hashtbl_get(hashtbl, OPH_TERM_ENV_PIT_SERVER_PORT), params, hashtbl)) {
+					if (print_json)
+						print_oph_term_output_json(hashtbl);
+					if (exec_one_statement) {
+						oph_term_return = OPH_TERM_GENERIC_ERROR;
+						break;
+					}
+					continue;
+				}
+				if (print_json)
+					print_oph_term_output_json(hashtbl);
+				if (exec_one_statement)
+					break;
+				continue;
+			}
+
+
+		}
+#endif
+
 		else {		// command not recognized
 			alias_substitutions = 0;
 			(print_json) ? my_fprintf(stderr, "Command %s not recognized [CODE %d]\\n", cursor, OPH_TERM_COMMAND_NOT_RECOGNIZED) : fprintf(stderr,

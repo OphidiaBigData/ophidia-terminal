@@ -78,6 +78,18 @@
 #else
 #define im_cmds_num 0
 #endif
+#ifdef WITH_PIT_SUPPORT
+#define OPH_SEARCH_PIT	"pit_search"
+#define OPH_LOOKUP_PIT	"pit_lookup"
+#define OPH_INSERT_PIT "pit_insert"
+#define pit_cmds_num 3
+#define OPH_INSERT_PIT_ARGS 8
+#define OPH_INSERT_PIT_ARGS_NOT_REQUIRED 1
+#define OPH_LOOKUP_PIT_ARGS 1
+#else
+#define pit_cmds_num 0
+
+#endif
 /* Remote Commands */
 #define OPH_TERM_REMOTE_CMD_PREFIX	OPH_TERM_ENV_OPH_PREFIX
 #define OPH_TERM_REMOTE_CMD_PREFIX_LEN	OPH_TERM_ENV_OPH_PREFIX_LEN
@@ -85,9 +97,9 @@
 #define OPH_TERM_TOKEN_USER "__token__"
 
 #ifndef NO_WORKFLOW
-#define cmds_num 21+im_cmds_num
+#define cmds_num 21+im_cmds_num+pit_cmds_num
 #else
-#define cmds_num 20+im_cmds_num
+#define cmds_num 20+im_cmds_num+pit_cmds_num
 #endif
 static char *cmds[cmds_num] = {
 	OPH_TERM_CMD_VERSION,
@@ -121,6 +133,12 @@ static char *cmds[cmds_num] = {
 	OPH_TERM_CMD_UNDEPLOY,
 	OPH_TERM_CMD_DEPLOYS_LIST,
 	OPH_TERM_CMD_DEPLOY_VMS_LIST
+#endif
+#ifdef WITH_PIT_SUPPORT
+	    ,
+	OPH_SEARCH_PIT,
+	OPH_LOOKUP_PIT,
+	OPH_INSERT_PIT
 #endif
 };
 
