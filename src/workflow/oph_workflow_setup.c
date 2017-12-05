@@ -365,18 +365,16 @@ int oph_workflow_init(oph_workflow_task * tasks, int tasks_num, int **initial_ta
 
 int oph_workflow_get_subgraphs_string(oph_workflow * workflow, char **subgraphs_string, int count, int k, int *subgraphs, int *visited, int flag, int openfor)
 {
-	if (!workflow || !subgraphs_string) {
+	if (!workflow || !subgraphs_string)
 		return OPH_WORKFLOW_EXIT_BAD_PARAM_ERROR;
-	}
 
 	int cc = count;
 	int openf = openfor;
 
 	if (!(*subgraphs_string)) {
-		*subgraphs_string = (char *) calloc(workflow->tasks_num * OPH_WORKFLOW_RANK_SIZE, sizeof(char));
-		if (!(*subgraphs_string)) {
+		*subgraphs_string = (char *) calloc(OPH_WORKFLOW_DOT_MAX_LEN, sizeof(char));
+		if (!(*subgraphs_string))
 			return OPH_WORKFLOW_EXIT_MEMORY_ERROR;
-		}
 		visited = (int *) calloc(workflow->tasks_num, sizeof(int));
 		if (!visited) {
 			free(*subgraphs_string);
@@ -389,7 +387,6 @@ int oph_workflow_get_subgraphs_string(oph_workflow * workflow, char **subgraphs_
 		int i, res;
 		for (i = 0; i < workflow->tasks_num; i++) {
 			if ((!strcasecmp(workflow->tasks[i].operator, OPH_OPERATOR_FOR) || !strcasecmp(workflow->tasks[i].operator, OPH_OPERATOR_IF)) && !visited[i]) {
-				// if (!oph_workflow_get_subgraphs_string(workflow,subgraphs_string,cc,i,subgraphs,visited,2,openfor)) {
 				res = oph_workflow_get_subgraphs_string(workflow, subgraphs_string, cc, i, subgraphs, visited, 0, openfor);
 				if (res) {
 					if (visited) {
@@ -402,7 +399,6 @@ int oph_workflow_get_subgraphs_string(oph_workflow * workflow, char **subgraphs_
 					}
 					return res;
 				}
-				// }
 			}
 		}
 		if (visited) {
@@ -429,8 +425,19 @@ int oph_workflow_get_subgraphs_string(oph_workflow * workflow, char **subgraphs_
 				}
 				openf++;
 			}
-			snprintf((*subgraphs_string) + strlen(*subgraphs_string), (workflow->tasks_num * OPH_WORKFLOW_RANK_SIZE) - strlen(*subgraphs_string), " %d", kk);
 			cc = strlen(*subgraphs_string);
+			cc += snprintf((*subgraphs_string) + cc, OPH_WORKFLOW_DOT_MAX_LEN - cc, " %d", kk);
+			if (cc > OPH_WORKFLOW_DOT_MAX_LEN - 2) {
+				if (visited) {
+					free(visited);
+					visited = NULL;
+				}
+				if (*subgraphs_string) {
+					free(*subgraphs_string);
+					*subgraphs_string = NULL;
+				}
+				return OPH_WORKFLOW_EXIT_MEMORY_ERROR;
+			}
 			if (strcasecmp(workflow->tasks[kk].operator, OPH_OPERATOR_ENDFOR) && strcasecmp(workflow->tasks[kk].operator, OPH_OPERATOR_ENDIF)) {
 				res = oph_workflow_get_subgraphs_string(workflow, subgraphs_string, cc, kk, subgraphs, visited, 1, openf);
 				if (res) {
@@ -462,23 +469,20 @@ int oph_workflow_get_subgraphs_string(oph_workflow * workflow, char **subgraphs_
 			}
 		}
 		return OPH_WORKFLOW_EXIT_SUCCESS;
-	} else if (flag == 2) {
-		int i, kk;
-		int nested;
-		for (i = 0; i < workflow->tasks[k].deps_num; i++) {
-			kk = workflow->tasks[k].deps[i].task_index;
-			if (!strcasecmp(workflow->tasks[kk].operator, OPH_OPERATOR_FOR) || !strcasecmp(workflow->tasks[kk].operator, OPH_OPERATOR_IF)) {
-				return 1;
-			} else {
-				nested = oph_workflow_get_subgraphs_string(workflow, subgraphs_string, cc, kk, subgraphs, visited, 2, openfor);
-				if (nested)
-					return 1;
-			}
-		}
-		return 0;
-	} else {
+	} else {		// flag == 0
 		cc = strlen(*subgraphs_string);
-		cc += snprintf((*subgraphs_string) + cc, (workflow->tasks_num * OPH_WORKFLOW_RANK_SIZE) - cc, " subgraph cluster_%d {%d", *subgraphs, k);
+		cc += snprintf((*subgraphs_string) + cc, OPH_WORKFLOW_DOT_MAX_LEN - cc, " subgraph cluster_%d {%d", *subgraphs, k);
+		if (cc > OPH_WORKFLOW_DOT_MAX_LEN - 2) {
+			if (visited) {
+				free(visited);
+				visited = NULL;
+			}
+			if (*subgraphs_string) {
+				free(*subgraphs_string);
+				*subgraphs_string = NULL;
+			}
+			return OPH_WORKFLOW_EXIT_MEMORY_ERROR;
+		}
 		(*subgraphs)++;
 		visited[k] = 1;
 		int res;
@@ -494,7 +498,18 @@ int oph_workflow_get_subgraphs_string(oph_workflow * workflow, char **subgraphs_
 			}
 			return res;
 		}
-		snprintf((*subgraphs_string) + strlen(*subgraphs_string), (workflow->tasks_num * OPH_WORKFLOW_RANK_SIZE) - strlen(*subgraphs_string), "} ");
+		cc = snprintf((*subgraphs_string) + strlen(*subgraphs_string), OPH_WORKFLOW_DOT_MAX_LEN - strlen(*subgraphs_string), "} ");
+		if (cc > OPH_WORKFLOW_DOT_MAX_LEN - 2) {
+			if (visited) {
+				free(visited);
+				visited = NULL;
+			}
+			if (*subgraphs_string) {
+				free(*subgraphs_string);
+				*subgraphs_string = NULL;
+			}
+			return OPH_WORKFLOW_EXIT_MEMORY_ERROR;
+		}
 		return OPH_WORKFLOW_EXIT_SUCCESS;
 	}
 }
@@ -502,12 +517,13 @@ int oph_workflow_get_subgraphs_string(oph_workflow * workflow, char **subgraphs_
 int oph_workflow_print(oph_workflow * workflow, int save_img, int open_img, char *layout)
 {
 	if (!workflow || (save_img != 0 && save_img != 1) || (open_img != 0 && open_img != 1)) {
+		(print_json) ? my_fprintf(stderr, "Unable to create the image.\\n") : fprintf(stderr, "\n\e[1;31mUnable to create the image.\e[0m\n");
 		return OPH_WORKFLOW_EXIT_BAD_PARAM_ERROR;
 	}
 
 	if (save_img) {
 		// create dot string for dag
-		char dot_string[OPH_WORKFLOW_DOT_MAX_LEN];
+		char dot_string[2 * OPH_WORKFLOW_DOT_MAX_LEN];
 		size_t cc = 0, i, j;
 		int k, kk;
 
@@ -553,6 +569,7 @@ int oph_workflow_print(oph_workflow * workflow, int save_img, int open_img, char
 			if (strstr(layout, "ranked")) {
 				char *ranks_string = NULL;
 				if (oph_workflow_get_ranks_string(workflow->tasks, workflow->tasks_num, &ranks_string)) {
+					(print_json) ? my_fprintf(stderr, "Unable to create the image.\\n") : fprintf(stderr, "\n\e[1;31mUnable to create the image.\e[0m\n");
 					return OPH_WORKFLOW_EXIT_GENERIC_ERROR;
 				}
 				cc += snprintf(dot_string + cc, OPH_WORKFLOW_DOT_MAX_LEN - cc, "%s", ranks_string);
@@ -563,18 +580,28 @@ int oph_workflow_print(oph_workflow * workflow, int save_img, int open_img, char
 				cc += snprintf(dot_string + cc, OPH_WORKFLOW_DOT_MAX_LEN - cc, " rankdir=LR; ");
 			}
 		}
+
+		if (cc > OPH_WORKFLOW_DOT_MAX_LEN - 2) {
+			(print_json) ? my_fprintf(stderr, "Unable to create the image (buffer overflow).\\n") : fprintf(stderr, "\n\e[1;31mUnable to create the image (buffer overflow).\e[0m\n");
+			return OPH_WORKFLOW_EXIT_GENERIC_ERROR;
+		}
 		// group FOR/ENDFOR as subgraphs
 		char *subgraphs_string = NULL;
 		int subgraphs = 0;
 		int *visited = NULL;
 		if (oph_workflow_get_subgraphs_string(workflow, &subgraphs_string, 0, -1, &subgraphs, visited, 0, 0)) {
+			(print_json) ? my_fprintf(stderr, "Unable to create the image.\\n") : fprintf(stderr, "\n\e[1;31mUnable to create the image.\e[0m\n");
 			return OPH_WORKFLOW_EXIT_GENERIC_ERROR;
 		}
-		cc += snprintf(dot_string + cc, OPH_WORKFLOW_DOT_MAX_LEN - cc, "%s", subgraphs_string);
+
+		cc += snprintf(dot_string + cc, 2 * OPH_WORKFLOW_DOT_MAX_LEN - cc, "%s}\n", subgraphs_string);
 		free(subgraphs_string);
 		subgraphs_string = NULL;
 
-		cc += snprintf(dot_string + cc, OPH_WORKFLOW_DOT_MAX_LEN - cc, "}\n");
+		if (cc > 2 * OPH_WORKFLOW_DOT_MAX_LEN - 2) {
+			(print_json) ? my_fprintf(stderr, "Unable to create the image (buffer overflow).\\n") : fprintf(stderr, "\n\e[1;31mUnable to create the image (buffer overflow).\e[0m\n");
+			return OPH_WORKFLOW_EXIT_GENERIC_ERROR;
+		}
 
 		Agraph_t *g;
 		FILE *fp;
@@ -622,15 +649,19 @@ int oph_workflow_print(oph_workflow * workflow, int save_img, int open_img, char
 int oph_workflow_print_status(oph_workflow * workflow, int save_img, int open_img, char *json_string_with_status, char *layout)
 {
 	if (!workflow || (save_img != 0 && save_img != 1) || (open_img != 0 && open_img != 1) || !json_string_with_status) {
+		(print_json) ? my_fprintf(stderr, "Unable to create the image.\\n") : fprintf(stderr, "\n\e[1;31mUnable to create the image.\e[0m\n");
 		return OPH_WORKFLOW_EXIT_BAD_PARAM_ERROR;
 	}
 
 	char *tmp_json_string = strdup(json_string_with_status);
-	if (!tmp_json_string)
+	if (!tmp_json_string) {
+		(print_json) ? my_fprintf(stderr, "Unable to create the image.\\n") : fprintf(stderr, "\n\e[1;31mUnable to create the image.\e[0m\n");
 		return OPH_WORKFLOW_EXIT_MEMORY_ERROR;
+	}
 
 	oph_json *json = NULL;
 	if (oph_json_from_json_string(&json, &tmp_json_string)) {
+		(print_json) ? my_fprintf(stderr, "Unable to create the image.\\n") : fprintf(stderr, "\n\e[1;31mUnable to create the image.\e[0m\n");
 		if (json)
 			oph_json_free(json);
 		return OPH_WORKFLOW_EXIT_GENERIC_ERROR;
@@ -638,7 +669,7 @@ int oph_workflow_print_status(oph_workflow * workflow, int save_img, int open_im
 
 	if (save_img) {
 		// create dot string for dag
-		char dot_string[OPH_WORKFLOW_DOT_MAX_LEN];
+		char dot_string[2 * OPH_WORKFLOW_DOT_MAX_LEN];
 		size_t cc = 0, i, j;
 		int k, kk, offset = workflow->output_format ? 4 : 0;
 
@@ -727,6 +758,7 @@ int oph_workflow_print_status(oph_workflow * workflow, int save_img, int open_im
 			if (strstr(layout, "ranked")) {
 				char *ranks_string = NULL;
 				if (oph_workflow_get_ranks_string(workflow->tasks, workflow->tasks_num, &ranks_string)) {
+					(print_json) ? my_fprintf(stderr, "Unable to create the image.\\n") : fprintf(stderr, "\n\e[1;31mUnable to create the image.\e[0m\n");
 					if (json)
 						oph_json_free(json);
 					return OPH_WORKFLOW_EXIT_GENERIC_ERROR;
@@ -739,19 +771,33 @@ int oph_workflow_print_status(oph_workflow * workflow, int save_img, int open_im
 				cc += snprintf(dot_string + cc, OPH_WORKFLOW_DOT_MAX_LEN - cc, " rankdir=LR; ");
 			}
 		}
+
+		if (cc > OPH_WORKFLOW_DOT_MAX_LEN - 2) {
+			(print_json) ? my_fprintf(stderr, "Unable to create the image (buffer overflow).\\n") : fprintf(stderr, "\n\e[1;31mUnable to create the image (buffer overflow).\e[0m\n");
+			if (json)
+				oph_json_free(json);
+			return OPH_WORKFLOW_EXIT_GENERIC_ERROR;
+		}
 		// group FOR/ENDFOR as subgraphs
 		char *subgraphs_string = NULL;
 		int subgraphs = 0;
 		int *visited = NULL;
 		if (oph_workflow_get_subgraphs_string(workflow, &subgraphs_string, 0, -1, &subgraphs, visited, 0, 0)) {
+			(print_json) ? my_fprintf(stderr, "Unable to create the image.\\n") : fprintf(stderr, "\n\e[1;31mUnable to create the image.\e[0m\n");
+			if (json)
+				oph_json_free(json);
 			return OPH_WORKFLOW_EXIT_GENERIC_ERROR;
 		}
-		cc += snprintf(dot_string + cc, OPH_WORKFLOW_DOT_MAX_LEN - cc, "%s", subgraphs_string);
+		cc += snprintf(dot_string + cc, 2 * OPH_WORKFLOW_DOT_MAX_LEN - cc, "%s}\n", subgraphs_string);
 		free(subgraphs_string);
 		subgraphs_string = NULL;
 
-		cc += snprintf(dot_string + cc, OPH_WORKFLOW_DOT_MAX_LEN - cc, "}\n");
-
+		if (cc > 2 * OPH_WORKFLOW_DOT_MAX_LEN - 2) {
+			(print_json) ? my_fprintf(stderr, "Unable to create the image (buffer overflow).\\n") : fprintf(stderr, "\n\e[1;31mUnable to create the image (buffer overflow).\e[0m\n");
+			if (json)
+				oph_json_free(json);
+			return OPH_WORKFLOW_EXIT_GENERIC_ERROR;
+		}
 
 		Agraph_t *g;
 		FILE *fp;
