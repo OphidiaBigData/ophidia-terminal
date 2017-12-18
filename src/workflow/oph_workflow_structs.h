@@ -133,6 +133,7 @@ typedef struct _oph_workflow_task {
  * \param name Name of the workflow
  * \param author Author of the workflow
  * \param abstract Abstract of the workflow
+ * \param url URL of the workflow
  * \param sessionid SessionID for the entire workflow
  * \param exec_mode Execution mode for the entire workflow
  * \param ncores Number of cores for the entire workflow
@@ -158,6 +159,7 @@ typedef struct _oph_workflow {
 	char *name;
 	char *author;
 	char *abstract;
+	char *url;
 	char *sessionid;
 	char *exec_mode;
 	int ncores;

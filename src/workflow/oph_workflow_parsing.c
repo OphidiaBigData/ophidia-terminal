@@ -66,10 +66,10 @@ int oph_workflow_load(char *json_string, char *username, oph_workflow ** workflo
 	}
 	//unpack global vars
 	char *name = NULL, *author = NULL, *abstract = NULL, *sessionid = NULL, *exec_mode = NULL, *ncores = NULL, *cwd = NULL, *cdd = NULL, *cube = NULL, *callback_url = NULL, *on_error =
-	    NULL, *command = NULL, *on_exit = NULL, *run = NULL, *output_format = NULL;
+	    NULL, *command = NULL, *on_exit = NULL, *run = NULL, *output_format = NULL, *url = NULL;
 	json_unpack(jansson, "{s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s}", "name", &name, "author", &author, "abstract", &abstract, "sessionid", &sessionid, "exec_mode", &exec_mode,
 		    "ncores", &ncores, "cwd", &cwd, "cdd", &cdd, "cube", &cube, "callback_url", &callback_url, "on_error", &on_error, "command", &command, "on_exit", &on_exit, "run", &run,
-		    "output_format", &output_format);
+		    "output_format", &output_format, "url", &url);
 
 	//add global vars
 	if (!name || !author || !abstract) {
@@ -102,6 +102,16 @@ int oph_workflow_load(char *json_string, char *username, oph_workflow ** workflo
 			json_decref(jansson);
 		(print_json) ? my_fprintf(stderr, "Error: abstract allocation\\n\\n") : fprintf(stderr, "\e[1;31mError: abstract allocation\e[0m\n\n");
 		return OPH_WORKFLOW_EXIT_MEMORY_ERROR;
+	}
+	if (url && strlen(url)) {
+		(*workflow)->url = (char *) strdup((const char *) url);
+		if (!((*workflow)->url)) {
+			oph_workflow_free(*workflow);
+			if (jansson)
+				json_decref(jansson);
+			(print_json) ? my_fprintf(stderr, "Error: url allocation\\n\\n") : fprintf(stderr, "\e[1;31mError: url allocation\e[0m\n\n");
+			return OPH_WORKFLOW_EXIT_MEMORY_ERROR;
+		}
 	}
 	if (sessionid && strlen(sessionid)) {
 		(*workflow)->sessionid = (char *) strdup((const char *) sessionid);
@@ -644,6 +654,7 @@ int _oph_workflow_alloc(oph_workflow ** workflow)
 		return OPH_WORKFLOW_EXIT_MEMORY_ERROR;
 	}
 	//init
+	(*workflow)->url = NULL;
 	(*workflow)->abstract = NULL;
 	(*workflow)->author = NULL;
 	(*workflow)->callback_url = NULL;
