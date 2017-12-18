@@ -103,6 +103,10 @@ int oph_workflow_free(oph_workflow * workflow)
 		free(workflow->run);
 		workflow->run = NULL;
 	}
+	if (workflow->host_partition) {
+		free(workflow->host_partition);
+		workflow->host_partition = NULL;
+	}
 	free(workflow);
 	workflow = NULL;
 	return OPH_WORKFLOW_EXIT_SUCCESS;

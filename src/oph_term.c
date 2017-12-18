@@ -5432,7 +5432,7 @@ int main(int argc, char **argv, char **envp)
 					(print_json) ? my_printf("Abstract\\n--------\\n%s\\n\\n", expanded_field) : printf("Abstract\n--------\n%s\n\n", tmp_workflow->abstract);
 					if (tmp_workflow->url) {
 						expand_escapes(expanded_field, tmp_workflow->url);
-						(print_json) ? my_printf("URL: %s\\n", expanded_field) : printf("URL: %s\n", tmp_workflow->url);
+						(print_json) ? my_printf("URL\\n--------\\n%s\\n\\n", expanded_field) : printf("URL\n--------\n%s\n\n", tmp_workflow->url);
 					}
 
 					(print_json) ? my_printf("Other info\\n----------\\n") : printf("Other info\n----------\n");
@@ -5475,6 +5475,10 @@ int main(int argc, char **argv, char **envp)
 					if (tmp_workflow->run) {
 						expand_escapes(expanded_field, tmp_workflow->run);
 						(print_json) ? my_printf("run: %s\\n", expanded_field) : printf("run: %s\n", tmp_workflow->run);
+					}
+					if (tmp_workflow->host_partition) {
+						expand_escapes(expanded_field, tmp_workflow->host_partition);
+						(print_json) ? my_printf("host_partition: %s\\n", expanded_field) : printf("host_partition: %s\n", tmp_workflow->host_partition);
 					}
 					oph_workflow_free(tmp_workflow);
 				} else {

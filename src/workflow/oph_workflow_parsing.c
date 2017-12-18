@@ -66,10 +66,10 @@ int oph_workflow_load(char *json_string, char *username, oph_workflow ** workflo
 	}
 	//unpack global vars
 	char *name = NULL, *author = NULL, *abstract = NULL, *sessionid = NULL, *exec_mode = NULL, *ncores = NULL, *cwd = NULL, *cdd = NULL, *cube = NULL, *callback_url = NULL, *on_error =
-	    NULL, *command = NULL, *on_exit = NULL, *run = NULL, *output_format = NULL, *url = NULL;
-	json_unpack(jansson, "{s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s}", "name", &name, "author", &author, "abstract", &abstract, "sessionid", &sessionid, "exec_mode", &exec_mode,
-		    "ncores", &ncores, "cwd", &cwd, "cdd", &cdd, "cube", &cube, "callback_url", &callback_url, "on_error", &on_error, "command", &command, "on_exit", &on_exit, "run", &run,
-		    "output_format", &output_format, "url", &url);
+	    NULL, *command = NULL, *on_exit = NULL, *run = NULL, *output_format = NULL, *host_partition = NULL, *url = NULL;
+	json_unpack(jansson, "{s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s}", "name", &name, "author", &author, "abstract", &abstract, "sessionid", &sessionid, "exec_mode",
+		    &exec_mode, "ncores", &ncores, "cwd", &cwd, "cdd", &cdd, "cube", &cube, "callback_url", &callback_url, "on_error", &on_error, "command", &command, "on_exit", &on_exit, "run", &run,
+		    "output_format", &output_format, "host_partition", &host_partition, "url", &url);
 
 	//add global vars
 	if (!name || !author || !abstract) {
@@ -225,6 +225,16 @@ int oph_workflow_load(char *json_string, char *username, oph_workflow ** workflo
 				json_decref(jansson);
 			(print_json) ? my_fprintf(stderr, "Error: wrong parameter 'output_format'\\n\\n") : fprintf(stderr, "\e[1;31mError: wrong parameter 'output_format'\e[0m\n\n");
 			return OPH_WORKFLOW_EXIT_BAD_PARAM_ERROR;
+		}
+	}
+	if (host_partition && strlen(host_partition)) {
+		(*workflow)->host_partition = (char *) strdup((const char *) host_partition);
+		if (!((*workflow)->host_partition)) {
+			oph_workflow_free(*workflow);
+			if (jansson)
+				json_decref(jansson);
+			(print_json) ? my_fprintf(stderr, "Error: host_partition allocation\\n\\n") : fprintf(stderr, "\e[1;31mError: host_partition allocation\e[0m\n\n");
+			return OPH_WORKFLOW_EXIT_MEMORY_ERROR;
 		}
 	}
 	//unpack tasks
