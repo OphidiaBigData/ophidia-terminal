@@ -324,7 +324,7 @@ int oph_term_help(const char *cmd);
 \tbefore the validation phase together with variable substitution.\n\
 \tAfter the validation phase, according to the value of OPH_TERM_IMGS, it can produce an image representing the workflow.\n\
 \tWith the option -m it returns the metadata relative to name,author and abstract and, if present,\n\
-\tsessionid,exec_mode,ncores,cwd,cdd,cube,callback_url,on_error,command,on_exit and run. In this case validation is not performed.\n"
+\tURL,sessionid,exec_mode,ncores,cwd,cdd,cube,callback_url,on_error,command,on_exit and run. In this case validation is not performed.\n"
 #define OPH_TERM_HELP_CHECK_LONG2 \
 "USAGE OF check COMMAND\\n\\n\
 \\tcheck [-m] workflow.json [param1 [param2 [...]]]\\n\\n\
@@ -333,7 +333,7 @@ int oph_term_help(const char *cmd);
 \\tbefore the validation phase together with variable substitution.\\n\
 \\tAfter the validation phase, according to the value of OPH_TERM_IMGS, it can produce an image representing the workflow.\\n\
 \\tWith the option -m it returns the metadata relative to name,author and abstract and, if present,\\n\
-\\tsessionid,exec_mode,ncores,cwd,cdd,cube,callback_url,on_error,command,on_exit and run. In this case validation is not performed.\\n"
+\\tURL,sessionid,exec_mode,ncores,cwd,cdd,cube,callback_url,on_error,command,on_exit and run. In this case validation is not performed.\\n"
 #endif
 
 #define OPH_TERM_HELP_ALIAS_SHORT "\"list aliases\"\n"

@@ -28,6 +28,10 @@ int oph_workflow_free(oph_workflow * workflow)
 	if (!workflow)
 		return OPH_WORKFLOW_EXIT_SUCCESS;
 	int i;
+	if (workflow->url) {
+		free(workflow->url);
+		workflow->url = NULL;
+	}
 	if (workflow->abstract) {
 		free(workflow->abstract);
 		workflow->abstract = NULL;
@@ -98,6 +102,10 @@ int oph_workflow_free(oph_workflow * workflow)
 	if (workflow->run) {
 		free(workflow->run);
 		workflow->run = NULL;
+	}
+	if (workflow->host_partition) {
+		free(workflow->host_partition);
+		workflow->host_partition = NULL;
 	}
 	free(workflow);
 	workflow = NULL;

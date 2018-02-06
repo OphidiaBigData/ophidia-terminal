@@ -133,6 +133,7 @@ typedef struct _oph_workflow_task {
  * \param name Name of the workflow
  * \param author Author of the workflow
  * \param abstract Abstract of the workflow
+ * \param url URL of the workflow
  * \param sessionid SessionID for the entire workflow
  * \param exec_mode Execution mode for the entire workflow
  * \param ncores Number of cores for the entire workflow
@@ -147,6 +148,7 @@ typedef struct _oph_workflow_task {
  * \param response Output of the execution
  * \param exit_values Values to be used in the operation executed on the end of workflow
  * \param output_format Format to code workflow output
+ * \param host_partition Host partition to be used during the workflow
  */
 typedef struct _oph_workflow {
 	int idjob;
@@ -158,6 +160,7 @@ typedef struct _oph_workflow {
 	char *name;
 	char *author;
 	char *abstract;
+	char *url;
 	char *sessionid;
 	char *exec_mode;
 	int ncores;
@@ -175,6 +178,7 @@ typedef struct _oph_workflow {
 	char *on_exit;
 	char *run;
 	int output_format;
+	char *host_partition;
 } oph_workflow;
 
 /* Functions for structs cleanup */
