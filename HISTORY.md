@@ -1,4 +1,26 @@
 
+## v1.2.0 - 2018-02-12
+
+### Fixed:
+
+- Bug in buffer overflow check during creation of dot string 
+- Bug [#4](https://github.com/OphidiaBigData/ophidia-terminal/issues/4)
+- Memory leaks when loading XML files
+- Bug in handling oph_base_src_path in case of workflows
+
+### Added:
+
+- URL to workflow header [#5](https://github.com/OphidiaBigData/ophidia-terminal/pull/5)
+- Control for known errors in WPS client
+- 'creation time' to history when calling 'resume' command
+- Print execution time of commands 
+- OPH_CDD in submitted workflows
+- 3 new aliases: mkdird, rmd, mvd
+- single call to get all configuration parameters from server 
+- auto-setting of cdd from server configuration
+- cdd parameter to workflow struct
+
+
 ## v1.1.0 - 2017-07-28
 
 ### Fixed:
@@ -43,7 +65,7 @@
 
 ### Fixed:
 
-- Bug [\#3](https://github.com/OphidiaBigData/ophidia-terminal/issues/3)
+- Bug [#3](https://github.com/OphidiaBigData/ophidia-terminal/issues/3)
 - Bug in gtk handler when window is closed while running in auto-view mode
 
 ### Added:
