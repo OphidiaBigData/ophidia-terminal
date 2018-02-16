@@ -16,8 +16,8 @@
 - Print execution time of commands 
 - OPH_CDD in submitted workflows
 - 3 new aliases: mkdird, rmd, mvd
-- single call to get all configuration parameters from server 
-- auto-setting of cdd from server configuration
+- Single call to get all configuration parameters from server
+- Auto-setting of cdd from server configuration
 - cdd parameter to workflow struct
 
 
