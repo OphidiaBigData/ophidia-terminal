@@ -1940,8 +1940,8 @@ int main(int argc, char **argv, char **envp)
 		}
 		// VISUALIZATION
 		if (response_for_viewer) {
-			char *newtoken = NULL, *exectime = NULL;
-			int viewer_res = oph_term_viewer((const char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_VIEWER), &response_for_viewer,
+			char *newtoken = NULL, *exectime = NULL, *viewer_type = hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_VIEWER);
+			int viewer_res = oph_term_viewer((const char *) viewer_type, &response_for_viewer,
 							 (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1)) ? ((const char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1)) : "red", 0, 0, 1, NULL,
 							 NULL, NULL,
 							 &newtoken, &exectime, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_GRAPH_LAYOUT));
@@ -1966,10 +1966,10 @@ int main(int argc, char **argv, char **envp)
 				pthread_mutex_unlock(&global_flag);
 				free(newtoken);
 			}
-			if (exectime) {
+			if (exectime && (!viewer_type || strcmp(viewer_type, OPH_TERM_VIEWER_TYPE_DUMP)))
 				(print_json) ? my_printf("Execution time: %s\\n", oph_print_exectime(&exectime)) : printf("Execution time: %s\n", oph_print_exectime(&exectime));
+			if (exectime)
 				free(exectime);
-			}
 		}
 		if (print_json)
 			print_oph_term_output_json(hashtbl);
@@ -2791,8 +2791,8 @@ int main(int argc, char **argv, char **envp)
 				if (response_for_viewer) {
 					int open_img = !strcmp((char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_IMGS), "open");
 					int save_img = open_img || !strcmp((char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_IMGS), "save");
-					char *newtoken = NULL, *exectime = NULL;
-					int viewer_res = oph_term_viewer((const char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_VIEWER), &response_for_viewer,
+					char *newtoken = NULL, *exectime = NULL, *viewer_type = hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_VIEWER);
+					int viewer_res = oph_term_viewer(viewer_type, &response_for_viewer,
 									 (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1)) ? ((const char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1)) : "red",
 									 save_img,
 									 open_img, 1, &newdatacube, &newcwd, &newcdd, &newtoken, &exectime, (char *) hashtbl_get(hashtbl,
@@ -2841,10 +2841,10 @@ int main(int argc, char **argv, char **envp)
 						pthread_mutex_unlock(&global_flag);
 						free(newtoken);
 					}
-					if (exectime) {
+					if (exectime && (!viewer_type || strcmp(viewer_type, OPH_TERM_VIEWER_TYPE_DUMP)))
 						(print_json) ? my_printf("Execution time: %s\\n", oph_print_exectime(&exectime)) : printf("Execution time: %s\n", oph_print_exectime(&exectime));
+					if (exectime)
 						free(exectime);
-					}
 				}
 				//update OPH_SESSION_ID if necessary
 				if (newsession) {
@@ -3201,8 +3201,8 @@ int main(int argc, char **argv, char **envp)
 				if (response_for_viewer) {
 					int open_img = !strcmp((char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_IMGS), "open");
 					int save_img = open_img || !strcmp((char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_IMGS), "save");
-					char *newtoken = NULL, *exectime = NULL;
-					int viewer_res = oph_term_viewer((const char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_VIEWER), &response_for_viewer,
+					char *newtoken = NULL, *exectime = NULL, *viewer_type = hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_VIEWER);
+					int viewer_res = oph_term_viewer(viewer_type, &response_for_viewer,
 									 (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1)) ? ((const char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1)) : "red",
 									 save_img,
 									 open_img, 1, &newdatacube, &newcwd, &newcdd, &newtoken, &exectime, (char *) hashtbl_get(hashtbl,
@@ -3251,10 +3251,10 @@ int main(int argc, char **argv, char **envp)
 						pthread_mutex_unlock(&global_flag);
 						free(newtoken);
 					}
-					if (exectime) {
+					if (exectime && (!viewer_type || strcmp(viewer_type, OPH_TERM_VIEWER_TYPE_DUMP)))
 						(print_json) ? my_printf("Execution time: %s\\n", oph_print_exectime(&exectime)) : printf("Execution time: %s\n", oph_print_exectime(&exectime));
+					if (exectime)
 						free(exectime);
-					}
 				}
 				//update OPH_SESSION_ID if necessary
 				if (newsession) {
@@ -5086,8 +5086,8 @@ int main(int argc, char **argv, char **envp)
 			}
 			// VISUALIZATION
 			if (response_for_viewer) {
-				char *newtoken = NULL, *exectime = NULL;
-				int viewer_res = oph_term_viewer((const char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_VIEWER), &response_for_viewer,
+				char *newtoken = NULL, *exectime = NULL, *viewer_type = hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_VIEWER);
+				int viewer_res = oph_term_viewer(viewer_type, &response_for_viewer,
 								 (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1)) ? ((const char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1)) : "red", 0, 0, 1,
 								 NULL, NULL,
 								 NULL, &newtoken, &exectime, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_GRAPH_LAYOUT));
@@ -5115,10 +5115,10 @@ int main(int argc, char **argv, char **envp)
 					pthread_mutex_unlock(&global_flag);
 					free(newtoken);
 				}
-				if (exectime) {
+				if (exectime && (!viewer_type || strcmp(viewer_type, OPH_TERM_VIEWER_TYPE_DUMP)))
 					(print_json) ? my_printf("Execution time: %s\\n", oph_print_exectime(&exectime)) : printf("Execution time: %s\n", oph_print_exectime(&exectime));
+				if (exectime)
 					free(exectime);
-				}
 			}
 			if (print_json)
 				print_oph_term_output_json(hashtbl);

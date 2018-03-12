@@ -1093,10 +1093,10 @@ void *main_loop(void *ptr)
 				filename[0] = '\0';
 
 			// VISUALIZATION
-			char *newtoken = NULL, *exectime = NULL;
+			char *newtoken = NULL, *exectime = NULL, *viewer_type = hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_VIEWER);
 			ended = oph_term_viewer_check_workflow_ended(response_for_viewer);
 			if (ended == 0) {
-				int viewer_res = oph_term_viewer((const char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_VIEWER), &response_for_viewer,
+				int viewer_res = oph_term_viewer(viewer_type, &response_for_viewer,
 								 (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1)) ? ((const char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1)) : "red", save_img,
 								 open_img,
 								 show_list, NULL, NULL, NULL, &newtoken, &exectime, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_GRAPH_LAYOUT));
@@ -1128,14 +1128,14 @@ void *main_loop(void *ptr)
 					pthread_mutex_unlock(&global_flag);
 					free(newtoken);
 				}
-				if (exectime) {
+				if (exectime && (!viewer_type || strcmp(viewer_type, OPH_TERM_VIEWER_TYPE_DUMP)))
 					(print_json) ? my_printf("Execution time: %s\\n", oph_print_exectime(&exectime)) : printf("Execution time: %s\n", oph_print_exectime(&exectime));
+				if (exectime)
 					free(exectime);
-				}
 				break;
 			} else {
 				if (!start_gtk) {
-					int viewer_res = oph_term_viewer((const char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_VIEWER), &response_for_viewer,
+					int viewer_res = oph_term_viewer(viewer_type, &response_for_viewer,
 									 (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1)) ? ((const char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1)) : "red",
 									 save_img,
 									 open_img, show_list, NULL, NULL, NULL, &newtoken, &exectime, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_GRAPH_LAYOUT));
@@ -1161,10 +1161,10 @@ void *main_loop(void *ptr)
 						pthread_mutex_unlock(&global_flag);
 						free(newtoken);
 					}
-					if (exectime) {
+					if (exectime && (!viewer_type || strcmp(viewer_type, OPH_TERM_VIEWER_TYPE_DUMP)))
 						(print_json) ? my_printf("Execution time: %s\\n", oph_print_exectime(&exectime)) : printf("Execution time: %s\n", oph_print_exectime(&exectime));
+					if (exectime)
 						free(exectime);
-					}
 				} else if (response_for_viewer) {
 					free(response_for_viewer);
 					response_for_viewer = NULL;
