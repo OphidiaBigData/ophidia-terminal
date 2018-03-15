@@ -516,12 +516,16 @@ int oph_term_client(char *cmd_line, char *command, char **newsession, char *user
 	gsi_set_confidentiality(&soap_global, GLOBUS_TRUE);
 	gsi_set_integrity(&soap_global, GLOBUS_TRUE);
 
-	/* Timeout after 2 minutes stall on send/recv */
-	gsi_set_recv_timeout(&soap_global, 3600);
-	gsi_set_send_timeout(&soap_global, 3600);
+	char *timeout = hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TIMEOUT);
+	int connection_timeout = timeout ? (int) strtol(timeout, NULL, 10) : OPH_TERM_DEFAULT_TIMEOUT;
+	if (connection_timeout <= 0)
+		connection_timeout = OPH_TERM_DEFAULT_TIMEOUT;
+
+	gsi_set_recv_timeout(&soap_global, connection_timeout);
+	gsi_set_send_timeout(&soap_global, connection_timeout);
 
 	soap_global.connect_timeout = 60;	/* try to connect for 1 minute */
-	soap_global.send_timeout = soap_global.recv_timeout = 3600;	/* if I/O stalls, then timeout after 1 hour */
+	soap_global.send_timeout = soap_global.recv_timeout = connection_timeout;
 
 	snprintf(server_global, OPH_MAX_STRING_SIZE, "httpg://%s:%s", host, port);
 

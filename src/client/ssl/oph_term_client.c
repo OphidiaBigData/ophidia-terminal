@@ -501,8 +501,13 @@ int oph_term_client(char *cmd_line, char *command, char **newsession, char *user
 		return 1;
 	}
 #endif
+	char *timeout = hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TIMEOUT);
+	int connection_timeout = timeout ? (int) strtol(timeout, NULL, 10) : OPH_TERM_DEFAULT_TIMEOUT;
+	if (connection_timeout <= 0)
+		connection_timeout = OPH_TERM_DEFAULT_TIMEOUT;
+
 	soap_global.connect_timeout = 60;	/* try to connect for 1 minute */
-	soap_global.send_timeout = soap_global.recv_timeout = 3600;	/* if I/O stalls, then timeout after 1 hour */
+	soap_global.send_timeout = soap_global.recv_timeout = connection_timeout;
 
 #ifdef WITH_OPENSSL
 	snprintf(server_global, OPH_MAX_STRING_SIZE, "https://%s:%s", host, port);

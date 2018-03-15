@@ -755,6 +755,14 @@ int oph_term_help(const char *cmd);
 "OPH_TOKEN\\n\
 \\tToken used to connect to the remote server by using OpenId. If it is set, username and password will be ignored.\\n"
 
+#define OPH_TERM_HELP_OPH_TIMEOUT_SHORT "\"timeout\"\n"
+#define OPH_TERM_HELP_OPH_TIMEOUT_LONG \
+"\e[1mOPH_TIMEOUT\e[0m\n\
+\tMaximum connection duration in seconds. By default is 3600 s. The terminal remains connected for the entire execution time of any synchronous command.\n"
+#define OPH_TERM_HELP_OPH_TIMEOUT_LONG2 \
+"OPH_TIMEOUT\\n\
+\\tMaximum connection duration in seconds. By default is 3600 s. The terminal remains connected for the entire execution time of any synchronous command.\\n"
+
 #define OPH_TERM_HELP_OPH_SERVER_HOST_SHORT "\"server address\"\n"
 #define OPH_TERM_HELP_OPH_SERVER_HOST_LONG \
 "\e[1mOPH_SERVER_HOST\e[0m\n\
