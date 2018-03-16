@@ -332,6 +332,8 @@ void print_cmd_list()
 																  OPH_TERM_HELP_OPH_WORKFLOW_AUTOVIEW_SHORT);
 		} else if (!strcmp(env_vars[i], OPH_TERM_ENV_OPH_TOKEN)) {
 			(print_json) ? my_printf("\\t%25s = %s", env_vars[i], OPH_TERM_HELP_OPH_TOKEN_SHORT) : printf("\t%25s = %s", env_vars[i], OPH_TERM_HELP_OPH_TOKEN_SHORT);
+		} else if (!strcmp(env_vars[i], OPH_TERM_ENV_OPH_TIMEOUT)) {
+			(print_json) ? my_printf("\\t%25s = %s", env_vars[i], OPH_TERM_HELP_OPH_TIMEOUT_SHORT) : printf("\t%25s = %s", env_vars[i], OPH_TERM_HELP_OPH_TIMEOUT_SHORT);
 		}
 #ifdef WITH_IM_SUPPORT
 		else if (!strcmp(env_vars[i], OPH_TERM_ENV_OPH_INFRASTRUCTURE_URL)) {
@@ -403,6 +405,8 @@ void print_env_var_usage(const char *var)
 		(print_json) ? my_printf("%s", OPH_TERM_HELP_OPH_WORKFLOW_AUTOVIEW_LONG2) : printf("%s", OPH_TERM_HELP_OPH_WORKFLOW_AUTOVIEW_LONG);
 	} else if (!strcmp(var, OPH_TERM_ENV_OPH_TOKEN)) {
 		(print_json) ? my_printf("%s", OPH_TERM_HELP_OPH_TOKEN_LONG2) : printf("%s", OPH_TERM_HELP_OPH_TOKEN_LONG);
+	} else if (!strcmp(var, OPH_TERM_ENV_OPH_TIMEOUT)) {
+		(print_json) ? my_printf("%s", OPH_TERM_HELP_OPH_TIMEOUT_LONG2) : printf("%s", OPH_TERM_HELP_OPH_TIMEOUT_LONG);
 	}
 #ifdef WITH_IM_SUPPORT
 	else if (!strcmp(var, OPH_TERM_ENV_OPH_INFRASTRUCTURE_URL)) {

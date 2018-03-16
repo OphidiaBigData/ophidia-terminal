@@ -293,6 +293,13 @@ int startup_opt_setup(int argc, char *argv[], char *envp[], HASHTBL * hashtbl, c
 																		     OPH_TERM_ENV_OPH_TOKEN, OPH_TERM_MEMORY_ERROR);
 		return OPH_TERM_MEMORY_ERROR;
 	}
+	//preset OPH_TIMEOUT
+	if (oph_term_setenv(hashtbl, OPH_TERM_ENV_OPH_TIMEOUT, "3600")) {
+		(print_json) ? my_fprintf(stderr, "Could not set variable %s [CODE %d]\\n", OPH_TERM_ENV_OPH_TIMEOUT, OPH_TERM_MEMORY_ERROR) : fprintf(stderr,
+																		       "\e[1;31mCould not set variable %s [CODE %d]\e[0m\n",
+																		       OPH_TERM_ENV_OPH_TIMEOUT, OPH_TERM_MEMORY_ERROR);
+		return OPH_TERM_MEMORY_ERROR;
+	}
 	//preset useful aliases
 	int z;
 	for (z = 0; z < pre_defined_aliases_num; z++) {
