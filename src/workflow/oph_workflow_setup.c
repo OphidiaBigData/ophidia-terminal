@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <stddef.h>
 #include <ctype.h>
+#include <locale.h>
 
 #include <gtk/gtk.h>
 
@@ -102,6 +103,7 @@ char *oph_print_exectime(char **exectime)
 	if (!exectime)
 		return NULL;
 	char _exectime[OPH_WORKFLOW_BASIC_SIZE];
+	setlocale(LC_ALL, "C");
 	double n_exectime = strtod(*exectime, NULL);
 	if (n_exectime < 60.0)
 		snprintf(_exectime, OPH_WORKFLOW_BASIC_SIZE, "%.2f seconds", n_exectime);
