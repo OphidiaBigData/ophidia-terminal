@@ -1513,7 +1513,7 @@ void oph_term_viewer_retrieve_info(oph_json * json, char *txtstring, char **newd
 							}
 						}
 					}
-				if (!*newdatacube)
+				if (!*newdatacube && json->extra)
 					for (i = 0; i < json->extra->keys_num; i++)
 						if (!strcmp(json->extra->keys[i], OPH_TERM_CUBE_JSON)) {
 							*newdatacube = (char *) strdup(json->extra->values[i]);
@@ -1536,7 +1536,7 @@ void oph_term_viewer_retrieve_info(oph_json * json, char *txtstring, char **newd
 							}
 						}
 					}
-				if (!*newcwd)
+				if (!*newcwd && json->extra)
 					for (i = 0; i < json->extra->keys_num; i++)
 						if (!strcmp(json->extra->keys[i], OPH_TERM_CWD_JSON)) {
 							*newcwd = (char *) strdup(json->extra->values[i]);
@@ -1559,7 +1559,7 @@ void oph_term_viewer_retrieve_info(oph_json * json, char *txtstring, char **newd
 							}
 						}
 					}
-				if (!*newcdd)
+				if (!*newcdd && json->extra)
 					for (i = 0; i < json->extra->keys_num; i++) {
 						if (!strcmp(json->extra->keys[i], OPH_TERM_CDD_JSON)) {
 							*newcdd = (char *) strdup(json->extra->values[i]);
