@@ -4163,14 +4163,13 @@ int main(int argc, char **argv, char **envp)
 			}
 
 			if (last_njobs > 0) {
-				int begin = 0, end = 0;
+				int begin = 0, end = 0, size = 0;
 				char **exit_status = NULL;
 
 				//retrieve number of jobs of new session from server
-				int error_code =
-				    oph_term_get_session_size(tmp_session, _user, _passwd, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST),
-							      (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT), &oph_term_return, &begin, &end, 1, hashtbl, &exit_status);
-				int size = 1 + end - begin;
+				int error_code = oph_term_get_session_size(tmp_session, _user, _passwd, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST),
+									   (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT), &oph_term_return, &begin, &end, 1, hashtbl, &exit_status,
+									   &size);
 				if (error_code) {
 					if (exit_status) {
 						int jj;
@@ -4188,8 +4187,10 @@ int main(int argc, char **argv, char **envp)
 					continue;
 				}
 
+				int start = 1 + end - begin;
+				last_njobs = (last_njobs > start) ? start : last_njobs;
 				last_njobs = (last_njobs > end) ? end : last_njobs;
-				last_njobs = (last_njobs > size) ? end : last_njobs;
+				last_njobs = (last_njobs > size) ? size : last_njobs;
 
 				int i, stop = 0, format;
 				char *tmp_command = NULL;

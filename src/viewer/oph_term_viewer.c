@@ -2283,7 +2283,7 @@ int oph_term_viewer_retrieve_command_jobid(char *json_string, char **command, ch
 	return oph_term_viewer_retrieve_command_jobid_creation(json_string, command, jobid, NULL);
 }
 
-int oph_term_viewer_retrieve_session_size(char *json_string, int *begin, int *end, char ***exit_status)
+int oph_term_viewer_retrieve_session_size(char *json_string, int *begin, int *end, char ***exit_status, int *size)
 {
 	if (!json_string || !begin || !end)
 		return OPH_TERM_INVALID_PARAM_VALUE;
@@ -2311,9 +2311,9 @@ int oph_term_viewer_retrieve_session_size(char *json_string, int *begin, int *en
 					session_size = grid->values_num1;
 					*begin = (int) strtol(grid->values[0][OPH_TERM_VIEWER_WORKFLOW_ID_INDEX], NULL, 10);
 					*end = (int) strtol(grid->values[session_size - 1][OPH_TERM_VIEWER_WORKFLOW_ID_INDEX], NULL, 10);
-					if (exit_status) {
+					if (exit_status && size) {
 						int j;
-						*exit_status = (char **) calloc(session_size, sizeof(char *));
+						*exit_status = (char **) calloc(*size = session_size, sizeof(char *));
 						for (j = 0; j < session_size; j++)
 							(*exit_status)[j] = strdup(grid->values[j][OPH_TERM_VIEWER_EXIT_STATUS_INDEX]);
 					}

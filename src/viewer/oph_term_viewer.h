@@ -86,7 +86,7 @@ int oph_term_viewer_retrieve_command_jobid_creation(char *json_string, char **co
 int oph_term_viewer_retrieve_command_jobid(char *json_string, char **command, char **jobid);
 
 //Retrieve number of jobs in session after a call to oph_resume
-int oph_term_viewer_retrieve_session_size(char *json_string, int *begin, int *end, char ***exit_status);
+int oph_term_viewer_retrieve_session_size(char *json_string, int *begin, int *end, char ***exit_status, int *size);
 
 //Check if session has been saved by server after a call to oph_resume with save=yes
 int oph_term_viewer_is_session_switched(char *json_string);
