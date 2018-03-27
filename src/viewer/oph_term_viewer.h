@@ -60,6 +60,7 @@ extern int oph_term_error_cur;
 #define OPH_TERM_VIEWER_WHITE_STRING		"\033[1;37m%s\033[0m"
 
 #define OPH_TERM_VIEWER_COLOR_STRING_SURPLUS	11
+#define OPH_TERM_VIEWER_WORKFLOW_ID_INDEX	2
 #define OPH_TERM_VIEWER_EXIT_STATUS_INDEX	5
 
 #define OPH_TERM_VIEWER_WORKFLOW_TASK_LIST	"Workflow Task List"
@@ -85,7 +86,7 @@ int oph_term_viewer_retrieve_command_jobid_creation(char *json_string, char **co
 int oph_term_viewer_retrieve_command_jobid(char *json_string, char **command, char **jobid);
 
 //Retrieve number of jobs in session after a call to oph_resume
-int oph_term_viewer_retrieve_session_size(char *json_string, int *session_size, char ***exit_status);
+int oph_term_viewer_retrieve_session_size(char *json_string, int *begin, int *end, char ***exit_status);
 
 //Check if session has been saved by server after a call to oph_resume with save=yes
 int oph_term_viewer_is_session_switched(char *json_string);
