@@ -1447,6 +1447,29 @@ int main(int argc, char **argv, char **envp)
 	if (!print_json)
 		printf("\e[2m");
 
+	// Set client address
+	char *client_address = NULL;
+	if (oph_term_env_get_client_address(&client_address)) {
+		(print_json) ? my_fprintf(stderr, "Error getting client address\\n") : fprintf(stderr, "\e[1;31mError getting client address\e[0m\n");
+		oph_term_env_clear(hashtbl);
+		oph_term_alias_clear(aliases);
+		if (print_json)
+			print_oph_term_output_json(hashtbl);
+		return OPH_TERM_MEMORY_ERROR;
+	}
+	if (client_address) {
+		if (hashtbl_insert(hashtbl, OPH_TERM_ENV_OPH_CLIENT_ADDRESS, client_address, strlen(client_address) + 1)) {
+			(print_json) ? my_fprintf(stderr, "Error setting client address\\n") : fprintf(stderr, "\e[1;31mError setting client address\e[0m\n");
+			free(client_address);
+			oph_term_env_clear(hashtbl);
+			oph_term_alias_clear(aliases);
+			if (print_json)
+				print_oph_term_output_json(hashtbl);
+			return OPH_TERM_MEMORY_ERROR;
+		}
+		free(client_address);
+	}
+
 	char *_user = hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_USER);
 	char token_user[10], *_token = hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TOKEN);
 

@@ -76,6 +76,9 @@
 #define env_vars_num 18
 #endif
 
+// Other keys
+#define OPH_TERM_ENV_OPH_CLIENT_ADDRESS		"OPH_CLIENT_ADDRESS"
+
 static char *env_vars[env_vars_num] = {
 	OPH_TERM_ENV_OPH_TERM_PS1,
 	OPH_TERM_ENV_OPH_USER,
@@ -203,6 +206,9 @@ int oph_term_get_full_request(char *session, char *wid, char *user, char *passwd
 
 // Check if wid and mkid are valid
 int oph_term_check_wid_mkid(char *session, char *wid, char *mkid, char *user, char *passwd, char *host, char *port, int *return_value, HASHTBL * hashtbl);
+
+// Get client address
+int oph_term_env_get_client_address(char **client_address);
 
 /* ALIAS */
 //Alloc hashtable

@@ -20,6 +20,8 @@
 
 #include <ctype.h>
 
+#define OPH_TERM_ENV_CLIENT_ADDRESS "ipinfo.io/ip"
+
 #define UNUSED(x) {(void)(x);}
 
 HASHTBL *conf_hashtbl = NULL;
@@ -1881,8 +1883,6 @@ int is_alias(HASHTBL * hashtbl, const char *key)
 	return 0;
 }
 
-//IM related struct and functions TODO
-#ifdef WITH_IM_SUPPORT
 typedef struct {
 	char *buffer;
 	size_t len;
@@ -1904,6 +1904,52 @@ size_t _write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
 	return realsize;
 }
 
+int oph_term_env_get_client_address(char **client_address)
+{
+	if (!client_address) {
+		(print_json) ? my_fprintf(stderr, "Null parameters\\n") : fprintf(stderr, "\e[1;31mNull parameters\e[0m\n");
+		return OPH_TERM_INVALID_PARAM_VALUE;
+	}
+	*client_address = NULL;
+
+	CURLcode ret;
+	curlbuf mybuf;
+	mybuf.buffer = malloc(1);	/* will be grown as needed by the realloc */
+	mybuf.len = 0;		/* no data at this point */
+	CURL *hnd = curl_easy_init();
+	curl_easy_setopt(hnd, CURLOPT_WRITEDATA, &mybuf);
+	curl_easy_setopt(hnd, CURLOPT_WRITEFUNCTION, _write_callback);
+	curl_easy_setopt(hnd, CURLOPT_INFILESIZE_LARGE, (curl_off_t) - 1);
+	curl_easy_setopt(hnd, CURLOPT_URL, OPH_TERM_ENV_CLIENT_ADDRESS);
+	curl_easy_setopt(hnd, CURLOPT_FOLLOWLOCATION, 1L);
+	curl_easy_setopt(hnd, CURLOPT_UNRESTRICTED_AUTH, 1L);
+	curl_easy_setopt(hnd, CURLOPT_MAXREDIRS, 50);
+	curl_easy_setopt(hnd, CURLOPT_CONNECTTIMEOUT, 10);
+	ret = curl_easy_perform(hnd);
+
+	long http_code = 0;
+	curl_easy_getinfo(hnd, CURLINFO_RESPONSE_CODE, &http_code);
+	if (http_code != 200 || ret == CURLE_ABORTED_BY_CALLBACK) {
+		curl_easy_cleanup(hnd);
+		if (mybuf.buffer)
+			free(mybuf.buffer);
+		return OPH_TERM_SUCCESS;
+	}
+	curl_easy_cleanup(hnd);
+
+	if (mybuf.buffer) {
+		if (strlen(mybuf.buffer) > 1) {
+			mybuf.buffer[strlen(mybuf.buffer) - 1] = 0;
+			*client_address = mybuf.buffer;
+		} else
+			free(mybuf.buffer);
+	}
+
+	return OPH_TERM_SUCCESS;
+}
+
+//IM related struct and functions TODO
+#ifdef WITH_IM_SUPPORT
 int oph_term_env_deploy(const char *auth_header, const char *infrastructure_url, const char *radl_filename, HASHTBL * hashtbl)
 {
 	if (!auth_header || !infrastructure_url || !radl_filename || !hashtbl) {

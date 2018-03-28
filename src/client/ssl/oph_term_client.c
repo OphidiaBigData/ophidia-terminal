@@ -233,6 +233,12 @@ void oph_execute(struct soap *soap, xsd__string query, char *wps, char **newsess
 					n += snprintf(fixed_query + n, WORKFLOW_MAX_LEN - n, "%s%s%s", WRAPPING_WORKFLOW4f, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CDD), WRAPPING_WORKFLOW4f_1);
 				}
 			}
+			if (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CLIENT_ADDRESS)) {
+				if (!strstr(query, "\"client_address\"")) {
+					n += snprintf(fixed_query + n, WORKFLOW_MAX_LEN - n, "%s%s%s", WRAPPING_WORKFLOW4g, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CLIENT_ADDRESS),
+						      WRAPPING_WORKFLOW4g_1);
+				}
+			}
 			if (cmd_line) {
 				if (!strstr(query, "\"command\"")) {
 					n += snprintf(fixed_query + n, WORKFLOW_MAX_LEN - n, "%s%s%s", WRAPPING_WORKFLOW4b, cmd_line, WRAPPING_WORKFLOW4b_1);
