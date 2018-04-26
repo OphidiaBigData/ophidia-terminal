@@ -747,6 +747,14 @@ int oph_term_help(const char *cmd);
 "OPH_PASSWD\\n\
 \\tPassword used to connect to the remote server when SSL is used (default). With the GSI interface it is ignored.\\n"
 
+#define OPH_TERM_HELP_OPH_HOST_PARTITION_SHORT "\"host_partition\"\n"
+#define OPH_TERM_HELP_OPH_HOST_PARTITION_LONG \
+"\e[1mOPH_HOST_PARTITION\e[0m\n\
+\tName of default host partition.\n"
+#define OPH_TERM_HELP_OPH_HOST_PARTITION_LONG2 \
+"OPH_HOST_PARTITION\\n\
+\\tName of default host partition.\\n"
+
 #define OPH_TERM_HELP_OPH_TOKEN_SHORT "\"token\"\n"
 #define OPH_TERM_HELP_OPH_TOKEN_LONG \
 "\e[1mOPH_TOKEN\e[0m\n\

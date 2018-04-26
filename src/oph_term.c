@@ -286,6 +286,14 @@ int startup_opt_setup(int argc, char *argv[], char *envp[], HASHTBL * hashtbl, c
 																				 OPH_TERM_MEMORY_ERROR);
 		return OPH_TERM_MEMORY_ERROR;
 	}
+	//preset OPH_HOST_PARTITION
+	if (oph_term_setenv(hashtbl, OPH_TERM_ENV_OPH_HOST_PARTITION, "test")) {
+		(print_json) ? my_fprintf(stderr, "Could not set variable %s [CODE %d]\\n", OPH_TERM_ENV_OPH_HOST_PARTITION, OPH_TERM_MEMORY_ERROR) : fprintf(stderr,
+																			      "\e[1;31mCould not set variable %s [CODE %d]\e[0m\n",
+																			      OPH_TERM_ENV_OPH_HOST_PARTITION,
+																			      OPH_TERM_MEMORY_ERROR);
+		return OPH_TERM_MEMORY_ERROR;
+	}
 	//preset OPH_TOKEN
 	if (oph_term_setenv(hashtbl, OPH_TERM_ENV_OPH_TOKEN, "")) {
 		(print_json) ? my_fprintf(stderr, "Could not set variable %s [CODE %d]\\n", OPH_TERM_ENV_OPH_TOKEN, OPH_TERM_MEMORY_ERROR) : fprintf(stderr,
@@ -2768,6 +2776,9 @@ int main(int argc, char **argv, char **envp)
 					}
 				}
 				n += snprintf(submission_string + n, OPH_TERM_MAX_LEN - n, "cdd=%s;", (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CDD));
+				//host partition management
+				if (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_HOST_PARTITION))
+					n += snprintf(submission_string + n, OPH_TERM_MAX_LEN - n, "host_partition=%s;", (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_HOST_PARTITION));
 
 				// SUBMISSION
 				if (strstr(submission_string, ";cube=[") || strstr(submission_string, " cube=["))
@@ -3173,6 +3184,31 @@ int main(int argc, char **argv, char **envp)
 						}
 						snprintf(cursorcopy, OPH_TERM_MAX_LEN, "%scdd=%s;", cursorcopy2, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CDD));
 						free(cursorcopy2);
+					}
+				}
+				//host_partition management
+				if (!strstr(cursor, ";host_partition=") && strncmp(cursor, "host_partition=", 15)) {
+					if (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_HOST_PARTITION)) {
+						if (!flag) {
+							snprintf(cursorcopy, OPH_TERM_MAX_LEN, "%shost_partition=%s;", cursor, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_HOST_PARTITION));
+							flag = 1;
+						} else {
+							char *cursorcopy2 = strdup(cursorcopy);
+							if (!cursorcopy2) {
+								(print_json) ? my_fprintf(stderr, "Could not use OPH_HOST_PARTITION [CODE %d]\\n", OPH_TERM_MEMORY_ERROR) : fprintf(stderr,
+																						    "\e[1;31mCould not use OPH_HOST_PARTITION [CODE %d]\e[0m\n",
+																						    OPH_TERM_MEMORY_ERROR);
+								if (print_json)
+									print_oph_term_output_json(hashtbl);
+								if (exec_one_statement) {
+									oph_term_return = OPH_TERM_MEMORY_ERROR;
+									break;
+								}
+								continue;
+							}
+							snprintf(cursorcopy, OPH_TERM_MAX_LEN, "%shost_partition=%s;", cursorcopy2, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_HOST_PARTITION));
+							free(cursorcopy2);
+						}
 					}
 				}
 				//prefix operator name
