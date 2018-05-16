@@ -2303,7 +2303,7 @@ int oph_term_viewer_retrieve_session_size(char *json_string, int *begin, int *en
 	int found = 0, session_size = 0;
 	if (json->response_num >= 1) {
 		size_t i;
-		oph_json_obj_grid *grid = (oph_json_obj_grid *) json->response[i].objcontent;
+		oph_json_obj_grid *grid = NULL;
 		for (i = 0; i < json->response_num; i++) {
 			if (!strcmp(json->response[i].objkey, "resume")) {
 				if (json->response[i].objcontent_num >= 1) {
