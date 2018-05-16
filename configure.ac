@@ -193,6 +193,7 @@ AC_SUBST(GTK2_INCLUDE)
 GTK2_LIB="$gtk2_lib_path"
 AC_SUBST(GTK2_LIB)
 
+AC_CHECK_LIB(gthread-2.0, g_thread_init)
 
 PKG_CHECK_MODULES(JANSSON, jansson >= 2.3)
 AC_ARG_WITH(jansson_header_path,
