@@ -1864,8 +1864,6 @@ int main(int argc, char **argv, char **envp)
 			return OPH_TERM_INVALID_PARAM_VALUE;
 		}
 		if (oph_workflow_indexing(tmp_workflow->tasks, tmp_workflow->tasks_num)) {
-			(print_json) ? my_fprintf(stderr, "There are some problems with the tasks (duplicates, loops, etc.)\\n") : fprintf(stderr,
-																	   "\e[1;31mThere are some problems with the tasks (duplicates, loops, etc.)\e[0m\n");
 			(print_json) ? my_fprintf(stderr, "Workflow is not a valid Ophidia Workflow JSON file.\\n") : fprintf(stderr,
 															      "\e[1;31mWorkflow is not a valid Ophidia Workflow JSON file.\e[0m\n");
 			oph_term_env_clear(hashtbl);
@@ -5041,8 +5039,6 @@ int main(int argc, char **argv, char **envp)
 				continue;
 			}
 			if (oph_workflow_indexing(tmp_workflow->tasks, tmp_workflow->tasks_num)) {
-				(print_json) ? my_fprintf(stderr, "There are some problems with the tasks (duplicates, loops, etc.)\\n") : fprintf(stderr,
-																		   "\e[1;31mThere are some problems with the tasks (duplicates, loops, etc.)\e[0m\n");
 				(print_json) ? my_fprintf(stderr, "Workflow is not a valid Ophidia Workflow JSON file.\\n") : fprintf(stderr,
 																      "\e[1;31mWorkflow is not a valid Ophidia Workflow JSON file.\e[0m\n");
 				if (submission_workflow) {
@@ -5530,8 +5526,6 @@ int main(int argc, char **argv, char **envp)
 					oph_workflow_free(tmp_workflow);
 				} else {
 					if (oph_workflow_indexing(tmp_workflow->tasks, tmp_workflow->tasks_num)) {
-						(print_json) ? my_fprintf(stderr, "There are some problems with the tasks (duplicates, loops, etc.)\\n") : fprintf(stderr,
-																				   "\e[1;31mThere are some problems with the tasks (duplicates, loops, etc.)\e[0m\n");
 						(print_json) ? my_fprintf(stderr, "Workflow is NOT a VALID Ophidia Workflow.\\n") : fprintf(stderr,
 																	    "Workflow is \e[1;31mNOT\e[0m a \e[1;31mVALID\e[0m Ophidia Workflow.\n");
 						oph_workflow_free(tmp_workflow);

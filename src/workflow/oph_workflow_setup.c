@@ -129,6 +129,7 @@ char *oph_print_exectime(char **exectime)
 int oph_workflow_indexing(oph_workflow_task * tasks, int tasks_num)
 {
 	if (!tasks || tasks_num < 1) {
+		(print_json) ? my_fprintf(stderr, "No task found.\\n") : fprintf(stderr, "No task found.\n");
 		return OPH_WORKFLOW_EXIT_BAD_PARAM_ERROR;
 	}
 
@@ -139,6 +140,7 @@ int oph_workflow_indexing(oph_workflow_task * tasks, int tasks_num)
 		curtask = &(tasks[i]);
 		for (j = 0; j < curtask->deps_num; j++) {
 			if (!strcmp(curtask->deps[j].task_name, curtask->name)) {
+				(print_json) ? my_fprintf(stderr, "Task '%s' cannot depend on itself.\\n", curtask->name) : fprintf(stderr, "Task '%s' cannot depend on itself.\n", curtask->name);
 				return OPH_WORKFLOW_EXIT_BAD_PARAM_ERROR;
 			}
 			for (k = 0; k < tasks_num; k++) {
@@ -147,6 +149,7 @@ int oph_workflow_indexing(oph_workflow_task * tasks, int tasks_num)
 					if (tasks[k].dependents_indexes_num == 0) {
 						tasks[k].dependents_indexes = (int *) calloc(1, sizeof(int));
 						if (!(tasks[k].dependents_indexes)) {
+							(print_json) ? my_fprintf(stderr, "Memory error.\\n") : fprintf(stderr, "Memory error.\n");
 							return OPH_WORKFLOW_EXIT_MEMORY_ERROR;
 						}
 						tasks[k].dependents_indexes[0] = i;
@@ -156,6 +159,7 @@ int oph_workflow_indexing(oph_workflow_task * tasks, int tasks_num)
 						tasks[k].dependents_indexes = (int *) realloc(tasks[k].dependents_indexes, (tasks[k].dependents_indexes_num + 1) * sizeof(int));
 						if (!(tasks[k].dependents_indexes)) {
 							tasks[k].dependents_indexes = tmp;
+							(print_json) ? my_fprintf(stderr, "Memory error.\\n") : fprintf(stderr, "Memory error.\n");
 							return OPH_WORKFLOW_EXIT_MEMORY_ERROR;
 						}
 						tasks[k].dependents_indexes[tasks[k].dependents_indexes_num] = i;
@@ -165,6 +169,10 @@ int oph_workflow_indexing(oph_workflow_task * tasks, int tasks_num)
 				}
 			}
 			if (k >= tasks_num) {
+				(print_json) ? my_fprintf(stderr, "Task '%s' depending on '%s' not found.\\n", curtask->name, curtask->deps[j].task_name) : fprintf(stderr,
+																				    "Task '%s' depending on '%s' not found.\n",
+																				    curtask->name,
+																				    curtask->deps[j].task_name);
 				return OPH_WORKFLOW_EXIT_BAD_PARAM_ERROR;
 			}
 		}
@@ -313,13 +321,11 @@ int oph_workflow_validate(oph_workflow * workflow)
 		}
 	}
 
-	//      else
 	for (k = 0; k < workflow->tasks_num; k++)
 		workflow_node_free(&(graph[k]));
 	free(graph);
 	graph = NULL;
 	workflow_s_nodes_free(&S);
-	//          return success (graph has no cycles)
 
 	// Check for flow control operators
 	if (workflow_validate_fco(workflow))
@@ -850,13 +856,14 @@ int oph_workflow_print_status(oph_workflow * workflow, int save_img, int open_im
 
 void destroy(GtkWidget * window, GtkWidget * widget)
 {
-	UNUSED(window) UNUSED(widget)
-	    gtk_main_quit();
+	UNUSED(window);
+	UNUSED(widget);
+	gtk_main_quit();
 }
 
 gboolean resize_image(GtkWidget * window, GdkEvent * event, GtkWidget * widget)
 {
-	UNUSED(event)
+	UNUSED(event);
 	GError *error = NULL;
 	if (strlen(filename) > 0) {
 		if (pixbuf) {
@@ -881,7 +888,7 @@ void set_image(GtkWidget * widget, gpointer pixbuf)
 
 void resize_image2(GtkWidget * window, GtkWidget * widget)
 {
-	UNUSED(widget)
+	UNUSED(widget);
 	GError *error = NULL;
 	if (strlen(filename) > 0) {
 		if (pixbuf) {
@@ -1193,12 +1200,15 @@ void *main_loop(void *ptr)
 int view_status(int iterations_num, char *command_line, char *tmp_submission_string, HASHTBL * hashtbl, int *oph_term_return, char *tmp_session, char *tmp_workflow, int save_img, int open_img,
 		int show_list, int time_interval, oph_workflow * wf)
 {
-	UNUSED(cmds) UNUSED(env_vars)
-	    UNUSED(pre_defined_aliases_keys)
-	    UNUSED(pre_defined_aliases_values)
-	    UNUSED(env_vars_ptr) UNUSED(alias_ptr)
-	    UNUSED(xml_defs) UNUSED(operators_list)
-	    UNUSED(operators_list_size)
+	UNUSED(cmds);
+	UNUSED(env_vars);
+	UNUSED(pre_defined_aliases_keys);
+	UNUSED(pre_defined_aliases_values);
+	UNUSED(env_vars_ptr);
+	UNUSED(alias_ptr);
+	UNUSED(xml_defs);
+	UNUSED(operators_list);
+	UNUSED(operators_list_size);
 
 	GThread *Thread2 = NULL;
 	GError *err2 = NULL;
@@ -1563,90 +1573,159 @@ int workflow_validate_fco(oph_workflow * wf)
 			for (i = 0; i < wf->tasks_num; ++i)
 				flag[i] = 1;
 			number = workflow_number_of(wf, k, k, k, OPH_OPERATOR_ENDFOR, OPH_OPERATOR_FOR, flag, 0, &child);
-			if (!number || (number > 1))
+			if (!number || (number > 1)) {
+				(print_json) ? my_fprintf(stderr, "Found %s%d ways to reach '%s' corresponding to '%s'.\\n", number ? "at least" : "", number, OPH_OPERATOR_ENDFOR,
+							  wf->tasks[k].name) : fprintf(stderr, "Found %s%d ways to reach '%s' corresponding to '%s'.\n", number ? "at least" : "", number,
+										       OPH_OPERATOR_ENDFOR, wf->tasks[k].name);
 				break;
+			}
 			for (i = 0; i < wf->tasks_num; ++i)
 				if ((wf->tasks[i].parent == k) && strncasecmp(wf->tasks[k].operator, OPH_OPERATOR_ENDFOR, OPH_WORKFLOW_MAX_STRING) && !workflow_is_child_of(wf, i, child))
 					break;
-			if (i < wf->tasks_num)
+			if (i < wf->tasks_num) {
+				(print_json) ? my_fprintf(stderr, "Found a wrong correspondence between '%s' and '%s'.\\n", wf->tasks[k].name, OPH_OPERATOR_ENDFOR) : fprintf(stderr,
+																					      "Found a wrong correspondence between '%s' and '%s'.\n",
+																					      wf->tasks[k].name,
+																					      OPH_OPERATOR_ENDFOR);
 				break;
+			}
 		} else if (!strncasecmp(wf->tasks[k].operator, OPH_OPERATOR_IF, OPH_WORKFLOW_MAX_STRING)) {
 			for (i = 0; i < wf->tasks_num; ++i)
 				flag[i] = 1;
 			child = -1;
 			number = workflow_number_of(wf, k, k, k, OPH_OPERATOR_ELSEIF, OPH_OPERATOR_IF, flag, 0, &child);
-			if (number > 1)
+			if (number > 1) {
+				(print_json) ? my_fprintf(stderr, "Found %s%d ways to reach '%s' corresponding to '%s'.\\n", number ? "at least" : "", number, OPH_OPERATOR_ELSEIF,
+							  wf->tasks[k].name) : fprintf(stderr, "Found %s%d ways to reach '%s' corresponding to '%s'.\n", number ? "at least" : "", number,
+										       OPH_OPERATOR_ELSEIF, wf->tasks[k].name);
 				break;
+			}
 			if (child >= 0) {
 				for (i = 0; i < wf->tasks_num; ++i)
 					if ((wf->tasks[i].parent == k) && strncasecmp(wf->tasks[k].operator, OPH_OPERATOR_ELSEIF, OPH_WORKFLOW_MAX_STRING) && !workflow_is_child_of(wf, i, child))
 						break;
-				if (i < wf->tasks_num)
+				if (i < wf->tasks_num) {
+					(print_json) ? my_fprintf(stderr, "Found a wrong correspondence between '%s' and '%s'.\\n", wf->tasks[k].name, OPH_OPERATOR_ELSEIF) : fprintf(stderr,
+																						      "Found a wrong correspondence between '%s' and '%s'.\n",
+																						      wf->tasks[k].name,
+																						      OPH_OPERATOR_ELSEIF);
 					break;
+				}
 			} else {
 				for (i = 0; i < wf->tasks_num; ++i)
 					flag[i] = 1;
 				child = -1;
 				number = workflow_number_of(wf, k, k, k, OPH_OPERATOR_ELSE, OPH_OPERATOR_IF, flag, 0, &child);
-				if (number > 1)
+				if (number > 1) {
+					(print_json) ? my_fprintf(stderr, "Found %s%d ways to reach '%s' corresponding to '%s'.\\n", number ? "at least" : "", number, OPH_OPERATOR_ELSE,
+								  wf->tasks[k].name) : fprintf(stderr, "Found %s%d ways to reach '%s' corresponding to '%s'.\n", number ? "at least" : "", number,
+											       OPH_OPERATOR_ELSE, wf->tasks[k].name);
 					break;
+				}
 				if (child >= 0) {
 					for (i = 0; i < wf->tasks_num; ++i)
 						if ((wf->tasks[i].parent == k) && strncasecmp(wf->tasks[k].operator, OPH_OPERATOR_ELSE, OPH_WORKFLOW_MAX_STRING) && !workflow_is_child_of(wf, i, child))
 							break;
-					if (i < wf->tasks_num)
+					if (i < wf->tasks_num) {
+						(print_json) ? my_fprintf(stderr, "Found a wrong correspondence between '%s' and '%s'.\\n", wf->tasks[k].name, OPH_OPERATOR_ELSE) : fprintf(stderr,
+																							    "Found a wrong correspondence between '%s' and '%s'.\n",
+																							    wf->
+																							    tasks[k].
+																							    name,
+																							    OPH_OPERATOR_ELSE);
 						break;
+					}
 				}
 			}
 			for (i = 0; i < wf->tasks_num; ++i)
 				flag[i] = 1;
 			number = workflow_number_of(wf, k, k, k, OPH_OPERATOR_ENDIF, OPH_OPERATOR_IF, flag, 0, &child);
-			if (!number && (number > 1))
+			if (!number && (number > 1)) {
+				(print_json) ? my_fprintf(stderr, "Found %s%d ways to reach '%s' corresponding to '%s'.\\n", number ? "at least" : "", number, OPH_OPERATOR_ENDIF,
+							  wf->tasks[k].name) : fprintf(stderr, "Found %s%d ways to reach '%s' corresponding to '%s'.\n", number ? "at least" : "", number,
+										       OPH_OPERATOR_ENDIF, wf->tasks[k].name);
 				break;
+			}
 			for (i = 0; i < wf->tasks_num; ++i)
 				if ((wf->tasks[i].parent == k) && strncasecmp(wf->tasks[k].operator, OPH_OPERATOR_ENDIF, OPH_WORKFLOW_MAX_STRING) && !workflow_is_child_of(wf, i, child))
 					break;
-			if (i < wf->tasks_num)
+			if (i < wf->tasks_num) {
+				(print_json) ? my_fprintf(stderr, "Found a wrong correspondence between '%s' and '%s'.\\n", wf->tasks[k].name, OPH_OPERATOR_ENDIF) : fprintf(stderr,
+																					     "Found a wrong correspondence between '%s' and '%s'.\n",
+																					     wf->tasks[k].name,
+																					     OPH_OPERATOR_ENDIF);
 				break;
+			}
 		} else if (!strncasecmp(wf->tasks[k].operator, OPH_OPERATOR_ELSEIF, OPH_WORKFLOW_MAX_STRING)) {
 			kk = gparent_of(wf, k);
 			for (i = 0; i < wf->tasks_num; ++i)
 				flag[i] = 1;
 			child = -1;
 			number = workflow_number_of(wf, k, k, kk, OPH_OPERATOR_ELSEIF, OPH_OPERATOR_IF, flag, 0, &child);
-			if (number > 1)
+			if (number > 1) {
+				(print_json) ? my_fprintf(stderr, "Found %s%d ways to reach '%s' corresponding to '%s'.\\n", number ? "at least" : "", number, OPH_OPERATOR_ELSEIF,
+							  wf->tasks[k].name) : fprintf(stderr, "Found %s%d ways to reach '%s' corresponding to '%s'.\n", number ? "at least" : "", number,
+										       OPH_OPERATOR_ELSEIF, wf->tasks[k].name);
 				break;
+			}
 			if (child >= 0) {
 				for (i = 0; i < wf->tasks_num; ++i)
 					if ((wf->tasks[i].parent == k) && strncasecmp(wf->tasks[k].operator, OPH_OPERATOR_ELSEIF, OPH_WORKFLOW_MAX_STRING) && !workflow_is_child_of(wf, i, child))
 						break;
-				if (i < wf->tasks_num)
+				if (i < wf->tasks_num) {
+					(print_json) ? my_fprintf(stderr, "Found a wrong correspondence between '%s' and '%s'.\\n", wf->tasks[k].name, OPH_OPERATOR_ELSEIF) : fprintf(stderr,
+																						      "Found a wrong correspondence between '%s' and '%s'.\n",
+																						      wf->tasks[k].name,
+																						      OPH_OPERATOR_ELSEIF);
 					break;
+				}
 			} else {
 				for (i = 0; i < wf->tasks_num; ++i)
 					flag[i] = 1;
 				child = -1;
 				number = workflow_number_of(wf, k, k, kk, OPH_OPERATOR_ELSE, OPH_OPERATOR_IF, flag, 0, &child);
-				if (number > 1)
+				if (number > 1) {
+					(print_json) ? my_fprintf(stderr, "Found %s%d ways to reach '%s' corresponding to '%s'.\\n", number ? "at least" : "", number, OPH_OPERATOR_ELSE,
+								  wf->tasks[k].name) : fprintf(stderr, "Found %s%d ways to reach '%s' corresponding to '%s'.\n", number ? "at least" : "", number,
+											       OPH_OPERATOR_ELSE, wf->tasks[k].name);
 					break;
+				}
 				if (child >= 0) {
 					for (i = 0; i < wf->tasks_num; ++i)
 						if ((wf->tasks[i].parent == k) && strncasecmp(wf->tasks[k].operator, OPH_OPERATOR_ELSE, OPH_WORKFLOW_MAX_STRING) && !workflow_is_child_of(wf, i, child))
 							break;
-					if (i < wf->tasks_num)
+					if (i < wf->tasks_num) {
+						(print_json) ? my_fprintf(stderr, "Found a wrong correspondence between '%s' and '%s'.\\n", wf->tasks[k].name, OPH_OPERATOR_ELSE) : fprintf(stderr,
+																							    "Found a wrong correspondence between '%s' and '%s'.\n",
+																							    wf->
+																							    tasks[k].
+																							    name,
+																							    OPH_OPERATOR_ELSE);
 						break;
+					}
 				} else {
 					for (i = 0; i < wf->tasks_num; ++i)
 						flag[i] = 1;
 					number = workflow_number_of(wf, k, k, kk, OPH_OPERATOR_ENDIF, OPH_OPERATOR_IF, flag, 0, &child);
-					if (!number || (number > 1))
+					if (!number || (number > 1)) {
+						(print_json) ? my_fprintf(stderr, "Found %s%d ways to reach '%s' corresponding to '%s'.\\n", number ? "at least" : "", number, OPH_OPERATOR_ENDIF,
+									  wf->tasks[k].name) : fprintf(stderr, "Found %s%d ways to reach '%s' corresponding to '%s'.\n", number ? "at least" : "",
+												       number, OPH_OPERATOR_ENDIF, wf->tasks[k].name);
 						break;
+					}
 					for (i = 0; i < wf->tasks_num; ++i)
 						if ((wf->tasks[i].parent == k) && strncasecmp(wf->tasks[k].operator, OPH_OPERATOR_ENDIF, OPH_WORKFLOW_MAX_STRING)
 						    && !workflow_is_child_of(wf, i, child))
 							break;
-					if (i < wf->tasks_num)
+					if (i < wf->tasks_num) {
+						(print_json) ? my_fprintf(stderr, "Found a wrong correspondence between '%s' and '%s'.\\n", wf->tasks[k].name, OPH_OPERATOR_ENDIF) : fprintf(stderr,
+																							     "Found a wrong correspondence between '%s' and '%s'.\n",
+																							     wf->
+																							     tasks[k].
+																							     name,
+																							     OPH_OPERATOR_ENDIF);
 						break;
+					}
 				}
 			}
 		} else if (!strncasecmp(wf->tasks[k].operator, OPH_OPERATOR_ELSE, OPH_WORKFLOW_MAX_STRING)) {
@@ -1654,13 +1733,22 @@ int workflow_validate_fco(oph_workflow * wf)
 			for (i = 0; i < wf->tasks_num; ++i)
 				flag[i] = 1;
 			number = workflow_number_of(wf, k, k, kk, OPH_OPERATOR_ENDIF, OPH_OPERATOR_IF, flag, 0, &child);
-			if (!number || (number > 1))
+			if (!number || (number > 1)) {
+				(print_json) ? my_fprintf(stderr, "Found %s%d ways to reach '%s' corresponding to '%s'.\\n", number ? "at least" : "", number, OPH_OPERATOR_ENDIF,
+							  wf->tasks[k].name) : fprintf(stderr, "Found %s%d ways to reach '%s' corresponding to '%s'.\n", number ? "at least" : "", number,
+										       OPH_OPERATOR_ENDIF, wf->tasks[k].name);
 				break;
+			}
 			for (i = 0; i < wf->tasks_num; ++i)
 				if ((wf->tasks[i].parent == k) && strncasecmp(wf->tasks[k].operator, OPH_OPERATOR_ENDIF, OPH_WORKFLOW_MAX_STRING) && !workflow_is_child_of(wf, i, child))
 					break;
-			if (i < wf->tasks_num)
+			if (i < wf->tasks_num) {
+				(print_json) ? my_fprintf(stderr, "Found a wrong correspondence between '%s' and '%s'.\\n", wf->tasks[k].name, OPH_OPERATOR_ENDIF) : fprintf(stderr,
+																					     "Found a wrong correspondence between '%s' and '%s'.\n",
+																					     wf->tasks[k].name,
+																					     OPH_OPERATOR_ENDIF);
 				break;
+			}
 		}
 	}
 	if (k < wf->tasks_num)
@@ -1668,14 +1756,23 @@ int workflow_validate_fco(oph_workflow * wf)
 
 	for (k = 0; k < wf->tasks_num; k++)
 		if (wf->tasks[k].parent < 0) {
-			if (!strncasecmp(wf->tasks[k].operator, OPH_OPERATOR_ENDFOR, OPH_WORKFLOW_MAX_STRING))
+			if (!strncasecmp(wf->tasks[k].operator, OPH_OPERATOR_ENDFOR, OPH_WORKFLOW_MAX_STRING)) {
+				(print_json) ? my_fprintf(stderr, "Found '%s' without '%s'.\\n", wf->tasks[k].name, OPH_OPERATOR_FOR) : fprintf(stderr, "Found '%s' without '%s'.\n", wf->tasks[k].name,
+																		OPH_OPERATOR_FOR);
 				break;
-			else if (!strncasecmp(wf->tasks[k].operator, OPH_OPERATOR_ELSEIF, OPH_WORKFLOW_MAX_STRING))
+			} else if (!strncasecmp(wf->tasks[k].operator, OPH_OPERATOR_ELSEIF, OPH_WORKFLOW_MAX_STRING)) {
+				(print_json) ? my_fprintf(stderr, "Found '%s' without '%s'.\\n", wf->tasks[k].name, OPH_OPERATOR_IF) : fprintf(stderr, "Found '%s' without '%s'.\n", wf->tasks[k].name,
+																	       OPH_OPERATOR_IF);
 				break;
-			else if (!strncasecmp(wf->tasks[k].operator, OPH_OPERATOR_ELSE, OPH_WORKFLOW_MAX_STRING))
+			} else if (!strncasecmp(wf->tasks[k].operator, OPH_OPERATOR_ELSE, OPH_WORKFLOW_MAX_STRING)) {
+				(print_json) ? my_fprintf(stderr, "Found '%s' without '%s'.\\n", wf->tasks[k].name, OPH_OPERATOR_IF) : fprintf(stderr, "Found '%s' without '%s'.\n", wf->tasks[k].name,
+																	       OPH_OPERATOR_IF);
 				break;
-			else if (!strncasecmp(wf->tasks[k].operator, OPH_OPERATOR_ENDIF, OPH_WORKFLOW_MAX_STRING))
+			} else if (!strncasecmp(wf->tasks[k].operator, OPH_OPERATOR_ENDIF, OPH_WORKFLOW_MAX_STRING)) {
+				(print_json) ? my_fprintf(stderr, "Found '%s' without '%s'.\\n", wf->tasks[k].name, OPH_OPERATOR_IF) : fprintf(stderr, "Found '%s' without '%s'.\n", wf->tasks[k].name,
+																	       OPH_OPERATOR_IF);
 				break;
+			}
 		}
 	if (k < wf->tasks_num)
 		return OPH_WORKFLOW_EXIT_BAD_PARAM_ERROR;
