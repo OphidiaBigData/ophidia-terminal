@@ -1,4 +1,10 @@
 
+## Next release
+
+### Fixed:
+
+- Avoid to print command execution time in case dump viewer is used 
+
 ## v1.2.0 - 2018-02-16
 
 ### Fixed:
