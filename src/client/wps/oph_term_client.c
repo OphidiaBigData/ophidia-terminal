@@ -790,6 +790,12 @@ void oph_execute(char *query, char **newsession, int *return_value, char **out_r
 					n += snprintf(fixed_query + n, WORKFLOW_MAX_LEN - n, "%s%s%s", WRAPPING_WORKFLOW4f, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CDD), WRAPPING_WORKFLOW4f_1);
 				}
 			}
+			char *host_partition = (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_HOST_PARTITION);
+			if (host_partition) {
+				if (!strstr(query, "\"host_partition\"") && strcmp(host_partition, "test")) {
+					n += snprintf(fixed_query + n, WORKFLOW_MAX_LEN - n, "%s%s%s", WRAPPING_WORKFLOW4h, host_partition, WRAPPING_WORKFLOW4h_1);
+				}
+			}
 			if (cmd_line) {
 				if (!strstr(query, "\"command\"")) {
 					n += snprintf(fixed_query + n, WORKFLOW_MAX_LEN - n, "%s%s%s", WRAPPING_WORKFLOW4b, cmd_line, WRAPPING_WORKFLOW4b_1);
