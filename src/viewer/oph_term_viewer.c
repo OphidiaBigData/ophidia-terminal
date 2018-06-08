@@ -43,8 +43,11 @@
 #define OPH_TERM_VIEWER_TITLE_FOR_CWD 	"Current Working Directory"
 #define OPH_TERM_VIEWER_TITLE_FOR_CDD 	"Current Data Directory"
 
-#define OPH_TERM_TOKEN_JSON	"access_token"
-#define OPH_TERM_EXEC_TIME "execution_time"
+#define OPH_TERM_CUBE_JSON		"cube"
+#define OPH_TERM_CWD_JSON		"cwd"
+#define OPH_TERM_CDD_JSON		"cdd"
+#define OPH_TERM_EXEC_TIME_JSON	"execution_time"
+#define OPH_TERM_TOKEN_JSON		"access_token"
 
 int oph_viewer_get_ranks_string(oph_json_links * nodelinks, unsigned int nodelinks_num, char **ranks_string)
 {
@@ -1493,11 +1496,13 @@ void oph_term_viewer_retrieve_info(oph_json * json, char *txtstring, char **newd
 	}
 
 	if (json) {
+
+		unsigned int i;
+
 		if (newdatacube) {
 			*newdatacube = NULL;
 			if (json->response_num >= 1) {
-				size_t i;
-				for (i = 0; i < json->response_num; i++) {
+				for (i = 0; i < json->response_num; i++)
 					if (!strcmp(json->response[i].objclass, OPH_JSON_TEXT)) {
 						if (json->response[i].objcontent_num >= 1) {
 							if ((((oph_json_obj_text *) json->response[i].objcontent)[0]).title && (((oph_json_obj_text *) json->response[i].objcontent)[0]).message) {
@@ -1508,15 +1513,19 @@ void oph_term_viewer_retrieve_info(oph_json * json, char *txtstring, char **newd
 							}
 						}
 					}
-				}
+				if (!*newdatacube && json->extra)
+					for (i = 0; i < json->extra->keys_num; i++)
+						if (!strcmp(json->extra->keys[i], OPH_TERM_CUBE_JSON)) {
+							*newdatacube = (char *) strdup(json->extra->values[i]);
+							break;
+						}
 			}
 		}
 
 		if (newcwd) {
 			*newcwd = NULL;
 			if (json->response_num >= 1) {
-				size_t i;
-				for (i = 0; i < json->response_num; i++) {
+				for (i = 0; i < json->response_num; i++)
 					if (!strcmp(json->response[i].objclass, OPH_JSON_TEXT)) {
 						if (json->response[i].objcontent_num >= 1) {
 							if ((((oph_json_obj_text *) json->response[i].objcontent)[0]).title && (((oph_json_obj_text *) json->response[i].objcontent)[0]).message) {
@@ -1527,15 +1536,19 @@ void oph_term_viewer_retrieve_info(oph_json * json, char *txtstring, char **newd
 							}
 						}
 					}
-				}
+				if (!*newcwd && json->extra)
+					for (i = 0; i < json->extra->keys_num; i++)
+						if (!strcmp(json->extra->keys[i], OPH_TERM_CWD_JSON)) {
+							*newcwd = (char *) strdup(json->extra->values[i]);
+							break;
+						}
 			}
 		}
 
 		if (newcdd) {
 			*newcdd = NULL;
 			if (json->response_num >= 1) {
-				size_t i;
-				for (i = 0; i < json->response_num; i++) {
+				for (i = 0; i < json->response_num; i++)
 					if (!strcmp(json->response[i].objclass, OPH_JSON_TEXT)) {
 						if (json->response[i].objcontent_num >= 1) {
 							if ((((oph_json_obj_text *) json->response[i].objcontent)[0]).title && (((oph_json_obj_text *) json->response[i].objcontent)[0]).message) {
@@ -1546,33 +1559,35 @@ void oph_term_viewer_retrieve_info(oph_json * json, char *txtstring, char **newd
 							}
 						}
 					}
-				}
+				if (!*newcdd && json->extra)
+					for (i = 0; i < json->extra->keys_num; i++) {
+						if (!strcmp(json->extra->keys[i], OPH_TERM_CDD_JSON)) {
+							*newcdd = (char *) strdup(json->extra->values[i]);
+							break;
+						}
+					}
 			}
 		}
-
-		unsigned int i;
 
 		if (newtoken) {
 			*newtoken = NULL;
 			if (json->extra) {
-				for (i = 0; i < json->extra->keys_num; i++) {
+				for (i = 0; i < json->extra->keys_num; i++)
 					if (!strcmp(json->extra->keys[i], OPH_TERM_TOKEN_JSON)) {
 						*newtoken = (char *) strdup(json->extra->values[i]);
 						break;
 					}
-				}
 			}
 		}
 
 		if (exectime) {
 			*exectime = NULL;
 			if (json->extra) {
-				for (i = 0; i < json->extra->keys_num; i++) {
-					if (!strcmp(json->extra->keys[i], OPH_TERM_EXEC_TIME)) {
+				for (i = 0; i < json->extra->keys_num; i++)
+					if (!strcmp(json->extra->keys[i], OPH_TERM_EXEC_TIME_JSON)) {
 						*exectime = (char *) strdup(json->extra->values[i]);
 						break;
 					}
-				}
 			}
 		}
 
