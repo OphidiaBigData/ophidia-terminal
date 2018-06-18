@@ -73,9 +73,9 @@
 #ifdef WITH_IM_SUPPORT
 #define OPH_TERM_ENV_OPH_INFRASTRUCTURE_URL	"OPH_INFRASTRUCTURE_URL"
 #define OPH_TERM_ENV_OPH_AUTH_HEADER		"OPH_AUTH_HEADER"
-#define env_vars_num 21
+#define env_vars_num 22
 #else
-#define env_vars_num 19
+#define env_vars_num 20
 #endif
 
 static char *env_vars[env_vars_num] = {
