@@ -2283,10 +2283,11 @@ int oph_term_viewer_retrieve_command_jobid(char *json_string, char **command, ch
 	return oph_term_viewer_retrieve_command_jobid_creation(json_string, command, jobid, NULL);
 }
 
-int oph_term_viewer_retrieve_session_size(char *json_string, int *session_size, char ***exit_status)
+int oph_term_viewer_retrieve_session_size(char *json_string, int *begin, int *end, char ***exit_status, int *size)
 {
-	if (!json_string || !session_size)
+	if (!json_string || !begin || !end)
 		return OPH_TERM_INVALID_PARAM_VALUE;
+	*begin = *end = 0;
 
 	char *tmp_json_string = strdup(json_string);
 	if (!tmp_json_string)
@@ -2299,19 +2300,21 @@ int oph_term_viewer_retrieve_session_size(char *json_string, int *session_size, 
 		return OPH_TERM_GENERIC_ERROR;
 	}
 
-	int found = 0;
+	int found = 0, session_size = 0;
 	if (json->response_num >= 1) {
 		size_t i;
-		oph_json_obj_grid *grid = (oph_json_obj_grid *) json->response[i].objcontent;
+		oph_json_obj_grid *grid = NULL;
 		for (i = 0; i < json->response_num; i++) {
 			if (!strcmp(json->response[i].objkey, "resume")) {
 				if (json->response[i].objcontent_num >= 1) {
 					grid = (oph_json_obj_grid *) json->response[i].objcontent;
-					*session_size = grid->values_num1;
-					if (exit_status) {
+					session_size = grid->values_num1;
+					*begin = (int) strtol(grid->values[0][OPH_TERM_VIEWER_WORKFLOW_ID_INDEX], NULL, 10);
+					*end = (int) strtol(grid->values[session_size - 1][OPH_TERM_VIEWER_WORKFLOW_ID_INDEX], NULL, 10);
+					if (exit_status && size) {
 						int j;
-						*exit_status = (char **) calloc(*session_size, sizeof(char *));
-						for (j = 0; j < *session_size; j++)
+						*exit_status = (char **) calloc(*size = session_size, sizeof(char *));
+						for (j = 0; j < session_size; j++)
 							(*exit_status)[j] = strdup(grid->values[j][OPH_TERM_VIEWER_EXIT_STATUS_INDEX]);
 					}
 					found = 1;

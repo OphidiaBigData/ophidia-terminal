@@ -1863,8 +1863,6 @@ int main(int argc, char **argv, char **envp)
 			return OPH_TERM_INVALID_PARAM_VALUE;
 		}
 		if (oph_workflow_indexing(tmp_workflow->tasks, tmp_workflow->tasks_num)) {
-			(print_json) ? my_fprintf(stderr, "There are some problems with the tasks (duplicates, loops, etc.)\\n") : fprintf(stderr,
-																	   "\e[1;31mThere are some problems with the tasks (duplicates, loops, etc.)\e[0m\n");
 			(print_json) ? my_fprintf(stderr, "Workflow is not a valid Ophidia Workflow JSON file.\\n") : fprintf(stderr,
 															      "\e[1;31mWorkflow is not a valid Ophidia Workflow JSON file.\e[0m\n");
 			oph_term_env_clear(hashtbl);
@@ -4170,16 +4168,17 @@ int main(int argc, char **argv, char **envp)
 			}
 
 			if (last_njobs > 0) {
-				int end = 0;
+				int begin = 0, end = 0, size = 0;
 				char **exit_status = NULL;
 
 				//retrieve number of jobs of new session from server
-				if (oph_term_get_session_size
-				    (tmp_session, _user, _passwd, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST), (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT),
-				     &oph_term_return, &end, 1, hashtbl, &exit_status)) {
+				int error_code = oph_term_get_session_size(tmp_session, _user, _passwd, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST),
+									   (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT), &oph_term_return, &begin, &end, 1, hashtbl, &exit_status,
+									   &size);
+				if (error_code) {
 					if (exit_status) {
 						int jj;
-						for (jj = 0; jj < end; ++jj)
+						for (jj = 0; jj < size; ++jj)
 							if (exit_status[jj])
 								free(exit_status[jj]);
 						free(exit_status);
@@ -4193,7 +4192,11 @@ int main(int argc, char **argv, char **envp)
 					continue;
 				}
 
+				int start = 1 + end - begin;
+				last_njobs = (last_njobs > start) ? start : last_njobs;
 				last_njobs = (last_njobs > end) ? end : last_njobs;
+				last_njobs = (last_njobs > size) ? size : last_njobs;
+
 				int i, stop = 0, format;
 				char *tmp_command = NULL;
 				char *tmp_jobid = NULL;
@@ -4202,47 +4205,49 @@ int main(int argc, char **argv, char **envp)
 				char buf[OPH_TERM_MAX_LEN];
 
 				for (i = last_njobs - 1; i >= 0; i--) {
-					memset(buf, 0, OPH_TERM_MAX_LEN);
+
 					snprintf(buf, OPH_TERM_MAX_LEN, "%d", end - i);
-					if (oph_term_get_request
+					if (!oph_term_get_request
 					    (tmp_session, buf, _user, _passwd, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST), (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT),
 					     &oph_term_return, &tmp_command, &tmp_jobid, &tmp_request_time, hashtbl)) {
-						stop = 1;
-						break;
-					}
 
-					format = 1;
-					tmp_status = NULL;
-					if (exit_status) {
-						tmp_status = exit_status[end - i - 1];
-						if (!strcmp(tmp_status, "OPH_STATUS_COMPLETED"))
-							format = 2;
-						else if (!strcmp(tmp_status, "OPH_STATUS_RUNNING"))
-							format = 3;
-						else if (!strcmp(tmp_status, "OPH_STATUS_WAITING"))
-							format = 4;
-						else if (!strcmp(tmp_status, "OPH_STATUS_PENDING"))
-							format = 5;
-						else if (!strcmp(tmp_status, "OPH_STATUS_RUNNING_ERROR")) {
-							free(tmp_status);
-							tmp_status = exit_status[end - i - 1] = strdup("OPH_STATUS_RUNNING");
+						format = 1;
+						tmp_status = NULL;
+						if (exit_status) {
+							tmp_status = exit_status[size - i - 1];
+							if (!strcmp(tmp_status, "OPH_STATUS_COMPLETED"))
+								format = 2;
+							else if (!strcmp(tmp_status, "OPH_STATUS_RUNNING"))
+								format = 3;
+							else if (!strcmp(tmp_status, "OPH_STATUS_WAITING"))
+								format = 4;
+							else if (!strcmp(tmp_status, "OPH_STATUS_PENDING"))
+								format = 5;
+							else if (!strcmp(tmp_status, "OPH_STATUS_RUNNING_ERROR")) {
+								free(tmp_status);
+								tmp_status = exit_status[size - i - 1] = strdup("OPH_STATUS_RUNNING");
+							}
 						}
-					}
 
-					if (is_verbose)
-						(print_json) ? my_printf("[%s] %s [%s]\\n%*s%s\\n%*s[%s]\\n", buf, tmp_request_time ? tmp_request_time : "", tmp_status ? tmp_status : "",
-									 (int) (strlen(buf) + 3), " ", (tmp_command) ? tmp_command : "", (int) (strlen(buf) + 3), " ",
-									 (tmp_jobid) ? tmp_jobid : "") : printf("\e[1;34m[%s]\e[0m %s \e[1;3%dm[%s]\e[0m\n%*s%s\n%*s\e[1;34m[%s]\e[0m\n", buf,
-														tmp_request_time ? tmp_request_time : "", format, tmp_status ? tmp_status : "",
-														(int) (strlen(buf) + 3), " ", (tmp_command) ? tmp_command : "", (int) (strlen(buf) + 3),
-														" ", (tmp_jobid) ? tmp_jobid : "");
-					else {
-						if (tmp_command && (strlen(tmp_command) > OPH_TERM_CMD_MAX_LEN))
-							snprintf(tmp_command + OPH_TERM_CMD_MAX_LEN - 5, 5, " ...");
-						(print_json) ? my_printf("[%s] %s [%s]\t%s\\n", buf, tmp_request_time ? tmp_request_time : "", tmp_status ? tmp_status : "",
-									 (tmp_command) ? tmp_command : "") : printf("\e[1;34m[%s]\e[0m %s \e[1;3%dm[%s]\e[0m\t%s\n", buf,
-														    tmp_request_time ? tmp_request_time : "", format, tmp_status ? tmp_status : "",
-														    (tmp_command) ? tmp_command : "");
+						if (is_verbose)
+							(print_json) ? my_printf("[%s] %s [%s]\\n%*s%s\\n%*s[%s]\\n", buf, tmp_request_time ? tmp_request_time : "", tmp_status ? tmp_status : "",
+										 (int) (strlen(buf) + 3), " ", (tmp_command) ? tmp_command : "", (int) (strlen(buf) + 3), " ",
+										 (tmp_jobid) ? tmp_jobid : "") : printf("\e[1;34m[%s]\e[0m %s \e[1;3%dm[%s]\e[0m\n%*s%s\n%*s\e[1;34m[%s]\e[0m\n", buf,
+															tmp_request_time ? tmp_request_time : "", format, tmp_status ? tmp_status : "",
+															(int) (strlen(buf) + 3), " ", (tmp_command) ? tmp_command : "",
+															(int) (strlen(buf) + 3), " ", (tmp_jobid) ? tmp_jobid : "");
+						else {
+							if (tmp_command && (strlen(tmp_command) > OPH_TERM_CMD_MAX_LEN))
+								snprintf(tmp_command + OPH_TERM_CMD_MAX_LEN - 5, 5, " ...");
+							(print_json) ? my_printf("[%s] %s [%s]\t%s\\n", buf, tmp_request_time ? tmp_request_time : "", tmp_status ? tmp_status : "",
+										 (tmp_command) ? tmp_command : "") : printf("\e[1;34m[%s]\e[0m %s \e[1;3%dm[%s]\e[0m\t%s\n", buf,
+															    tmp_request_time ? tmp_request_time : "", format,
+															    tmp_status ? tmp_status : "", (tmp_command) ? tmp_command : "");
+						}
+
+					} else {
+						oph_term_return = OPH_TERM_SUCCESS;
+						stop = 1;
 					}
 
 					if (tmp_command) {
@@ -4253,10 +4258,14 @@ int main(int argc, char **argv, char **envp)
 						free(tmp_jobid);
 						tmp_jobid = NULL;
 					}
+					if (tmp_request_time) {
+						free(tmp_request_time);
+						tmp_request_time = NULL;
+					}
 				}
 				if (exit_status) {
 					int jj;
-					for (jj = 0; jj < end; ++jj)
+					for (jj = 0; jj < size; ++jj)
 						if (exit_status[jj])
 							free(exit_status[jj]);
 					free(exit_status);
@@ -5001,8 +5010,6 @@ int main(int argc, char **argv, char **envp)
 				continue;
 			}
 			if (oph_workflow_indexing(tmp_workflow->tasks, tmp_workflow->tasks_num)) {
-				(print_json) ? my_fprintf(stderr, "There are some problems with the tasks (duplicates, loops, etc.)\\n") : fprintf(stderr,
-																		   "\e[1;31mThere are some problems with the tasks (duplicates, loops, etc.)\e[0m\n");
 				(print_json) ? my_fprintf(stderr, "Workflow is not a valid Ophidia Workflow JSON file.\\n") : fprintf(stderr,
 																      "\e[1;31mWorkflow is not a valid Ophidia Workflow JSON file.\e[0m\n");
 				if (submission_workflow) {
@@ -5490,8 +5497,6 @@ int main(int argc, char **argv, char **envp)
 					oph_workflow_free(tmp_workflow);
 				} else {
 					if (oph_workflow_indexing(tmp_workflow->tasks, tmp_workflow->tasks_num)) {
-						(print_json) ? my_fprintf(stderr, "There are some problems with the tasks (duplicates, loops, etc.)\\n") : fprintf(stderr,
-																				   "\e[1;31mThere are some problems with the tasks (duplicates, loops, etc.)\e[0m\n");
 						(print_json) ? my_fprintf(stderr, "Workflow is NOT a VALID Ophidia Workflow.\\n") : fprintf(stderr,
 																	    "Workflow is \e[1;31mNOT\e[0m a \e[1;31mVALID\e[0m Ophidia Workflow.\n");
 						oph_workflow_free(tmp_workflow);

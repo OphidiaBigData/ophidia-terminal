@@ -179,7 +179,8 @@ int oph_term_read_file_with_len(char *filename, char **buffer, long *alloc_size)
 int oph_term_view_filters_parsing(char *filters, int end, int **jobs, int *jobs_num);
 
 // Get the number of jobs of a remote session
-int oph_term_get_session_size(char *session, char *user, char *passwd, char *host, char *port, int *return_value, int *size, int workflow_wrap, HASHTBL * hashtbl, char ***exit_status);
+int oph_term_get_session_size(char *session, char *user, char *passwd, char *host, char *port, int *return_value, int *begin, int *end, int workflow_wrap, HASHTBL * hashtbl, char ***exit_status,
+			      int *size);
 
 // Tell server to switch session
 int oph_term_switch_remote_session(char *session, char *user, char *passwd, char *host, char *port, int *return_value, int workflow_wrap, HASHTBL * hashtbl);
