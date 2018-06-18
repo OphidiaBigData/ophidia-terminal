@@ -3,6 +3,7 @@
 
 ### Added:
 
+- Environment variable OPH_TIMEOUT to handle connection timeout [#10](https://github.com/OphidiaBigData/ophidia-terminal/pull/10/)
 - Environment variable OPH_HOST_PARTITION to handle reserved host partition [#9](https://github.com/OphidiaBigData/ophidia-terminal/pull/9)
 - Support to update some environment variables based on extra fields in json response [#8](https://github.com/OphidiaBigData/ophidia-terminal/pull/8)
 - Support for comments in workflow requests [#7](https://github.com/OphidiaBigData/ophidia-terminal/pull/7)
