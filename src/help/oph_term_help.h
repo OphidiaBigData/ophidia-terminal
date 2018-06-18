@@ -1,6 +1,6 @@
 /*
     Ophidia Terminal
-    Copyright (C) 2012-2017 CMCC Foundation
+    Copyright (C) 2012-2018 CMCC Foundation
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -746,6 +746,14 @@ int oph_term_help(const char *cmd);
 #define OPH_TERM_HELP_OPH_PASSWD_LONG2 \
 "OPH_PASSWD\\n\
 \\tPassword used to connect to the remote server when SSL is used (default). With the GSI interface it is ignored.\\n"
+
+#define OPH_TERM_HELP_OPH_HOST_PARTITION_SHORT "\"host_partition\"\n"
+#define OPH_TERM_HELP_OPH_HOST_PARTITION_LONG \
+"\e[1mOPH_HOST_PARTITION\e[0m\n\
+\tName of default host partition.\n"
+#define OPH_TERM_HELP_OPH_HOST_PARTITION_LONG2 \
+"OPH_HOST_PARTITION\\n\
+\\tName of default host partition.\\n"
 
 #define OPH_TERM_HELP_OPH_TOKEN_SHORT "\"token\"\n"
 #define OPH_TERM_HELP_OPH_TOKEN_LONG \

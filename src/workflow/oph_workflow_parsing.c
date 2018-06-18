@@ -1,6 +1,6 @@
 /*
     Ophidia Terminal
-    Copyright (C) 2012-2017 CMCC Foundation
+    Copyright (C) 2012-2018 CMCC Foundation
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -33,6 +33,8 @@ int _oph_workflow_alloc(oph_workflow ** workflow);
 int _oph_workflow_substitute_var(char *key, char *value, oph_workflow_task * tasks, int tasks_num);
 /* Add cube to list of arguments for each task with no explicit cube argument and with none or embedded-only deps */
 int _oph_workflow_substitute_cube(char *pid, oph_workflow_task * tasks, int tasks_num);
+/* Skip comments from input JSON file */
+int _oph_workflow_skip_comments(const char *json_string, char **clean_json_string);
 
 int oph_workflow_load(char *json_string, char *username, oph_workflow ** workflow)
 {
@@ -40,7 +42,6 @@ int oph_workflow_load(char *json_string, char *username, oph_workflow ** workflo
 		(print_json) ? my_fprintf(stderr, "Error: null input parameters\\n\\n") : fprintf(stderr, "\e[1;31mError: null input parameters\e[0m\n\n");
 		return OPH_WORKFLOW_EXIT_BAD_PARAM_ERROR;
 	}
-
 	*workflow = NULL;
 
 	//alloc and init
@@ -55,15 +56,25 @@ int oph_workflow_load(char *json_string, char *username, oph_workflow ** workflo
 		(print_json) ? my_fprintf(stderr, "Error: username allocation\\n\\n") : fprintf(stderr, "\e[1;31mError: username allocation\e[0m\n\n");
 		return OPH_WORKFLOW_EXIT_MEMORY_ERROR;
 	}
+	// Skip comments
+	char *clean_json_string = NULL;
+	if (_oph_workflow_skip_comments(json_string, &clean_json_string) || !clean_json_string) {
+		oph_workflow_free(*workflow);
+		(print_json) ? my_fprintf(stderr, "Error: comments are not corrected set\\n\\n") : fprintf(stderr, "\e[1;31mError: comments are not corrected set\e[0m\n\n");
+		return OPH_WORKFLOW_EXIT_BAD_PARAM_ERROR;
+	}
 	//load json_t from json_string
 	json_error_t error;
-	json_t *jansson = json_loads((const char *) json_string, 0, &error);
+	json_t *jansson = json_loads((const char *) clean_json_string, 0, &error);
 	if (!jansson) {
+		free(clean_json_string);
 		oph_workflow_free(*workflow);
 		(print_json) ? my_fprintf(stderr, "Error: %s Line: %d Column: %d\\n\\n", error.text, error.line, error.column) : fprintf(stderr, "\e[1;31mError: %s Line: %d Column: %d\e[0m\n\n",
 																	 error.text, error.line, error.column);
 		return OPH_WORKFLOW_EXIT_GENERIC_ERROR;
 	}
+	free(clean_json_string);
+
 	//unpack global vars
 	char *name = NULL, *author = NULL, *abstract = NULL, *sessionid = NULL, *exec_mode = NULL, *ncores = NULL, *cwd = NULL, *cdd = NULL, *cube = NULL, *callback_url = NULL, *on_error =
 	    NULL, *command = NULL, *on_exit = NULL, *run = NULL, *output_format = NULL, *host_partition = NULL, *url = NULL;
@@ -881,6 +892,75 @@ int _oph_workflow_substitute_cube(char *pid, oph_workflow_task * tasks, int task
 			}
 		}
 	}
+
+	return OPH_WORKFLOW_EXIT_SUCCESS;
+}
+
+int _oph_workflow_skip_comments(const char *json_string, char **clean_json_string)
+{
+	if (!json_string || !clean_json_string)
+		return OPH_WORKFLOW_EXIT_BAD_PARAM_ERROR;
+	*clean_json_string = NULL;
+
+	size_t i, j, size = strlen(json_string);
+	char invalue = 0, flag = 0, print, drop;
+	char result[1 + size];
+	for (i = j = 0; i < size; ++i) {
+		print = 1;
+		drop = 0;
+		if (json_string[i] == '"') {
+			if (invalue)
+				invalue = 0;
+			else
+				invalue = 1;
+		}
+		if (!invalue) {
+			if (json_string[i] == '/') {
+				if (flag == 0)	// Previous char belongs to valid code
+					flag = 1;
+				else if (flag == 1)	// Previous char is '/'
+				{
+					flag = 4;
+					drop = 1;
+				} else if (flag == 3)	// Previous char is '*'
+				{
+					flag = 0;
+					print = 0;
+				}
+			} else if (json_string[i] == '*') {
+				if (flag == 1)	// Previous char is '/'
+				{
+					flag = 2;	// Comment until '*/'
+					drop = 1;
+				} else if (flag == 2)	// Possible end of a comment
+					flag = 3;
+				else if (flag == 3)
+					flag = 2;
+			} else if (json_string[i] == '\n') {
+				if (flag == 1)
+					flag = 0;
+				else if (flag == 3)
+					flag = 2;
+				else if (flag == 4)
+					flag = 0;
+			} else {
+				if (flag == 1)
+					flag = 0;
+				else if (flag == 3)
+					flag = 2;
+			}
+		}
+		if (print && (flag < 2))
+			result[j++] = json_string[i];
+		if (drop && (j > 0))
+			j--;
+	}
+	result[j] = 0;
+
+	if (flag)
+		return OPH_WORKFLOW_EXIT_GENERIC_ERROR;
+
+	*clean_json_string = strdup(result);
 
 	return OPH_WORKFLOW_EXIT_SUCCESS;
 }

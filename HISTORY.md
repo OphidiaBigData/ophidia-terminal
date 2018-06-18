@@ -1,9 +1,19 @@
 
-## Next release
+## v1.3.0 - 2018-06-18
+
+### Added:
+
+- Environment variable OPH_HOST_PARTITION to handle reserved host partition [#9](https://github.com/OphidiaBigData/ophidia-terminal/pull/9)
+- Support to update some environment variables based on extra fields in json response [#8](https://github.com/OphidiaBigData/ophidia-terminal/pull/8)
+- Support for comments in workflow requests [#7](https://github.com/OphidiaBigData/ophidia-terminal/pull/7)
 
 ### Fixed:
 
-- Avoid to print command execution time in case dump viewer is used 
+- Algorithm used to check workflow validity
+- Warnings and configuration checks when building
+- Wrong behavior of 'resume' command [#6](https://github.com/OphidiaBigData/ophidia-terminal/issues/6)
+- Reset locale to 'C' before parsing strings
+- Avoid printing command execution time in case dump viewer is used
 
 ## v1.2.0 - 2018-02-16
 

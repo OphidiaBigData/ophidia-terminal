@@ -1,6 +1,6 @@
 /*
     Ophidia Terminal
-    Copyright (C) 2012-2017 CMCC Foundation
+    Copyright (C) 2012-2018 CMCC Foundation
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -231,6 +231,12 @@ void oph_execute(struct soap *soap, xsd__string query, char *wps, char **newsess
 			if (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CDD)) {
 				if (!strstr(query, "\"cdd\"")) {
 					n += snprintf(fixed_query + n, WORKFLOW_MAX_LEN - n, "%s%s%s", WRAPPING_WORKFLOW4f, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CDD), WRAPPING_WORKFLOW4f_1);
+				}
+			}
+			char *host_partition = (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_HOST_PARTITION);
+			if (host_partition) {
+				if (!strstr(query, "\"host_partition\"") && strcmp(host_partition, "test")) {
+					n += snprintf(fixed_query + n, WORKFLOW_MAX_LEN - n, "%s%s%s", WRAPPING_WORKFLOW4h, host_partition, WRAPPING_WORKFLOW4h_1);
 				}
 			}
 			if (cmd_line) {

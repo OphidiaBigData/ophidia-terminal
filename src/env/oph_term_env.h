@@ -1,6 +1,6 @@
 /*
     Ophidia Terminal
-    Copyright (C) 2012-2017 CMCC Foundation
+    Copyright (C) 2012-2018 CMCC Foundation
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -67,6 +67,7 @@
 #define OPH_TERM_ENV_OPH_GRAPH_LAYOUT		"OPH_GRAPH_LAYOUT"
 #define OPH_TERM_ENV_OPH_RESPONSE_BUFFER	"OPH_RESPONSE_BUFFER"
 #define OPH_TERM_ENV_OPH_WORKFLOW_AUTOVIEW	"OPH_WORKFLOW_AUTOVIEW"
+#define OPH_TERM_ENV_OPH_HOST_PARTITION		"OPH_HOST_PARTITION"
 #define OPH_TERM_ENV_OPH_TOKEN				"OPH_TOKEN"
 #define OPH_TERM_ENV_OPH_TIMEOUT			"OPH_TIMEOUT"
 #ifdef WITH_IM_SUPPORT
@@ -95,6 +96,7 @@ static char *env_vars[env_vars_num] = {
 	OPH_TERM_ENV_OPH_GRAPH_LAYOUT,
 	OPH_TERM_ENV_OPH_RESPONSE_BUFFER,
 	OPH_TERM_ENV_OPH_WORKFLOW_AUTOVIEW,
+	OPH_TERM_ENV_OPH_HOST_PARTITION,
 	OPH_TERM_ENV_OPH_TOKEN,
 	OPH_TERM_ENV_OPH_TIMEOUT
 #ifdef WITH_IM_SUPPORT
