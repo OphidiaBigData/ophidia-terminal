@@ -1,4 +1,10 @@
 
+## Next release
+
+### Fixed:
+
+- Bug in workflow comments parsing
+
 ## v1.3.0 - 2018-06-18
 
 ### Added:
