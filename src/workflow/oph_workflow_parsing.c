@@ -577,9 +577,11 @@ int oph_workflow_load(char *json_string, char *username, oph_workflow ** workflo
 			on_exit_task = on_exit;
 		if (on_exit_task) {
 			if (!strlen(on_exit_task) || !strcmp(on_exit_task, OPH_WORKFLOW_NOP))
-				(*workflow)->tasks[i].exit_action = 0;
+				(*workflow)->tasks[i].exit_action = OPH_WORKFLOW_EXIT_ACTION_NOP;
 			else if (!strcmp(on_exit_task, OPH_WORKFLOW_DELETE))
-				(*workflow)->tasks[i].exit_action = -1;
+				(*workflow)->tasks[i].exit_action = OPH_WORKFLOW_EXIT_ACTION_DELETE;
+			else if (!strcmp(on_exit_task, OPH_WORKFLOW_DELETECONTAINER))
+				(*workflow)->tasks[i].exit_action = OPH_WORKFLOW_EXIT_ACTION_DELETECONTAINER;
 			else {
 				oph_workflow_free(*workflow);
 				if (jansson)
