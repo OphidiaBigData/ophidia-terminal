@@ -1,4 +1,11 @@
 
+## Next release
+
+### Added:
+
+- 1 new alias: rmr
+- check for OPH_DELETECONTAINER as exit action
+
 ## v1.4.0 - 2018-07-27
 
 ### Fixed:
