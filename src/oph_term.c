@@ -1047,15 +1047,22 @@ char **oph_term_completion(char *text, int start, int end)
 
 	if (text[0] == '.' || text[0] == '/') {
 		int i = 0;
-		char chddir[OPH_TERM_MAX_LEN];
+		char chddir[OPH_TERM_MAX_LEN], bsp = 0;
 		if (oph_base_src_path && (strlen(oph_base_src_path) > 1) && (*text == '/')) {
 			snprintf(chddir, OPH_TERM_MAX_LEN, "%s%s", oph_base_src_path, text);
 			text = chddir;
-			i = 1;
+			bsp = 1;
 		}
 		// completion over local filesystem
 		matches = rl_completion_matches(text, rl_filename_completion_function);
-		if (oph_base_src_path && i && matches) {
+		// Check for folders
+		if (matches[0] && !matches[1]) {
+			struct stat fileStat;
+			if (!stat(matches[0], &fileStat) && S_ISDIR(fileStat.st_mode))
+				rl_completion_suppress_append = 1;
+		}
+		// Add OPH_BASE_SRC_PATH if set
+		if (oph_base_src_path && bsp && matches) {
 			for (i = 0; matches[i]; i++) {
 				snprintf(chddir, OPH_TERM_MAX_LEN, "%s", matches[i] + strlen(oph_base_src_path));
 				free(matches[i]);
@@ -2264,7 +2271,6 @@ int main(int argc, char **argv, char **envp)
 		rl_bind_keyseq("\\M-[C", rl_forward_char);
 		rl_bind_keyseq("\\M-[A", rl_get_previous_history);
 		rl_bind_keyseq("\\M-[B", rl_get_next_history);
-
 		rl_bind_keyseq("\\M-[Z", rl_menu_complete);
 	}
 
@@ -2275,9 +2281,8 @@ int main(int argc, char **argv, char **envp)
 	// history ready
 
 	//Auto-completion
-	if (!exec_statement) {
+	if (!exec_statement)
 		rl_attempted_completion_function = (rl_completion_func_t *) oph_term_completion;
-	}
 
 	/* MAIN LOOP */
 	while (1) {
@@ -2343,9 +2348,8 @@ int main(int argc, char **argv, char **envp)
 						} else {
 							snprintf(tmp_prompt, OPH_TERM_MAX_LEN, OPH_TERM_RED_PROMPT, tmp_session_code2);
 						}
-					} else {
+					} else
 						snprintf(tmp_prompt, OPH_TERM_MAX_LEN, OPH_TERM_RED_PROMPT, tmp_session_code2);
-					}
 					line = readline(tmp_prompt);
 				}
 			} else {
@@ -2407,7 +2411,6 @@ int main(int argc, char **argv, char **envp)
 		}
 
 		/* COMMAND PARSING */
-
 		if (!(linecopy = (char *) strdup(line))) {
 			(print_json) ? my_fprintf(stderr, "Error allocating memory [CODE %d]\\n", OPH_TERM_MEMORY_ERROR) : fprintf(stderr, "\e[1;31mError allocating memory [CODE %d]\e[0m\n",
 																   OPH_TERM_MEMORY_ERROR);
