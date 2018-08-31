@@ -1056,7 +1056,7 @@ char **oph_term_completion(char *text, int start, int end)
 		// completion over local filesystem
 		matches = rl_completion_matches(text, rl_filename_completion_function);
 		// Check for folders
-		if (matches[0] && !matches[1]) {
+		if (matches && matches[0] && !matches[1]) {
 			struct stat fileStat;
 			if (!stat(matches[0], &fileStat) && S_ISDIR(fileStat.st_mode))
 				rl_completion_suppress_append = 1;
