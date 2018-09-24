@@ -1893,8 +1893,8 @@ int main(int argc, char **argv, char **envp)
 		}
 		if ((error = oph_workflow_validate(tmp_workflow))) {
 			switch (error) {
+				case OPH_WORKFLOW_EXIT_BAD_PARAM_ERROR:
 				case OPH_WORKFLOW_EXIT_TASK_NAME_ERROR:
-					(print_json) ? my_fprintf(stderr, "There are tasks with the same name\\n") : fprintf(stderr, "\e[1;31mThere are tasks with the same name\e[0m\n");
 					break;
 				case OPH_WORKFLOW_EXIT_FLOW_CONTROL_ERROR:
 					(print_json) ? my_fprintf(stderr, "Flow control operators are not set correctly\\n") : fprintf(stderr,
@@ -5074,8 +5074,8 @@ int main(int argc, char **argv, char **envp)
 			int error;
 			if ((error = oph_workflow_validate(tmp_workflow))) {
 				switch (error) {
+					case OPH_WORKFLOW_EXIT_BAD_PARAM_ERROR:
 					case OPH_WORKFLOW_EXIT_TASK_NAME_ERROR:
-						(print_json) ? my_fprintf(stderr, "There are tasks with the same name\\n") : fprintf(stderr, "\e[1;31mThere are tasks with the same name\e[0m\n");
 						break;
 					case OPH_WORKFLOW_EXIT_FLOW_CONTROL_ERROR:
 						(print_json) ? my_fprintf(stderr, "Flow control operators are not set correctly\\n") : fprintf(stderr,
@@ -5637,9 +5637,8 @@ int main(int argc, char **argv, char **envp)
 					int error;
 					if ((error = oph_workflow_validate(tmp_workflow))) {
 						switch (error) {
+							case OPH_WORKFLOW_EXIT_BAD_PARAM_ERROR:
 							case OPH_WORKFLOW_EXIT_TASK_NAME_ERROR:
-								(print_json) ? my_fprintf(stderr, "There are tasks with the same name\\n") : fprintf(stderr,
-																		     "\e[1;31mThere are tasks with the same name\e[0m\n");
 								break;
 							case OPH_WORKFLOW_EXIT_FLOW_CONTROL_ERROR:
 								(print_json) ? my_fprintf(stderr, "Flow control operators are not set correctly\\n") : fprintf(stderr,
