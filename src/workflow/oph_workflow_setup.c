@@ -188,17 +188,53 @@ int oph_workflow_validate(oph_workflow * workflow)
 	}
 	// Check for uniqueness of task name
 	int i, j, k;
-	for (i = 0; i < workflow->tasks_num; i++)
-		for (j = 0; j < workflow->tasks_num; j++)
-			if ((i != j) && !strcmp(workflow->tasks[i].name, workflow->tasks[j].name))
+	for (i = 0; i < workflow->tasks_num - 1; i++)
+		for (j = i + 1; j < workflow->tasks_num; j++)
+			if (!strcmp(workflow->tasks[i].name, workflow->tasks[j].name)) {
+				(print_json) ? my_fprintf(stderr, "Found two tasks with the same name '%s'\\n", workflow->tasks[i].name) : fprintf(stderr,
+																		   "\e[1;31mFound two tasks with the same name '\e[0m%s\e[1;31m'\e[0m\n",
+																		   workflow->tasks[i].name);
 				return OPH_WORKFLOW_EXIT_TASK_NAME_ERROR;
+			}
+	// Check for special chars in parameters
+	for (i = 0; i < workflow->tasks_num; i++)
+		for (j = 0; j < workflow->tasks[i].arguments_num; j++) {
+			if (strchr(workflow->tasks[i].arguments_keys[j], OPH_WORKFLOW_KV_SEPARATOR[0])) {
+				(print_json) ? my_fprintf(stderr, "Wrong key '%s': '%s' is reserved\\n", workflow->tasks[i].arguments_keys[j], OPH_WORKFLOW_KV_SEPARATOR) : fprintf(stderr,
+																						    "\e[1;31mWrong key '%s': '%s' is reserved\e[0m\n",
+																						    workflow->tasks[i].
+																						    arguments_keys[j],
+																						    OPH_WORKFLOW_KV_SEPARATOR);
+				return OPH_WORKFLOW_EXIT_BAD_PARAM_ERROR;
+			}
+			if (strchr(workflow->tasks[i].arguments_keys[j], OPH_WORKFLOW_KV_SEPARATOR2[0])) {
+				(print_json) ? my_fprintf(stderr, "Wrong key '%s': '%s' is reserved\\n", workflow->tasks[i].arguments_keys[j], OPH_WORKFLOW_KV_SEPARATOR2) : fprintf(stderr,
+																						     "\e[1;31mWrong key '%s': '%s' is reserved\e[0m\n",
+																						     workflow->tasks[i].
+																						     arguments_keys[j],
+																						     OPH_WORKFLOW_KV_SEPARATOR2);
+				return OPH_WORKFLOW_EXIT_BAD_PARAM_ERROR;
+			}
+			if (strchr(workflow->tasks[i].arguments_values[j], OPH_WORKFLOW_KV_SEPARATOR[0])) {
+				(print_json) ? my_fprintf(stderr, "Wrong value '%s' for key '%s': '%s' is reserved\\n", workflow->tasks[i].arguments_values[j],
+							  OPH_WORKFLOW_KV_SEPARATOR) : fprintf(stderr, "\e[1;31mWrong value '%s' for key '%s': '%s' is reserved\e[0m\n",
+											       workflow->tasks[i].arguments_values[j], workflow->tasks[i].arguments_keys[j], OPH_WORKFLOW_KV_SEPARATOR);
+				return OPH_WORKFLOW_EXIT_BAD_PARAM_ERROR;
+			}
+			if (strchr(workflow->tasks[i].arguments_values[j], OPH_WORKFLOW_KV_SEPARATOR2[0])) {
+				(print_json) ? my_fprintf(stderr, "Wrong value '%s' for key '%s': '%s' is reserved\\n", workflow->tasks[i].arguments_values[j],
+							  OPH_WORKFLOW_KV_SEPARATOR2) : fprintf(stderr, "\e[1;31mWrong value '%s' for key '%s': '%s' is reserved\e[0m\n",
+												workflow->tasks[i].arguments_values[j], workflow->tasks[i].arguments_keys[j],
+												OPH_WORKFLOW_KV_SEPARATOR2);
+				return OPH_WORKFLOW_EXIT_BAD_PARAM_ERROR;
+			}
+		}
 
 	// Create graph from tasks
 	workflow_node *graph = NULL;
 	graph = (workflow_node *) calloc(workflow->tasks_num, sizeof(workflow_node));
-	if (!graph) {
+	if (!graph)
 		return OPH_WORKFLOW_EXIT_MEMORY_ERROR;
-	}
 
 	for (i = 0; i < workflow->tasks_num; i++) {
 		if (workflow->tasks[i].deps_num >= 1) {

@@ -6,6 +6,10 @@
 - 1 new alias: rmr
 - check for OPH_DELETECONTAINER as exit action
 
+### Changed:
+
+- Raise an error in case any task parameter contains special characters
+
 ## v1.4.0 - 2018-07-27
 
 ### Fixed:
