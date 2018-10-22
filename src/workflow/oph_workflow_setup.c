@@ -197,36 +197,51 @@ int oph_workflow_validate(oph_workflow * workflow)
 				return OPH_WORKFLOW_EXIT_TASK_NAME_ERROR;
 			}
 	// Check for special chars in parameters
+	size_t value_size, bracket_on = 0;
 	for (i = 0; i < workflow->tasks_num; i++)
 		for (j = 0; j < workflow->tasks[i].arguments_num; j++) {
 			if (strchr(workflow->tasks[i].arguments_keys[j], OPH_WORKFLOW_KV_SEPARATOR[0])) {
 				(print_json) ? my_fprintf(stderr, "Wrong key '%s': '%s' is reserved\\n", workflow->tasks[i].arguments_keys[j], OPH_WORKFLOW_KV_SEPARATOR) : fprintf(stderr,
 																						    "\e[1;31mWrong key '%s': '%s' is reserved\e[0m\n",
-																						    workflow->tasks[i].
-																						    arguments_keys[j],
+																						    workflow->
+																						    tasks
+																						    [i].arguments_keys
+																						    [j],
 																						    OPH_WORKFLOW_KV_SEPARATOR);
 				return OPH_WORKFLOW_EXIT_BAD_PARAM_ERROR;
 			}
 			if (strchr(workflow->tasks[i].arguments_keys[j], OPH_WORKFLOW_KV_SEPARATOR2[0])) {
 				(print_json) ? my_fprintf(stderr, "Wrong key '%s': '%s' is reserved\\n", workflow->tasks[i].arguments_keys[j], OPH_WORKFLOW_KV_SEPARATOR2) : fprintf(stderr,
 																						     "\e[1;31mWrong key '%s': '%s' is reserved\e[0m\n",
-																						     workflow->tasks[i].
-																						     arguments_keys[j],
+																						     workflow->
+																						     tasks
+																						     [i].arguments_keys
+																						     [j],
 																						     OPH_WORKFLOW_KV_SEPARATOR2);
 				return OPH_WORKFLOW_EXIT_BAD_PARAM_ERROR;
 			}
-			if (strchr(workflow->tasks[i].arguments_values[j], OPH_WORKFLOW_KV_SEPARATOR[0])) {
-				(print_json) ? my_fprintf(stderr, "Wrong value '%s' for key '%s': '%s' is reserved\\n", workflow->tasks[i].arguments_values[j],
-							  OPH_WORKFLOW_KV_SEPARATOR) : fprintf(stderr, "\e[1;31mWrong value '%s' for key '%s': '%s' is reserved\e[0m\n",
-											       workflow->tasks[i].arguments_values[j], workflow->tasks[i].arguments_keys[j], OPH_WORKFLOW_KV_SEPARATOR);
-				return OPH_WORKFLOW_EXIT_BAD_PARAM_ERROR;
-			}
-			if (strchr(workflow->tasks[i].arguments_values[j], OPH_WORKFLOW_KV_SEPARATOR2[0])) {
-				(print_json) ? my_fprintf(stderr, "Wrong value '%s' for key '%s': '%s' is reserved\\n", workflow->tasks[i].arguments_values[j],
-							  OPH_WORKFLOW_KV_SEPARATOR2) : fprintf(stderr, "\e[1;31mWrong value '%s' for key '%s': '%s' is reserved\e[0m\n",
-												workflow->tasks[i].arguments_values[j], workflow->tasks[i].arguments_keys[j],
-												OPH_WORKFLOW_KV_SEPARATOR2);
-				return OPH_WORKFLOW_EXIT_BAD_PARAM_ERROR;
+			value_size = strlen(workflow->tasks[i].arguments_values[j]);
+			for (k = 0; k < (int) value_size; ++k) {
+				if (workflow->tasks[i].arguments_values[j][k] == OPH_WORKFLOW_KV_BRACKET[0])
+					bracket_on++;
+				else if (bracket_on && (workflow->tasks[i].arguments_values[j][k] == OPH_WORKFLOW_KV_BRACKET[1]))
+					bracket_on--;
+				else if (!bracket_on) {
+					if (workflow->tasks[i].arguments_values[j][k] == OPH_WORKFLOW_KV_SEPARATOR[0]) {
+						(print_json) ? my_fprintf(stderr, "Wrong value '%s' for key '%s': '%s' is reserved\\n", workflow->tasks[i].arguments_values[j],
+									  OPH_WORKFLOW_KV_SEPARATOR) : fprintf(stderr, "\e[1;31mWrong value '%s' for key '%s': '%s' is reserved\e[0m\n",
+													       workflow->tasks[i].arguments_values[j], workflow->tasks[i].arguments_keys[j],
+													       OPH_WORKFLOW_KV_SEPARATOR);
+						return OPH_WORKFLOW_EXIT_BAD_PARAM_ERROR;
+					}
+					if (workflow->tasks[i].arguments_values[j][k] == OPH_WORKFLOW_KV_SEPARATOR2[0]) {
+						(print_json) ? my_fprintf(stderr, "Wrong value '%s' for key '%s': '%s' is reserved\\n", workflow->tasks[i].arguments_values[j],
+									  OPH_WORKFLOW_KV_SEPARATOR2) : fprintf(stderr, "\e[1;31mWrong value '%s' for key '%s': '%s' is reserved\e[0m\n",
+														workflow->tasks[i].arguments_values[j], workflow->tasks[i].arguments_keys[j],
+														OPH_WORKFLOW_KV_SEPARATOR2);
+						return OPH_WORKFLOW_EXIT_BAD_PARAM_ERROR;
+					}
+				}
 			}
 		}
 
