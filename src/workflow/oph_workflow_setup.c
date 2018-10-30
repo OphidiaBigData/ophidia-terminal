@@ -203,8 +203,7 @@ int oph_workflow_validate(oph_workflow * workflow)
 			if (strchr(workflow->tasks[i].arguments_keys[j], OPH_WORKFLOW_KV_SEPARATOR[0])) {
 				(print_json) ? my_fprintf(stderr, "Wrong key '%s': '%s' is reserved\\n", workflow->tasks[i].arguments_keys[j], OPH_WORKFLOW_KV_SEPARATOR) : fprintf(stderr,
 																						    "\e[1;31mWrong key '%s': '%s' is reserved\e[0m\n",
-																						    workflow->
-																						    tasks
+																						    workflow->tasks
 																						    [i].arguments_keys
 																						    [j],
 																						    OPH_WORKFLOW_KV_SEPARATOR);
@@ -213,8 +212,7 @@ int oph_workflow_validate(oph_workflow * workflow)
 			if (strchr(workflow->tasks[i].arguments_keys[j], OPH_WORKFLOW_KV_SEPARATOR2[0])) {
 				(print_json) ? my_fprintf(stderr, "Wrong key '%s': '%s' is reserved\\n", workflow->tasks[i].arguments_keys[j], OPH_WORKFLOW_KV_SEPARATOR2) : fprintf(stderr,
 																						     "\e[1;31mWrong key '%s': '%s' is reserved\e[0m\n",
-																						     workflow->
-																						     tasks
+																						     workflow->tasks
 																						     [i].arguments_keys
 																						     [j],
 																						     OPH_WORKFLOW_KV_SEPARATOR2);
