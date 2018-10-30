@@ -203,8 +203,7 @@ int oph_workflow_validate(oph_workflow * workflow)
 			if (strchr(workflow->tasks[i].arguments_keys[j], OPH_WORKFLOW_KV_SEPARATOR[0])) {
 				(print_json) ? my_fprintf(stderr, "Wrong key '%s': '%s' is reserved\\n", workflow->tasks[i].arguments_keys[j], OPH_WORKFLOW_KV_SEPARATOR) : fprintf(stderr,
 																						    "\e[1;31mWrong key '%s': '%s' is reserved\e[0m\n",
-																						    workflow->
-																						    tasks
+																						    workflow->tasks
 																						    [i].arguments_keys
 																						    [j],
 																						    OPH_WORKFLOW_KV_SEPARATOR);
@@ -213,8 +212,7 @@ int oph_workflow_validate(oph_workflow * workflow)
 			if (strchr(workflow->tasks[i].arguments_keys[j], OPH_WORKFLOW_KV_SEPARATOR2[0])) {
 				(print_json) ? my_fprintf(stderr, "Wrong key '%s': '%s' is reserved\\n", workflow->tasks[i].arguments_keys[j], OPH_WORKFLOW_KV_SEPARATOR2) : fprintf(stderr,
 																						     "\e[1;31mWrong key '%s': '%s' is reserved\e[0m\n",
-																						     workflow->
-																						     tasks
+																						     workflow->tasks
 																						     [i].arguments_keys
 																						     [j],
 																						     OPH_WORKFLOW_KV_SEPARATOR2);
@@ -229,16 +227,20 @@ int oph_workflow_validate(oph_workflow * workflow)
 				else if (!bracket_on) {
 					if (workflow->tasks[i].arguments_values[j][k] == OPH_WORKFLOW_KV_SEPARATOR[0]) {
 						(print_json) ? my_fprintf(stderr, "Wrong value '%s' for key '%s': '%s' is reserved\\n", workflow->tasks[i].arguments_values[j],
-									  OPH_WORKFLOW_KV_SEPARATOR) : fprintf(stderr, "\e[1;31mWrong value '%s' for key '%s': '%s' is reserved\e[0m\n",
-													       workflow->tasks[i].arguments_values[j], workflow->tasks[i].arguments_keys[j],
-													       OPH_WORKFLOW_KV_SEPARATOR);
+									  workflow->tasks[i].arguments_keys[j], OPH_WORKFLOW_KV_SEPARATOR) : fprintf(stderr,
+																		     "\e[1;31mWrong value '%s' for key '%s': '%s' is reserved\e[0m\n",
+																		     workflow->tasks[i].arguments_values[j],
+																		     workflow->tasks[i].arguments_keys[j],
+																		     OPH_WORKFLOW_KV_SEPARATOR);
 						return OPH_WORKFLOW_EXIT_BAD_PARAM_ERROR;
 					}
 					if (workflow->tasks[i].arguments_values[j][k] == OPH_WORKFLOW_KV_SEPARATOR2[0]) {
 						(print_json) ? my_fprintf(stderr, "Wrong value '%s' for key '%s': '%s' is reserved\\n", workflow->tasks[i].arguments_values[j],
-									  OPH_WORKFLOW_KV_SEPARATOR2) : fprintf(stderr, "\e[1;31mWrong value '%s' for key '%s': '%s' is reserved\e[0m\n",
-														workflow->tasks[i].arguments_values[j], workflow->tasks[i].arguments_keys[j],
-														OPH_WORKFLOW_KV_SEPARATOR2);
+									  workflow->tasks[i].arguments_keys[j], OPH_WORKFLOW_KV_SEPARATOR2) : fprintf(stderr,
+																		      "\e[1;31mWrong value '%s' for key '%s': '%s' is reserved\e[0m\n",
+																		      workflow->tasks[i].arguments_values[j],
+																		      workflow->tasks[i].arguments_keys[j],
+																		      OPH_WORKFLOW_KV_SEPARATOR2);
 						return OPH_WORKFLOW_EXIT_BAD_PARAM_ERROR;
 					}
 				}
