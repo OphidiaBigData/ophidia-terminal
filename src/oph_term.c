@@ -1060,6 +1060,8 @@ char **oph_term_completion(char *text, int start, int end)
 			struct stat fileStat;
 			if (!stat(matches[0], &fileStat) && S_ISDIR(fileStat.st_mode))
 				rl_completion_suppress_append = 1;
+			else if (start)
+				rl_completion_append_character = ';';
 		}
 		// Add OPH_BASE_SRC_PATH if set
 		if (oph_base_src_path && bsp && matches) {
