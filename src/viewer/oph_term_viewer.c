@@ -332,9 +332,9 @@ const char *get_color_string_of(const char *value)
 	else if (!strcmp(value, "OPH_STATUS_RUNNING") || !strcmp(value, "OPH_STATUS_SET_ENV") || !strcmp(value, "OPH_STATUS_INIT") || !strcmp(value, "OPH_STATUS_DISTRIBUTE")
 		 || !strcmp(value, "OPH_STATUS_EXECUTE") || !strcmp(value, "OPH_STATUS_REDUCE") || !strcmp(value, "OPH_STATUS_DESTROY") || !strcmp(value, "OPH_STATUS_UNSET_ENV"))
 		return OPH_TERM_VIEWER_YELLOW_STRING;
-	else if (!strcmp(value, "OPH_STATUS_COMPLETED") || !strcmp(value, "OPH_STATUS_SKIPPED"))
+	else if (!strcmp(value, "OPH_STATUS_COMPLETED") || !strcmp(value, "OPH_STATUS_SKIPPED") || !strcmp(value, "OPH_STATUS_ACTIVE"))
 		return OPH_TERM_VIEWER_GREEN_STRING;
-	else if (strstr(value, "_ERROR") || !strcmp(value, "OPH_STATUS_ABORTED") || !strcmp(value, "OPH_STATUS_EXPIRED"))
+	else if (strstr(value, "_ERROR") || !strcmp(value, "OPH_STATUS_ABORTED") || !strcmp(value, "OPH_STATUS_EXPIRED") || !strcmp(value, "OPH_STATUS_INACTIVE"))
 		return OPH_TERM_VIEWER_RED_STRING;
 	else
 		return OPH_TERM_VIEWER_NO_COLOR_STRING;
@@ -349,9 +349,9 @@ const char *get_color_char_of(const char *value)
 	else if (!strcmp(value, "OPH_STATUS_RUNNING") || !strcmp(value, "OPH_STATUS_SET_ENV") || !strcmp(value, "OPH_STATUS_INIT") || !strcmp(value, "OPH_STATUS_DISTRIBUTE")
 		 || !strcmp(value, "OPH_STATUS_EXECUTE") || !strcmp(value, "OPH_STATUS_REDUCE") || !strcmp(value, "OPH_STATUS_DESTROY") || !strcmp(value, "OPH_STATUS_UNSET_ENV"))
 		return OPH_TERM_VIEWER_YELLOW_CHAR;
-	else if (!strcmp(value, "OPH_STATUS_COMPLETED") || !strcmp(value, "OPH_STATUS_SKIPPED"))
+	else if (!strcmp(value, "OPH_STATUS_COMPLETED") || !strcmp(value, "OPH_STATUS_SKIPPED") || !strcmp(value, "OPH_STATUS_ACTIVE"))
 		return OPH_TERM_VIEWER_GREEN_CHAR;
-	else if (strstr(value, "_ERROR") || !strcmp(value, "OPH_STATUS_ABORTED") || !strcmp(value, "OPH_STATUS_EXPIRED"))
+	else if (strstr(value, "_ERROR") || !strcmp(value, "OPH_STATUS_ABORTED") || !strcmp(value, "OPH_STATUS_EXPIRED") || !strcmp(value, "OPH_STATUS_INACTIVE"))
 		return OPH_TERM_VIEWER_RED_CHAR;
 	else
 		return OPH_TERM_VIEWER_NO_COLOR_CHAR;
@@ -1791,7 +1791,8 @@ int oph_term_viewer_basic(char **json_string, const char *color, int save_img, i
 	for (n = 0; n < json->responseKeyset_num; n++) {
 		if (!strcmp(json->responseKeyset[n], "status"))
 			valid = 1;
-		if (!strcmp(json->responseKeyset[n], "massive_status") || !strcmp(json->responseKeyset[n], "workflow_status") || !strcmp(json->responseKeyset[n], "service_tasks"))
+		if (!strcmp(json->responseKeyset[n], "massive_status") || !strcmp(json->responseKeyset[n], "workflow_status") || !strcmp(json->responseKeyset[n], "service_status")
+		    || !strcmp(json->responseKeyset[n], "service_tasks"))
 			check_for_status = 1;
 	}
 	if (!valid) {
@@ -1968,7 +1969,8 @@ int oph_term_viewer_extended(char **json_string, const char *color, int save_img
 	for (n = 0; n < json->responseKeyset_num; n++) {
 		if (!strcmp(json->responseKeyset[n], "status"))
 			valid = 1;
-		if (!strcmp(json->responseKeyset[n], "massive_status") || !strcmp(json->responseKeyset[n], "workflow_status"))
+		if (!strcmp(json->responseKeyset[n], "massive_status") || !strcmp(json->responseKeyset[n], "workflow_status") || !strcmp(json->responseKeyset[n], "service_status")
+		    || !strcmp(json->responseKeyset[n], "service_tasks"))
 			check_for_status = 1;
 	}
 	if (!valid) {
