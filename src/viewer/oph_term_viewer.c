@@ -1791,7 +1791,7 @@ int oph_term_viewer_basic(char **json_string, const char *color, int save_img, i
 	for (n = 0; n < json->responseKeyset_num; n++) {
 		if (!strcmp(json->responseKeyset[n], "status"))
 			valid = 1;
-		if (!strcmp(json->responseKeyset[n], "massive_status") || !strcmp(json->responseKeyset[n], "workflow_status"))
+		if (!strcmp(json->responseKeyset[n], "massive_status") || !strcmp(json->responseKeyset[n], "workflow_status") || !strcmp(json->responseKeyset[n], "service_tasks"))
 			check_for_status = 1;
 	}
 	if (!valid) {
