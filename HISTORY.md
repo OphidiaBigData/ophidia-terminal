@@ -1,5 +1,10 @@
 
-## New features
+## Next release
+
+### Added:
+
+- 1 new alias: rmr
+- check for OPH_DELETECONTAINER as exit action
 
 ### Changed:
 
