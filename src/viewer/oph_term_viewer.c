@@ -1792,7 +1792,7 @@ int oph_term_viewer_basic(char **json_string, const char *color, int save_img, i
 		if (!strcmp(json->responseKeyset[n], "status"))
 			valid = 1;
 		if (!strcmp(json->responseKeyset[n], "massive_status") || !strcmp(json->responseKeyset[n], "workflow_status") || !strcmp(json->responseKeyset[n], "service_status")
-		    || !strcmp(json->responseKeyset[n], "service_tasks"))
+		    || !strcmp(json->responseKeyset[n], "service_tasks") || !strcmp(json->responseKeyset[n], "cluster_list"))
 			check_for_status = 1;
 	}
 	if (!valid) {
@@ -1970,7 +1970,7 @@ int oph_term_viewer_extended(char **json_string, const char *color, int save_img
 		if (!strcmp(json->responseKeyset[n], "status"))
 			valid = 1;
 		if (!strcmp(json->responseKeyset[n], "massive_status") || !strcmp(json->responseKeyset[n], "workflow_status") || !strcmp(json->responseKeyset[n], "service_status")
-		    || !strcmp(json->responseKeyset[n], "service_tasks"))
+		    || !strcmp(json->responseKeyset[n], "service_tasks") || !strcmp(json->responseKeyset[n], "cluster_list"))
 			check_for_status = 1;
 	}
 	if (!valid) {
