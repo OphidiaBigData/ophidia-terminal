@@ -323,7 +323,41 @@ int adjusted_string_max_len(char *not_adjusted_string)
 	return max_len;
 }
 
-void print_text(oph_json_obj_text * obj, const char *color_string)
+const char *get_color_string_of(const char *value)
+{
+	if (!strcmp(value, "OPH_STATUS_PENDING"))
+		return OPH_TERM_VIEWER_PURPLE_STRING;
+	else if (!strcmp(value, "OPH_STATUS_WAITING"))
+		return OPH_TERM_VIEWER_CYAN_STRING;
+	else if (!strcmp(value, "OPH_STATUS_RUNNING") || !strcmp(value, "OPH_STATUS_SET_ENV") || !strcmp(value, "OPH_STATUS_INIT") || !strcmp(value, "OPH_STATUS_DISTRIBUTE")
+		 || !strcmp(value, "OPH_STATUS_EXECUTE") || !strcmp(value, "OPH_STATUS_REDUCE") || !strcmp(value, "OPH_STATUS_DESTROY") || !strcmp(value, "OPH_STATUS_UNSET_ENV"))
+		return OPH_TERM_VIEWER_YELLOW_STRING;
+	else if (!strcmp(value, "OPH_STATUS_COMPLETED") || !strcmp(value, "OPH_STATUS_SKIPPED") || !strcmp(value, "OPH_STATUS_ACTIVE"))
+		return OPH_TERM_VIEWER_GREEN_STRING;
+	else if (strstr(value, "_ERROR") || !strcmp(value, "OPH_STATUS_ABORTED") || !strcmp(value, "OPH_STATUS_EXPIRED") || !strcmp(value, "OPH_STATUS_INACTIVE"))
+		return OPH_TERM_VIEWER_RED_STRING;
+	else
+		return OPH_TERM_VIEWER_NO_COLOR_STRING;
+}
+
+const char *get_color_char_of(const char *value)
+{
+	if (!strcmp(value, "OPH_STATUS_PENDING"))
+		return OPH_TERM_VIEWER_PURPLE_CHAR;
+	else if (!strcmp(value, "OPH_STATUS_WAITING"))
+		return OPH_TERM_VIEWER_CYAN_CHAR;
+	else if (!strcmp(value, "OPH_STATUS_RUNNING") || !strcmp(value, "OPH_STATUS_SET_ENV") || !strcmp(value, "OPH_STATUS_INIT") || !strcmp(value, "OPH_STATUS_DISTRIBUTE")
+		 || !strcmp(value, "OPH_STATUS_EXECUTE") || !strcmp(value, "OPH_STATUS_REDUCE") || !strcmp(value, "OPH_STATUS_DESTROY") || !strcmp(value, "OPH_STATUS_UNSET_ENV"))
+		return OPH_TERM_VIEWER_YELLOW_CHAR;
+	else if (!strcmp(value, "OPH_STATUS_COMPLETED") || !strcmp(value, "OPH_STATUS_SKIPPED") || !strcmp(value, "OPH_STATUS_ACTIVE"))
+		return OPH_TERM_VIEWER_GREEN_CHAR;
+	else if (strstr(value, "_ERROR") || !strcmp(value, "OPH_STATUS_ABORTED") || !strcmp(value, "OPH_STATUS_EXPIRED") || !strcmp(value, "OPH_STATUS_INACTIVE"))
+		return OPH_TERM_VIEWER_RED_CHAR;
+	else
+		return OPH_TERM_VIEWER_NO_COLOR_CHAR;
+}
+
+void print_text(oph_json_obj_text * obj, const char *color_string, int check_for_status)
 {
 	// print title
 	if (obj->title && strlen(obj->title)) {
@@ -337,14 +371,18 @@ void print_text(oph_json_obj_text * obj, const char *color_string)
 	}
 	// print message
 	if (obj->message && strlen(obj->message)) {
-		printf("%s\n", obj->message);
+		if (check_for_status) {
+			printf(get_color_string_of(obj->message), obj->message);
+			printf("\n");
+		} else
+			printf("%s\n", obj->message);
 		fflush(stdout);
 	}
 
 	return;
 }
 
-void print_grid(oph_json_obj_grid * obj, const char *color_string, int show_list)
+void print_grid(oph_json_obj_grid * obj, const char *color_string, int show_list, int check_for_status)
 {
 
 	// print title
@@ -523,7 +561,10 @@ void print_grid(oph_json_obj_grid * obj, const char *color_string, int show_list
 							printf(" ");
 							newline_found = 1;
 						} else {
-							printf("%c", adjusted_row[i][cursors[i]]);
+							if (check_for_status)
+								printf(get_color_char_of(obj->values[r][i]), adjusted_row[i][cursors[i]]);
+							else
+								printf("%c", adjusted_row[i][cursors[i]]);
 							cursors[i]++;
 							if (cursors[i] == (int) strlen(adjusted_row[i]))
 								completed++;
@@ -1746,12 +1787,13 @@ int oph_term_viewer_basic(char **json_string, const char *color, int save_img, i
 		return OPH_TERM_GENERIC_ERROR;
 	}
 	// Check for status. In case of ERROR print and exit
-	size_t n, valid = 0;
+	size_t n, valid = 0, check_for_status = 0;
 	for (n = 0; n < json->responseKeyset_num; n++) {
-		if (!strcmp(json->responseKeyset[n], "status")) {
+		if (!strcmp(json->responseKeyset[n], "status"))
 			valid = 1;
-			break;
-		}
+		if (!strcmp(json->responseKeyset[n], "massive_status") || !strcmp(json->responseKeyset[n], "workflow_status") || !strcmp(json->responseKeyset[n], "service_status")
+		    || !strcmp(json->responseKeyset[n], "service_tasks"))
+			check_for_status = 1;
 	}
 	if (!valid) {
 		if (json)
@@ -1766,7 +1808,7 @@ int oph_term_viewer_basic(char **json_string, const char *color, int save_img, i
 				if (print_debug_data) {
 					size_t j;
 					for (j = 1; j < json->response[n].objcontent_num; j++) {
-						print_text(&(((oph_json_obj_text *) (json->response[n].objcontent))[j]), (const char *) color_string);
+						print_text(&(((oph_json_obj_text *) (json->response[n].objcontent))[j]), (const char *) color_string, check_for_status);
 						printf("\n");
 					}
 				}
@@ -1775,7 +1817,7 @@ int oph_term_viewer_basic(char **json_string, const char *color, int save_img, i
 			} else {
 				size_t j;
 				for (j = 0; j < json->response[n].objcontent_num; j++) {
-					print_text(&(((oph_json_obj_text *) (json->response[n].objcontent))[j]), (const char *) color_string);
+					print_text(&(((oph_json_obj_text *) (json->response[n].objcontent))[j]), (const char *) color_string, check_for_status);
 					printf("\n");
 				}
 				if (json)
@@ -1817,9 +1859,9 @@ int oph_term_viewer_basic(char **json_string, const char *color, int save_img, i
 
 		if (response_i->objcontent_num == 1) {	//only 1 fragment -> additional info not needed
 			if (!strcmp(response_i->objclass, OPH_JSON_TEXT))
-				print_text(&(((oph_json_obj_text *) (response_i->objcontent))[0]), (const char *) color_string);
+				print_text(&(((oph_json_obj_text *) (response_i->objcontent))[0]), (const char *) color_string, check_for_status);
 			else if (!strcmp(response_i->objclass, OPH_JSON_GRID))
-				print_grid(&(((oph_json_obj_grid *) (response_i->objcontent))[0]), (const char *) color_string, show_list);
+				print_grid(&(((oph_json_obj_grid *) (response_i->objcontent))[0]), (const char *) color_string, show_list, check_for_status);
 			else if (!strcmp(response_i->objclass, OPH_JSON_MULTIGRID))
 				print_multigrid(&(((oph_json_obj_multigrid *) (response_i->objcontent))[0]), (const char *) color_string);
 			else if (!strcmp(response_i->objclass, OPH_JSON_TREE))
@@ -1835,14 +1877,14 @@ int oph_term_viewer_basic(char **json_string, const char *color, int save_img, i
 				for (j = 0; j < response_i->objcontent_num; j++) {
 					objcontent_j = &(((oph_json_obj_text *) (response_i->objcontent))[j]);
 					//printf("\n--- Part %d of %d ---\n",j+1,response_i->objcontent_num);
-					print_text(objcontent_j, (const char *) color_string);
+					print_text(objcontent_j, (const char *) color_string, check_for_status);
 				}
 			} else if (!strcmp(response_i->objclass, OPH_JSON_GRID)) {
 				oph_json_obj_grid *objcontent_j = NULL;
 				for (j = 0; j < response_i->objcontent_num; j++) {
 					objcontent_j = &(((oph_json_obj_grid *) (response_i->objcontent))[j]);
 					//printf("\n--- Part %d of %d ---\n",j+1,response_i->objcontent_num);
-					print_grid(objcontent_j, (const char *) color_string, show_list);
+					print_grid(objcontent_j, (const char *) color_string, show_list, check_for_status);
 				}
 			} else if (!strcmp(response_i->objclass, OPH_JSON_MULTIGRID)) {
 				oph_json_obj_multigrid *objcontent_j = NULL;
@@ -1923,12 +1965,13 @@ int oph_term_viewer_extended(char **json_string, const char *color, int save_img
 		return OPH_TERM_GENERIC_ERROR;
 	}
 	// Check for status. In case of ERROR print and exit
-	size_t n, valid = 0;
+	size_t n, valid = 0, check_for_status = 0;
 	for (n = 0; n < json->responseKeyset_num; n++) {
-		if (!strcmp(json->responseKeyset[n], "status")) {
+		if (!strcmp(json->responseKeyset[n], "status"))
 			valid = 1;
-			break;
-		}
+		if (!strcmp(json->responseKeyset[n], "massive_status") || !strcmp(json->responseKeyset[n], "workflow_status") || !strcmp(json->responseKeyset[n], "service_status")
+		    || !strcmp(json->responseKeyset[n], "service_tasks"))
+			check_for_status = 1;
 	}
 	if (!valid) {
 		if (json)
@@ -1943,7 +1986,7 @@ int oph_term_viewer_extended(char **json_string, const char *color, int save_img
 				if (print_debug_data) {
 					size_t j;
 					for (j = 1; j < json->response[n].objcontent_num; j++) {
-						print_text(&(((oph_json_obj_text *) (json->response[n].objcontent))[j]), (const char *) color_string);
+						print_text(&(((oph_json_obj_text *) (json->response[n].objcontent))[j]), (const char *) color_string, check_for_status);
 						printf("\n");
 					}
 				}
@@ -1952,7 +1995,7 @@ int oph_term_viewer_extended(char **json_string, const char *color, int save_img
 			} else {
 				size_t j;
 				for (j = 0; j < json->response[n].objcontent_num; j++) {
-					print_text(&(((oph_json_obj_text *) (json->response[n].objcontent))[j]), (const char *) color_string);
+					print_text(&(((oph_json_obj_text *) (json->response[n].objcontent))[j]), (const char *) color_string, check_for_status);
 					printf("\n");
 				}
 				if (json)
@@ -2016,9 +2059,9 @@ int oph_term_viewer_extended(char **json_string, const char *color, int save_img
 
 		if (response_i->objcontent_num == 1) {	//only 1 fragment -> additional info not needed
 			if (!strcmp(response_i->objclass, OPH_JSON_TEXT))
-				print_text(&(((oph_json_obj_text *) (response_i->objcontent))[0]), (const char *) color_string);
+				print_text(&(((oph_json_obj_text *) (response_i->objcontent))[0]), (const char *) color_string, check_for_status);
 			else if (!strcmp(response_i->objclass, OPH_JSON_GRID))
-				print_grid(&(((oph_json_obj_grid *) (response_i->objcontent))[0]), (const char *) color_string, show_list);
+				print_grid(&(((oph_json_obj_grid *) (response_i->objcontent))[0]), (const char *) color_string, show_list, check_for_status);
 			else if (!strcmp(response_i->objclass, OPH_JSON_MULTIGRID))
 				print_multigrid(&(((oph_json_obj_multigrid *) (response_i->objcontent))[0]), (const char *) color_string);
 			else if (!strcmp(response_i->objclass, OPH_JSON_TREE))
@@ -2034,14 +2077,14 @@ int oph_term_viewer_extended(char **json_string, const char *color, int save_img
 				for (j = 0; j < response_i->objcontent_num; j++) {
 					objcontent_j = &(((oph_json_obj_text *) (response_i->objcontent))[j]);
 					printf("--- Part %d of %d ---\n", (int) j + 1, response_i->objcontent_num);
-					print_text(objcontent_j, (const char *) color_string);
+					print_text(objcontent_j, (const char *) color_string, check_for_status);
 				}
 			} else if (!strcmp(response_i->objclass, OPH_JSON_GRID)) {
 				oph_json_obj_grid *objcontent_j = NULL;
 				for (j = 0; j < response_i->objcontent_num; j++) {
 					objcontent_j = &(((oph_json_obj_grid *) (response_i->objcontent))[j]);
 					printf("--- Part %d of %d ---\n", (int) j + 1, response_i->objcontent_num);
-					print_grid(objcontent_j, (const char *) color_string, show_list);
+					print_grid(objcontent_j, (const char *) color_string, show_list, check_for_status);
 				}
 			} else if (!strcmp(response_i->objclass, OPH_JSON_MULTIGRID)) {
 				oph_json_obj_multigrid *objcontent_j = NULL;
