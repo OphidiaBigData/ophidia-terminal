@@ -240,7 +240,7 @@ void oph_execute(struct soap *soap, xsd__string query, char *wps, char **newsess
 			}
 			char *host_partition = (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_HOST_PARTITION);
 			if (host_partition) {
-				if (!strstr(query, "\"host_partition\"") && strcmp(host_partition, "test")) {
+				if (!strstr(query, "\"host_partition\"") && strcmp(host_partition, OPH_TERM_ENV_OPH_MAIN_PARTITION)) {
 					n += snprintf(fixed_query + n, WORKFLOW_MAX_LEN - n, "%s%s%s", WRAPPING_WORKFLOW4h, host_partition, WRAPPING_WORKFLOW4h_1);
 				}
 			}
