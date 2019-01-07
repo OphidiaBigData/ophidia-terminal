@@ -3,11 +3,16 @@
 
 ### Added:
 
-- 1 new alias: rmr
-- check for OPH_DELETECONTAINER as exit action
+- A new alias 'rmr' [#11](https://github.com/OphidiaBigData/ophidia-terminal/pull/11/)
+- Check for OPH_DELETECONTAINER as workflow exit action [#11](https://github.com/OphidiaBigData/ophidia-terminal/pull/11/)
 
 ### Changed:
 
+- 'rm' alias to drop references to hidden containers [#15](https://github.com/OphidiaBigData/ophidia-terminal/pull/15/)
+- Default host partition name to 'main' [#14](https://github.com/OphidiaBigData/ophidia-terminal/pull/14/)
+- Display of status in command outputs with different colors [#13](https://github.com/OphidiaBigData/ophidia-terminal/pull/13/)
+- 'rc' alias [#12](https://github.com/OphidiaBigData/ophidia-terminal/pull/12/)
+- Path completion to add the key-word separator at the end
 - Raise an error in case any task parameter contains special characters
 
 ## v1.4.0 - 2018-07-27

@@ -21,6 +21,16 @@
 #include <ctype.h>
 
 #define UNUSED(x) {(void)(x);}
+void foo2()
+{
+	UNUSED(pre_defined_aliases_keys);
+	UNUSED(pre_defined_aliases_values);
+	UNUSED(env_vars_ptr);
+	UNUSED(alias_ptr);
+	UNUSED(xml_defs);
+	UNUSED(operators_list);
+	UNUSED(operators_list_size);
+}
 
 HASHTBL *conf_hashtbl = NULL;
 
