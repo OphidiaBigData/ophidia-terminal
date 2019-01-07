@@ -201,7 +201,7 @@ extern int oph_term_error_cur;
 #define OPH_TERM_DEFAULT_ALIAS_VAL_4 	"oph_folder command=mv;path=$1|$2;"
 #define OPH_TERM_DEFAULT_ALIAS_VAL_5 	"oph_folder command=rm;path=$1;"
 #define OPH_TERM_DEFAULT_ALIAS_VAL_6 	"oph_movecontainer container=$1|$2;"
-#define OPH_TERM_DEFAULT_ALIAS_VAL_7 	"oph_deletecontainer container=$1;hidden=no;delete_type=physical;"
+#define OPH_TERM_DEFAULT_ALIAS_VAL_7 	"oph_deletecontainer container=$1;"
 #define OPH_TERM_DEFAULT_ALIAS_VAL_8 	"oph_delete cube=$1;"
 #define OPH_TERM_DEFAULT_ALIAS_VAL_9 	"getenv OPH_CWD"
 #define OPH_TERM_DEFAULT_ALIAS_VAL_10 	"oph_man function=$1;"
@@ -222,7 +222,7 @@ extern int oph_term_error_cur;
 #define OPH_TERM_DEFAULT_ALIAS_VAL_25 	"oph_fs command=mkdir;dpath=$1;"
 #define OPH_TERM_DEFAULT_ALIAS_VAL_26 	"oph_fs command=mv;dpath=$1|$2;"
 #define OPH_TERM_DEFAULT_ALIAS_VAL_27 	"oph_fs command=rm;dpath=$1;"
-#define OPH_TERM_DEFAULT_ALIAS_VAL_28 	"oph_deletecontainer container=$1;hidden=no;delete_type=physical;force=yes;"
+#define OPH_TERM_DEFAULT_ALIAS_VAL_28 	"oph_deletecontainer container=$1;force=yes;"
 
 #define OPH_TERM_DEFAULT_ALIAS_NUM 28
 
