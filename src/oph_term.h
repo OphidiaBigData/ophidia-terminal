@@ -193,6 +193,7 @@ extern int oph_term_error_cur;
 #define OPH_TERM_DEFAULT_ALIAS_KEY_25 	"mkdird"
 #define OPH_TERM_DEFAULT_ALIAS_KEY_26 	"mvd"
 #define OPH_TERM_DEFAULT_ALIAS_KEY_27 	"rmd"
+#define OPH_TERM_DEFAULT_ALIAS_KEY_28 	"rmr"
 
 #define OPH_TERM_DEFAULT_ALIAS_VAL_1 	"oph_list path=$1;"
 #define OPH_TERM_DEFAULT_ALIAS_VAL_2 	"oph_folder command=cd;path=$1;"
@@ -207,7 +208,7 @@ extern int oph_term_error_cur;
 #define OPH_TERM_DEFAULT_ALIAS_VAL_11 	"oph_list path=$1;level=2;"
 #define OPH_TERM_DEFAULT_ALIAS_VAL_12 	"oph_list path=$1;level=2;recursive=yes;"
 #define OPH_TERM_DEFAULT_ALIAS_VAL_13 	"oph_createcontainer container=$1;dim=lat|lon|time;dim_type=double|double|double;hierarchy=oph_base|oph_base|oph_time;"
-#define OPH_TERM_DEFAULT_ALIAS_VAL_14 	"oph_randcube container=$1;dim=lat|lon|time;dim_size=$2|$3|$4;exp_ndim=2;host_partition=test;measure=example_measure;measure_type=double;nfrag=$2;ntuple=$3;compressed=no;concept_level=c|c|d;filesystem=local;ndb=1;ndbms=1;nhost=1;"
+#define OPH_TERM_DEFAULT_ALIAS_VAL_14 	"oph_randcube container=$1;dim=lat|lon|time;dim_size=$2|$3|$4;exp_ndim=2;host_partition=main;measure=example_measure;measure_type=double;nfrag=$2;ntuple=$3;compressed=no;concept_level=c|c|d;nhost=1;"
 #define OPH_TERM_DEFAULT_ALIAS_VAL_15 	"oph_cancel id=$1"
 #define OPH_TERM_DEFAULT_ALIAS_VAL_16 	"oph_fs command=ls;dpath=$1;"
 #define OPH_TERM_DEFAULT_ALIAS_VAL_17 	"oph_fs command=cd;dpath=$1;"
@@ -221,8 +222,9 @@ extern int oph_term_error_cur;
 #define OPH_TERM_DEFAULT_ALIAS_VAL_25 	"oph_fs command=mkdir;dpath=$1;"
 #define OPH_TERM_DEFAULT_ALIAS_VAL_26 	"oph_fs command=mv;dpath=$1|$2;"
 #define OPH_TERM_DEFAULT_ALIAS_VAL_27 	"oph_fs command=rm;dpath=$1;"
+#define OPH_TERM_DEFAULT_ALIAS_VAL_28 	"oph_deletecontainer container=$1;hidden=no;delete_type=physical;force=yes;"
 
-#define OPH_TERM_DEFAULT_ALIAS_NUM 27
+#define OPH_TERM_DEFAULT_ALIAS_NUM 28
 
 static char *pre_defined_aliases_keys[OPH_TERM_DEFAULT_ALIAS_NUM] = {
 	OPH_TERM_DEFAULT_ALIAS_KEY_1,
@@ -251,7 +253,8 @@ static char *pre_defined_aliases_keys[OPH_TERM_DEFAULT_ALIAS_NUM] = {
 	OPH_TERM_DEFAULT_ALIAS_KEY_24,
 	OPH_TERM_DEFAULT_ALIAS_KEY_25,
 	OPH_TERM_DEFAULT_ALIAS_KEY_26,
-	OPH_TERM_DEFAULT_ALIAS_KEY_27
+	OPH_TERM_DEFAULT_ALIAS_KEY_27,
+	OPH_TERM_DEFAULT_ALIAS_KEY_28
 };
 
 static char *pre_defined_aliases_values[OPH_TERM_DEFAULT_ALIAS_NUM] = {
@@ -281,7 +284,8 @@ static char *pre_defined_aliases_values[OPH_TERM_DEFAULT_ALIAS_NUM] = {
 	OPH_TERM_DEFAULT_ALIAS_VAL_24,
 	OPH_TERM_DEFAULT_ALIAS_VAL_25,
 	OPH_TERM_DEFAULT_ALIAS_VAL_26,
-	OPH_TERM_DEFAULT_ALIAS_VAL_27
+	OPH_TERM_DEFAULT_ALIAS_VAL_27,
+	OPH_TERM_DEFAULT_ALIAS_VAL_28
 };
 
 static const int pre_defined_aliases_num = OPH_TERM_DEFAULT_ALIAS_NUM;
