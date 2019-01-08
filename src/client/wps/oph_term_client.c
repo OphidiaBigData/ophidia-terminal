@@ -1094,15 +1094,6 @@ void oph_execute(char *query, char **newsession, int *return_value, char **out_r
 int oph_term_client(char *cmd_line, char *command, char **newsession, char *user, char *password, char *host, char *port, int *return_value, char **out_response, char **out_response_for_viewer,
 		    int workflow_wrap, HASHTBL * hashtbl)
 {
-	UNUSED(cmds);
-	UNUSED(pre_defined_aliases_keys);
-	UNUSED(pre_defined_aliases_values);
-	UNUSED(env_vars);
-	UNUSED(env_vars_ptr);
-	UNUSED(alias_ptr);
-	UNUSED(xml_defs);
-	UNUSED(operators_list);
-	UNUSED(operators_list_size);
 
 	snprintf(query_global, WORKFLOW_MAX_LEN, OPH_DEFAULT_QUERY);
 

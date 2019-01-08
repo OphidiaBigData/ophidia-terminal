@@ -79,39 +79,7 @@
 #define env_vars_num 20
 #endif
 
-static char *env_vars[env_vars_num] = {
-	OPH_TERM_ENV_OPH_TERM_PS1,
-	OPH_TERM_ENV_OPH_USER,
-	OPH_TERM_ENV_OPH_PASSWD,
-	OPH_TERM_ENV_OPH_SERVER_HOST,
-	OPH_TERM_ENV_OPH_SERVER_PORT,
-	OPH_TERM_ENV_OPH_SESSION_ID,
-	OPH_TERM_ENV_OPH_EXEC_MODE,
-	OPH_TERM_ENV_OPH_NCORES,
-	OPH_TERM_ENV_OPH_CWD,
-	OPH_TERM_ENV_OPH_CDD,
-	OPH_TERM_ENV_OPH_DATACUBE,
-	OPH_TERM_ENV_OPH_TERM_VIEWER,
-	OPH_TERM_ENV_OPH_TERM_IMGS,
-	OPH_TERM_ENV_OPH_TERM_FORMAT,
-	OPH_TERM_ENV_OPH_GRAPH_LAYOUT,
-	OPH_TERM_ENV_OPH_RESPONSE_BUFFER,
-	OPH_TERM_ENV_OPH_WORKFLOW_AUTOVIEW,
-	OPH_TERM_ENV_OPH_HOST_PARTITION,
-	OPH_TERM_ENV_OPH_TOKEN,
-	OPH_TERM_ENV_OPH_TIMEOUT
-#ifdef WITH_IM_SUPPORT
-	    ,
-	OPH_TERM_ENV_OPH_INFRASTRUCTURE_URL,
-	OPH_TERM_ENV_OPH_AUTH_HEADER
-#endif
-};
-
-static HASHTBL *env_vars_ptr = NULL;
-static HASHTBL *alias_ptr = NULL;
-static HASHTBL *xml_defs = NULL;
-static char **operators_list = NULL;
-static int operators_list_size = 0;
+extern const char *env_vars[env_vars_num];
 
 typedef struct operator_argument {
 	char name[30];

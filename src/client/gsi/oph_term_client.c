@@ -471,15 +471,6 @@ void oph_execute(struct soap *soap, xsd__string query, char *wps, char **newsess
 int oph_term_client(char *cmd_line, char *command, char **newsession, char *user, char *password, char *host, char *port, int *return_value, char **out_response, char **out_response_for_viewer,
 		    int workflow_wrap, HASHTBL * hashtbl)
 {
-	UNUSED(cmds);
-	UNUSED(pre_defined_aliases_keys);
-	UNUSED(pre_defined_aliases_values);
-	UNUSED(env_vars);
-	UNUSED(env_vars_ptr);
-	UNUSED(alias_ptr);
-	UNUSED(xml_defs);
-	UNUSED(operators_list);
-	UNUSED(operators_list_size);
 	UNUSED(user);
 	UNUSED(password);
 

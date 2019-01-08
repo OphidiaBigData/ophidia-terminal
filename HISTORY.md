@@ -6,6 +6,10 @@
 - A new alias 'rmr' [#11](https://github.com/OphidiaBigData/ophidia-terminal/pull/11/)
 - Check for OPH_DELETECONTAINER as workflow exit action [#11](https://github.com/OphidiaBigData/ophidia-terminal/pull/11/)
 
+### Fixed:
+
+- Global variable definition in header files
+
 ### Changed:
 
 - 'rm' alias to drop references to hidden containers [#15](https://github.com/OphidiaBigData/ophidia-terminal/pull/15/)

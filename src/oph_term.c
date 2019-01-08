@@ -50,6 +50,112 @@ char oph_term_error[OUTPUT_MAX_LEN] = "\0";
 int oph_term_error_cur = 0;
 char *oph_base_src_path = NULL;
 
+const char *cmds[cmds_num] = {
+	OPH_TERM_CMD_VERSION,
+	OPH_TERM_CMD_WARRANTY,
+	OPH_TERM_CMD_WATCH,
+	OPH_TERM_CMD_CONDITIONS,
+	OPH_TERM_CMD_HELP,
+	OPH_TERM_CMD_HISTORY,
+	OPH_TERM_CMD_ENV,
+	OPH_TERM_CMD_SETENV,
+	OPH_TERM_CMD_UNSETENV,
+	OPH_TERM_CMD_GETENV,
+	OPH_TERM_CMD_QUIT,
+	OPH_TERM_CMD_EXIT,
+	OPH_TERM_CMD_CLEAR,
+	OPH_TERM_CMD_UPDATE,
+	OPH_TERM_CMD_RESUME,
+	OPH_TERM_CMD_VIEW,
+#ifndef NO_WORKFLOW
+	OPH_TERM_CMD_CHECK,
+#endif
+	OPH_TERM_CMD_ALIAS,
+	OPH_TERM_CMD_SETALIAS,
+	OPH_TERM_CMD_UNSETALIAS,
+	OPH_TERM_CMD_GETALIAS
+#ifdef WITH_IM_SUPPORT
+	    ,
+	OPH_TERM_CMD_DEPLOY,
+	OPH_TERM_CMD_DEPLOY_STATUS,
+	OPH_TERM_CMD_GET_SERVER,
+	OPH_TERM_CMD_UNDEPLOY,
+	OPH_TERM_CMD_DEPLOYS_LIST,
+	OPH_TERM_CMD_DEPLOY_VMS_LIST
+#endif
+};
+
+
+const char *pre_defined_aliases_keys[OPH_TERM_DEFAULT_ALIAS_NUM] = {
+	OPH_TERM_DEFAULT_ALIAS_KEY_1,
+	OPH_TERM_DEFAULT_ALIAS_KEY_2,
+	OPH_TERM_DEFAULT_ALIAS_KEY_3,
+	OPH_TERM_DEFAULT_ALIAS_KEY_4,
+	OPH_TERM_DEFAULT_ALIAS_KEY_5,
+	OPH_TERM_DEFAULT_ALIAS_KEY_6,
+	OPH_TERM_DEFAULT_ALIAS_KEY_7,
+	OPH_TERM_DEFAULT_ALIAS_KEY_8,
+	OPH_TERM_DEFAULT_ALIAS_KEY_9,
+	OPH_TERM_DEFAULT_ALIAS_KEY_10,
+	OPH_TERM_DEFAULT_ALIAS_KEY_11,
+	OPH_TERM_DEFAULT_ALIAS_KEY_12,
+	OPH_TERM_DEFAULT_ALIAS_KEY_13,
+	OPH_TERM_DEFAULT_ALIAS_KEY_14,
+	OPH_TERM_DEFAULT_ALIAS_KEY_15,
+	OPH_TERM_DEFAULT_ALIAS_KEY_16,
+	OPH_TERM_DEFAULT_ALIAS_KEY_17,
+	OPH_TERM_DEFAULT_ALIAS_KEY_18,
+	OPH_TERM_DEFAULT_ALIAS_KEY_19,
+	OPH_TERM_DEFAULT_ALIAS_KEY_20,
+	OPH_TERM_DEFAULT_ALIAS_KEY_21,
+	OPH_TERM_DEFAULT_ALIAS_KEY_22,
+	OPH_TERM_DEFAULT_ALIAS_KEY_23,
+	OPH_TERM_DEFAULT_ALIAS_KEY_24,
+	OPH_TERM_DEFAULT_ALIAS_KEY_25,
+	OPH_TERM_DEFAULT_ALIAS_KEY_26,
+	OPH_TERM_DEFAULT_ALIAS_KEY_27,
+	OPH_TERM_DEFAULT_ALIAS_KEY_28
+};
+
+const char *pre_defined_aliases_values[OPH_TERM_DEFAULT_ALIAS_NUM] = {
+	OPH_TERM_DEFAULT_ALIAS_VAL_1,
+	OPH_TERM_DEFAULT_ALIAS_VAL_2,
+	OPH_TERM_DEFAULT_ALIAS_VAL_3,
+	OPH_TERM_DEFAULT_ALIAS_VAL_4,
+	OPH_TERM_DEFAULT_ALIAS_VAL_5,
+	OPH_TERM_DEFAULT_ALIAS_VAL_6,
+	OPH_TERM_DEFAULT_ALIAS_VAL_7,
+	OPH_TERM_DEFAULT_ALIAS_VAL_8,
+	OPH_TERM_DEFAULT_ALIAS_VAL_9,
+	OPH_TERM_DEFAULT_ALIAS_VAL_10,
+	OPH_TERM_DEFAULT_ALIAS_VAL_11,
+	OPH_TERM_DEFAULT_ALIAS_VAL_12,
+	OPH_TERM_DEFAULT_ALIAS_VAL_13,
+	OPH_TERM_DEFAULT_ALIAS_VAL_14,
+	OPH_TERM_DEFAULT_ALIAS_VAL_15,
+	OPH_TERM_DEFAULT_ALIAS_VAL_16,
+	OPH_TERM_DEFAULT_ALIAS_VAL_17,
+	OPH_TERM_DEFAULT_ALIAS_VAL_18,
+	OPH_TERM_DEFAULT_ALIAS_VAL_19,
+	OPH_TERM_DEFAULT_ALIAS_VAL_20,
+	OPH_TERM_DEFAULT_ALIAS_VAL_21,
+	OPH_TERM_DEFAULT_ALIAS_VAL_22,
+	OPH_TERM_DEFAULT_ALIAS_VAL_23,
+	OPH_TERM_DEFAULT_ALIAS_VAL_24,
+	OPH_TERM_DEFAULT_ALIAS_VAL_25,
+	OPH_TERM_DEFAULT_ALIAS_VAL_26,
+	OPH_TERM_DEFAULT_ALIAS_VAL_27,
+	OPH_TERM_DEFAULT_ALIAS_VAL_28
+};
+
+const int pre_defined_aliases_num = OPH_TERM_DEFAULT_ALIAS_NUM;
+
+static HASHTBL *env_vars_ptr = NULL;
+static HASHTBL *alias_ptr = NULL;
+static HASHTBL *xml_defs = NULL;
+static char **operators_list = NULL;
+static int operators_list_size = 0;
+
 /* Print Oph_Term version and copyright */
 void print_version()
 {
@@ -609,7 +715,7 @@ int startup_opt_setup(int argc, char *argv[], char *envp[], HASHTBL * hashtbl, c
 char *oph_term_base_generator(const char *text, int state)
 {
 	static int list_index, len;
-	char *name;
+	const char *name;
 	int i;
 
 	if (!state) {
@@ -617,9 +723,9 @@ char *oph_term_base_generator(const char *text, int state)
 		len = strlen(text);
 	}
 	// Get useful stuff
-	char **cmds_list = cmds;
+	const char **cmds_list = cmds;
 	int cmds_list_size = cmds_num;
-	char **def_vars_list = env_vars;
+	const char **def_vars_list = env_vars;
 	int def_vars_list_size = env_vars_num;
 	char **user_vars_list = NULL;
 	int user_vars_list_num = 0;
@@ -686,7 +792,7 @@ char *oph_term_base_generator(const char *text, int state)
 char *oph_term_vars_generator(const char *text, int state)
 {
 	static int list_index, len;
-	char *name;
+	const char *name;
 	int i;
 
 	if (!state) {
@@ -694,7 +800,7 @@ char *oph_term_vars_generator(const char *text, int state)
 		len = strlen(text);
 	}
 	// Get useful stuff
-	char **def_vars_list = env_vars;
+	const char **def_vars_list = env_vars;
 	int def_vars_list_size = env_vars_num;
 	char **user_vars_list = NULL;
 	int user_vars_list_num = 0;

@@ -1253,16 +1253,6 @@ void *main_loop(void *ptr)
 int view_status(int iterations_num, char *command_line, char *tmp_submission_string, HASHTBL * hashtbl, int *oph_term_return, char *tmp_session, char *tmp_workflow, int save_img, int open_img,
 		int show_list, int time_interval, oph_workflow * wf)
 {
-	UNUSED(cmds);
-	UNUSED(env_vars);
-	UNUSED(pre_defined_aliases_keys);
-	UNUSED(pre_defined_aliases_values);
-	UNUSED(env_vars_ptr);
-	UNUSED(alias_ptr);
-	UNUSED(xml_defs);
-	UNUSED(operators_list);
-	UNUSED(operators_list_size);
-
 	GThread *Thread2 = NULL;
 	GError *err2 = NULL;
 	gtkstruct container;
