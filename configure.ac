@@ -37,7 +37,6 @@ LT_INIT([disable-static])
 
 # Checks for libraries.
 AC_CHECK_LIB(ncurses, initscr, [have_ncurses=yes], [have_ncurses=no])
-AX_LIB_CRYPTO([yes])
 AX_LIB_READLINE
 AC_CHECK_LIB([m],[cos])
 AX_PTHREAD(AC_MSG_NOTICE("pthread found"),AC_MSG_ERROR("pthread not found"))
