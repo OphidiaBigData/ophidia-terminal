@@ -1,15 +1,15 @@
 
 ## v1.5.0 - 2019-01-24
 
+### Fixed:
+
+- Various warning when building on Ubuntu 18
+- Global variable definition in header files
+
 ### Added:
 
 - A new alias 'rmr' [#11](https://github.com/OphidiaBigData/ophidia-terminal/pull/11/)
 - Check for OPH_DELETECONTAINER as workflow exit action [#11](https://github.com/OphidiaBigData/ophidia-terminal/pull/11/)
-
-### Fixed:
-
-- Various warning when building
-- Global variable definition in header files
 
 ### Changed:
 
