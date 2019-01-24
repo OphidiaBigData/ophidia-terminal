@@ -1,5 +1,5 @@
 
-## Next release
+## v1.5.0 - 2019-01-24
 
 ### Added:
 
@@ -8,10 +8,12 @@
 
 ### Fixed:
 
+- Various warning when building
 - Global variable definition in header files
 
 ### Changed:
 
+- Soap interface files with gSOAP version 2.8.76 [#16](https://github.com/OphidiaBigData/ophidia-analytics-framework/pull/16)
 - 'rm' alias to drop references to hidden containers [#15](https://github.com/OphidiaBigData/ophidia-terminal/pull/15/)
 - Default host partition name to 'main' [#14](https://github.com/OphidiaBigData/ophidia-terminal/pull/14/)
 - Display of status in command outputs with different colors [#13](https://github.com/OphidiaBigData/ophidia-terminal/pull/13/)
