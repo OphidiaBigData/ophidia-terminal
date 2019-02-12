@@ -39,7 +39,6 @@
 #define OPH_WORKFLOW_REPEAT		"repeat"
 
 #define OPH_WORKFLOW_DELETE				"oph_delete"
-#define OPH_WORKFLOW_DELETECONTAINER	"oph_deletecontainer"
 
 #define OPH_WORKFLOW_EXIT_ACTION_NOP				0
 #define OPH_WORKFLOW_EXIT_ACTION_DELETE				1
