@@ -769,11 +769,13 @@ int oph_term_env_strtolower(char **string)
 // Load operator arguments from XML
 int oph_term_env_load_xml(const char *xmlfilename, char **operator_name, operator_argument ** operator_args, size_t * operator_args_size)
 {
-
-	if (!xmlfilename) {
+	if (!xmlfilename || !operator_args || !operator_args_size) {
 		(print_json) ? my_fprintf(stderr, "Null parameters\\n") : fprintf(stderr, "\e[1;31mNull parameters\e[0m\n");
 		return OPH_TERM_INVALID_PARAM_VALUE;
 	}
+
+	*operator_args = NULL;
+	*operator_args_size = 0;
 
 	xmlParserCtxtPtr ctxt;
 	xmlDocPtr doc;
@@ -850,7 +852,8 @@ int oph_term_env_load_xml(const char *xmlfilename, char **operator_name, operato
 		return OPH_TERM_GENERIC_ERROR;
 	}
 	if (xpathObj->nodesetval->nodeNr) {
-		*operator_args = (operator_argument *) malloc(sizeof(operator_argument) * (xpathObj->nodesetval->nodeNr));
+		*operator_args_size = sizeof(operator_argument) * xpathObj->nodesetval->nodeNr;
+		*operator_args = (operator_argument *) malloc(*operator_args_size);
 		if (!*operator_args) {
 			(print_json) ? my_fprintf(stderr, "Error allocating argument list\\n") : fprintf(stderr, "\e[1;31mError allocating argument list\e[0m\n");
 			xmlXPathFreeObject(xpathObj);
@@ -859,11 +862,8 @@ int oph_term_env_load_xml(const char *xmlfilename, char **operator_name, operato
 			xmlFreeParserCtxt(ctxt);
 			return OPH_TERM_MEMORY_ERROR;
 		}
-		memset(*operator_args, 0, sizeof(operator_argument) * (xpathObj->nodesetval->nodeNr));
-	} else
-		*operator_args = NULL;
-	*operator_args_size = sizeof(operator_argument) * (xpathObj->nodesetval->nodeNr);
-
+		memset(*operator_args, 0, *operator_args_size);
+	}
 	// SET ARGS
 	for (n = 0; n < xpathObj->nodesetval->nodeNr; n++) {
 		node = xpathObj->nodesetval->nodeTab[n];

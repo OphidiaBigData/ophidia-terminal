@@ -1,4 +1,10 @@
 
+## New features
+
+### Fixed:
+
+- Memory leak raised in case XML description of an operator is not correctly formatted
+
 ## v1.5.0 - 2019-01-24
 
 ### Fixed:
