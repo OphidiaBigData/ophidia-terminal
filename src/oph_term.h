@@ -183,7 +183,7 @@ extern int oph_term_error_cur;
 #define OPH_TERM_DEFAULT_ALIAS_VAL_19 	"oph_resume level=0;id=$1;"
 #define OPH_TERM_DEFAULT_ALIAS_VAL_20 	"oph_explorecube show_time=yes;"
 #define OPH_TERM_DEFAULT_ALIAS_VAL_21 	"oph_manage_session action=new;"
-#define OPH_TERM_DEFAULT_ALIAS_VAL_22 	"del [*]"
+#define OPH_TERM_DEFAULT_ALIAS_VAL_22 	"oph_delete cube=[*];exec_mode=async;"
 #define OPH_TERM_DEFAULT_ALIAS_VAL_23 	"oph_loggingbk job_level=1;mask=010;session_filter=@OPH_SESSION_ID;parent_job_filter=%;"
 #define OPH_TERM_DEFAULT_ALIAS_VAL_24 	"oph_explorenc src_path=$1;"
 #define OPH_TERM_DEFAULT_ALIAS_VAL_25 	"oph_fs command=mkdir;dpath=$1;"
