@@ -5,6 +5,10 @@
 
 - Memory leak raised in case XML description of an operator is not correctly formatted
 
+### Changed:
+
+- Default host partition to 'auto'
+
 ## v1.5.0 - 2019-01-24
 
 ### Fixed:
