@@ -36,6 +36,7 @@ const char *env_vars[env_vars_num] = {
 	OPH_TERM_ENV_OPH_TERM_IMGS,
 	OPH_TERM_ENV_OPH_TERM_FORMAT,
 	OPH_TERM_ENV_OPH_GRAPH_LAYOUT,
+	OPH_TERM_ENV_OPH_REQUEST_BUFFER,
 	OPH_TERM_ENV_OPH_RESPONSE_BUFFER,
 	OPH_TERM_ENV_OPH_WORKFLOW_AUTOVIEW,
 	OPH_TERM_ENV_OPH_HOST_PARTITION,
@@ -54,6 +55,10 @@ extern char *_passwd;
 extern pthread_mutex_t global_flag;
 extern char get_config;
 extern char *oph_base_src_path;
+extern size_t max_size;
+extern char *fixed_cursor;
+extern char *submission_string;
+extern char *command_line;
 
 //Alloc hashtable
 int _oph_term_env_init(HASHTBL ** hashtbl, int hashtbl_size)
@@ -207,6 +212,22 @@ int oph_term_setenv(HASHTBL * hashtbl, const char *key, const char *value)
 	if (hashtbl_insert(hashtbl, key, (void *) value, strlen(value) + 1)) {
 		(print_json) ? my_fprintf(stderr, "Error: setenv failed\\n") : fprintf(stderr, "\e[1;31mError: setenv failed\e[0m\n");
 		return OPH_TERM_MEMORY_ERROR;
+	}
+	if (!strcmp(key, OPH_TERM_ENV_OPH_REQUEST_BUFFER)) {
+		size_t new_size = strtol(value, NULL, 10);
+		if (new_size > 0)
+			max_size = 1024 * new_size;
+		else {
+			(print_json) ? my_fprintf(stderr, "Could not set variable [CODE %d]\\n", OPH_TERM_INVALID_PARAM_VALUE) : fprintf(stderr, "\e[1;31mCould not set variable [CODE %d]\e[0m\n",
+																	 OPH_TERM_INVALID_PARAM_VALUE);
+			return OPH_TERM_INVALID_PARAM_VALUE;
+		}
+		free(fixed_cursor);
+		free(submission_string);
+		free(command_line);
+		fixed_cursor = (char *) calloc(max_size, sizeof(char));
+		submission_string = (char *) calloc(max_size, sizeof(char));
+		command_line = (char *) calloc(max_size, sizeof(char));
 	}
 	return OPH_TERM_SUCCESS;
 }

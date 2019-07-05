@@ -50,6 +50,11 @@ char oph_term_error[OUTPUT_MAX_LEN] = "\0";
 int oph_term_error_cur = 0;
 char *oph_base_src_path = NULL;
 
+size_t max_size = OPH_TERM_MAX_LEN;
+char *fixed_cursor = NULL;
+char *submission_string = NULL;
+char *command_line = NULL;
+
 const char *cmds[cmds_num] = {
 	OPH_TERM_CMD_VERSION,
 	OPH_TERM_CMD_WARRANTY,
@@ -376,6 +381,14 @@ int startup_opt_setup(int argc, char *argv[], char *envp[], HASHTBL * hashtbl, c
 																			    OPH_TERM_MEMORY_ERROR);
 		return OPH_TERM_MEMORY_ERROR;
 	}
+	//preset OPH_REQUEST_BUFFER
+	if (oph_term_setenv(hashtbl, OPH_TERM_ENV_OPH_REQUEST_BUFFER, "1")) {
+		(print_json) ? my_fprintf(stderr, "Could not set variable %s [CODE %d]\\n", OPH_TERM_ENV_OPH_REQUEST_BUFFER, OPH_TERM_MEMORY_ERROR) : fprintf(stderr,
+																			      "\e[1;31mCould not set variable %s [CODE %d]\e[0m\n",
+																			      OPH_TERM_ENV_OPH_REQUEST_BUFFER,
+																			      OPH_TERM_MEMORY_ERROR);
+		return OPH_TERM_MEMORY_ERROR;
+	}
 	//preset OPH_RESPONSE_BUFFER
 	if (oph_term_setenv(hashtbl, OPH_TERM_ENV_OPH_RESPONSE_BUFFER, "1024")) {
 		(print_json) ? my_fprintf(stderr, "Could not set variable %s [CODE %d]\\n", OPH_TERM_ENV_OPH_RESPONSE_BUFFER, OPH_TERM_MEMORY_ERROR) : fprintf(stderr,
@@ -438,6 +451,15 @@ int startup_opt_setup(int argc, char *argv[], char *envp[], HASHTBL * hashtbl, c
 				return OPH_TERM_MEMORY_ERROR;
 			}
 		}
+	}
+
+	size_t new_size = 1024 * strtol((char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_REQUEST_BUFFER), NULL, 10);
+	if (new_size >= OPH_TERM_MAX_LEN)
+		max_size = new_size;
+	else {
+		(print_json) ? my_fprintf(stderr, "Could not set variable [CODE %d]\\n", OPH_TERM_INVALID_PARAM_VALUE) : fprintf(stderr, "\e[1;31mCould not set variable [CODE %d]\e[0m\n",
+																 OPH_TERM_INVALID_PARAM_VALUE);
+		return OPH_TERM_INVALID_PARAM_VALUE;
 	}
 
 	//get user-defined env vars from shell env
@@ -1153,9 +1175,9 @@ char **oph_term_completion(char *text, int start, int end)
 
 	if (text[0] == '.' || text[0] == '/') {
 		int i = 0;
-		char chddir[OPH_TERM_MAX_LEN], bsp = 0;
+		char chddir[max_size], bsp = 0;
 		if (oph_base_src_path && (strlen(oph_base_src_path) > 1) && (*text == '/')) {
-			snprintf(chddir, OPH_TERM_MAX_LEN, "%s%s", oph_base_src_path, text);
+			snprintf(chddir, max_size, "%s%s", oph_base_src_path, text);
 			text = chddir;
 			bsp = 1;
 		}
@@ -1172,7 +1194,7 @@ char **oph_term_completion(char *text, int start, int end)
 		// Add OPH_BASE_SRC_PATH if set
 		if (oph_base_src_path && bsp && matches) {
 			for (i = 0; matches[i]; i++) {
-				snprintf(chddir, OPH_TERM_MAX_LEN, "%s", matches[i] + strlen(oph_base_src_path));
+				snprintf(chddir, max_size, "%s", matches[i] + strlen(oph_base_src_path));
 				free(matches[i]);
 				matches[i] = strdup(chddir);
 			}
@@ -1505,6 +1527,7 @@ void siginthandler(int signum)
 /* Oph_Term Main program */
 int main(int argc, char **argv, char **envp)
 {
+	max_size = OPH_TERM_MAX_LEN;
 
 	signal(SIGINT, siginthandler);
 	signal(SIGTSTP, siginthandler);
@@ -1518,11 +1541,7 @@ int main(int argc, char **argv, char **envp)
 	char *exec_statement = NULL;
 	char *hist_path = NULL;
 	char *xml_path = NULL;
-	char xml_path_extended[OPH_TERM_MAX_LEN];
-	char fixed_cursor[OPH_TERM_MAX_LEN];
 	char *current_operator = NULL;
-	char submission_string[OPH_TERM_MAX_LEN];
-	char command_line[OPH_TERM_MAX_LEN];
 	FILE *hist_file;
 	HIST_ENTRY **hist_list = NULL;
 	HASHTBL *hashtbl = NULL;
@@ -1562,8 +1581,15 @@ int main(int argc, char **argv, char **envp)
 			print_oph_term_output_json(hashtbl);
 		return OPH_TERM_GENERIC_ERROR;
 	}
+
+	char xml_path_extended[OPH_TERM_MAX_LEN];
+
+	fixed_cursor = (char *) calloc(max_size, sizeof(char));
+	submission_string = (char *) calloc(max_size, sizeof(char));
+	command_line = (char *) calloc(max_size, sizeof(char));
+
 	// Set command line (excluding passwords)
-	memset(command_line, 0, OPH_TERM_MAX_LEN);
+	memset(command_line, 0, max_size);
 	for (i = 0; i < argc; i++) {
 		if (!strncmp(argv[i], "--password=", 11) || (!strncmp(argv[i], "-p", 2) && argv[i][2] != 0))
 			continue;
@@ -1571,7 +1597,7 @@ int main(int argc, char **argv, char **envp)
 			i++;
 			continue;
 		}
-		n += snprintf(command_line + n, OPH_TERM_MAX_LEN - n, "%s ", argv[i]);
+		n += snprintf(command_line + n, max_size - n, "%s ", argv[i]);
 	}
 
 	if (!print_json)
@@ -2534,8 +2560,8 @@ int main(int argc, char **argv, char **envp)
 		}
 		// Set command line at each iteration
 		if (!exec_one_statement && !exec_alias) {
-			memset(command_line, 0, OPH_TERM_MAX_LEN);
-			snprintf(command_line, OPH_TERM_MAX_LEN, "%s", line);
+			memset(command_line, 0, max_size);
+			snprintf(command_line, max_size, "%s", line);
 		}
 
 		cursor = strtok_r(linecopy, " \t\n", &saveptr);	// extract cmd name
@@ -2832,30 +2858,31 @@ int main(int argc, char **argv, char **envp)
 				else
 					cursor += p;
 			}
+
+			int n = 0;
+
 			if (!cursor) {
 				// submit with no other parameters
 				char *newsession = NULL;
 				char *newdatacube = NULL;
 				char *newcwd = NULL;
 				char *newcdd = NULL;
-				int n = 0;
 
 				//prefix operator name
-				memset(submission_string, 0, OPH_TERM_MAX_LEN);
-				n += snprintf(submission_string + n, OPH_TERM_MAX_LEN - n, "operator=%s;", current_operator);
-
+				memset(submission_string, 0, max_size);
+				n += snprintf(submission_string + n, max_size - n, "operator=%s;", current_operator);
 				//sessionid management
 				if (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SESSION_ID))
-					n += snprintf(submission_string + n, OPH_TERM_MAX_LEN - n, "sessionid=%s;", (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SESSION_ID));
+					n += snprintf(submission_string + n, max_size - n, "sessionid=%s;", (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SESSION_ID));
 				//exec_mode management
 				if (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_EXEC_MODE))
-					n += snprintf(submission_string + n, OPH_TERM_MAX_LEN - n, "exec_mode=%s;", (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_EXEC_MODE));
+					n += snprintf(submission_string + n, max_size - n, "exec_mode=%s;", (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_EXEC_MODE));
 				//ncores management
 				if (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_NCORES))
-					n += snprintf(submission_string + n, OPH_TERM_MAX_LEN - n, "ncores=%s;", (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_NCORES));
+					n += snprintf(submission_string + n, max_size - n, "ncores=%s;", (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_NCORES));
 				//cube management
 				if (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_DATACUBE))
-					n += snprintf(submission_string + n, OPH_TERM_MAX_LEN - n, "cube=%s;", (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_DATACUBE));
+					n += snprintf(submission_string + n, max_size - n, "cube=%s;", (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_DATACUBE));
 				//cwd management
 				if (!hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CWD)) {
 					if (oph_term_setenv(hashtbl, OPH_TERM_ENV_OPH_CWD, "/")) {
@@ -2871,7 +2898,7 @@ int main(int argc, char **argv, char **envp)
 						continue;
 					}
 				}
-				n += snprintf(submission_string + n, OPH_TERM_MAX_LEN - n, "cwd=%s;", (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CWD));
+				n += snprintf(submission_string + n, max_size - n, "cwd=%s;", (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CWD));
 				//cdd management
 				if (!hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CDD)) {
 					char oph_cdd[OPH_TERM_MAX_LEN], *_oph_cdd = oph_cdd;
@@ -2898,11 +2925,24 @@ int main(int argc, char **argv, char **envp)
 						continue;
 					}
 				}
-				n += snprintf(submission_string + n, OPH_TERM_MAX_LEN - n, "cdd=%s;", (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CDD));
+				n += snprintf(submission_string + n, max_size - n, "cdd=%s;", (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CDD));
 				//host partition management
 				if (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_HOST_PARTITION))
-					n += snprintf(submission_string + n, OPH_TERM_MAX_LEN - n, "host_partition=%s;", (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_HOST_PARTITION));
+					n += snprintf(submission_string + n, max_size - n, "host_partition=%s;", (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_HOST_PARTITION));
 
+				// Check for request buffer
+				if (n >= max_size) {
+					(print_json) ? my_fprintf(stderr, "Request buffer is too small [CODE %d]\\n", OPH_TERM_MEMORY_ERROR) : fprintf(stderr,
+																		       "\e[1;31mRequest buffer is too small [CODE %d]\e[0m\n",
+																		       OPH_TERM_MEMORY_ERROR);
+					if (print_json)
+						print_oph_term_output_json(hashtbl);
+					if (exec_one_statement) {
+						oph_term_return = OPH_TERM_MEMORY_ERROR;
+						break;
+					}
+					continue;
+				}
 				// SUBMISSION
 				if (strstr(submission_string, ";cube=[") || strstr(submission_string, " cube=["))
 					massive_flag = 1;
@@ -3127,7 +3167,20 @@ int main(int argc, char **argv, char **envp)
 				char *newdatacube = NULL;
 				char *newcwd = NULL;
 				char *newcdd = NULL;
-				char cursorcopy[OPH_TERM_MAX_LEN] = "\0";
+				char *cursorcopy = (char *) calloc(max_size, sizeof(char));
+				if (!cursorcopy) {
+					(print_json) ? my_fprintf(stderr, "Could not submit the request [CODE %d]\\n", OPH_TERM_MEMORY_ERROR) : fprintf(stderr,
+																			"\e[1;31mCould not submit the request [CODE %d]\e[0m\n",
+																			OPH_TERM_MEMORY_ERROR);
+					if (print_json)
+						print_oph_term_output_json(hashtbl);
+					if (exec_one_statement) {
+						oph_term_return = OPH_TERM_MEMORY_ERROR;
+						break;
+					}
+					continue;
+				}
+
 				int flag = 0;
 				for (i = strlen(cursor) - 1; i >= 0; i--) {
 					if (cursor[i] != ' ') {
@@ -3136,16 +3189,16 @@ int main(int argc, char **argv, char **envp)
 					}
 				}
 				if (cursor[strlen(cursor) - 1] != ';') {
-					memset(fixed_cursor, 0, OPH_TERM_MAX_LEN);
-					snprintf(fixed_cursor, OPH_TERM_MAX_LEN, "%s;", cursor);
+					memset(fixed_cursor, 0, max_size);
+					snprintf(fixed_cursor, max_size, "%s;", cursor);
 					cursor = fixed_cursor;
 				}
-				snprintf(cursorcopy, OPH_TERM_MAX_LEN, "%s", cursor);
+				snprintf(cursorcopy, max_size, "%s", cursor);
 
 				//sessionid management
 				if (!strstr(cursor, ";sessionid=") && strncmp(cursor, "sessionid=", 10)) {
 					if (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SESSION_ID)) {
-						snprintf(cursorcopy, OPH_TERM_MAX_LEN, "%ssessionid=%s;", cursor, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SESSION_ID));
+						snprintf(cursorcopy, max_size, "%ssessionid=%s;", cursor, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SESSION_ID));
 						flag = 1;
 					}
 				}
@@ -3153,7 +3206,7 @@ int main(int argc, char **argv, char **envp)
 				if (!strstr(cursor, ";exec_mode=") && strncmp(cursor, "exec_mode=", 10)) {
 					if (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_EXEC_MODE)) {
 						if (!flag) {
-							snprintf(cursorcopy, OPH_TERM_MAX_LEN, "%sexec_mode=%s;", cursor, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_EXEC_MODE));
+							snprintf(cursorcopy, max_size, "%sexec_mode=%s;", cursor, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_EXEC_MODE));
 							flag = 1;
 						} else {
 							char *cursorcopy2 = strdup(cursorcopy);
@@ -3161,6 +3214,7 @@ int main(int argc, char **argv, char **envp)
 								(print_json) ? my_fprintf(stderr, "Could not use OPH_EXEC_MODE [CODE %d]\\n", OPH_TERM_MEMORY_ERROR) : fprintf(stderr,
 																					       "\e[1;31mCould not use OPH_EXEC_MODE [CODE %d]\e[0m\n",
 																					       OPH_TERM_MEMORY_ERROR);
+								free(cursorcopy);
 								if (print_json)
 									print_oph_term_output_json(hashtbl);
 								if (exec_one_statement) {
@@ -3169,7 +3223,7 @@ int main(int argc, char **argv, char **envp)
 								}
 								continue;
 							}
-							snprintf(cursorcopy, OPH_TERM_MAX_LEN, "%sexec_mode=%s;", cursorcopy2, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_EXEC_MODE));
+							snprintf(cursorcopy, max_size, "%sexec_mode=%s;", cursorcopy2, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_EXEC_MODE));
 							free(cursorcopy2);
 						}
 					}
@@ -3178,7 +3232,7 @@ int main(int argc, char **argv, char **envp)
 				if (!strstr(cursor, ";ncores=") && strncmp(cursor, "ncores=", 7)) {
 					if (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_NCORES)) {
 						if (!flag) {
-							snprintf(cursorcopy, OPH_TERM_MAX_LEN, "%sncores=%s;", cursor, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_NCORES));
+							snprintf(cursorcopy, max_size, "%sncores=%s;", cursor, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_NCORES));
 							flag = 1;
 						} else {
 							char *cursorcopy2 = strdup(cursorcopy);
@@ -3186,6 +3240,7 @@ int main(int argc, char **argv, char **envp)
 								(print_json) ? my_fprintf(stderr, "Could not use OPH_NCORES [CODE %d]\\n", OPH_TERM_MEMORY_ERROR) : fprintf(stderr,
 																					    "\e[1;31mCould not use OPH_NCORES [CODE %d]\e[0m\n",
 																					    OPH_TERM_MEMORY_ERROR);
+								free(cursorcopy);
 								if (print_json)
 									print_oph_term_output_json(hashtbl);
 								if (exec_one_statement) {
@@ -3194,7 +3249,7 @@ int main(int argc, char **argv, char **envp)
 								}
 								continue;
 							}
-							snprintf(cursorcopy, OPH_TERM_MAX_LEN, "%sncores=%s;", cursorcopy2, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_NCORES));
+							snprintf(cursorcopy, max_size, "%sncores=%s;", cursorcopy2, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_NCORES));
 							free(cursorcopy2);
 						}
 					}
@@ -3203,7 +3258,7 @@ int main(int argc, char **argv, char **envp)
 				if (!strstr(cursor, ";cube=") && strncmp(cursor, "cube=", 5)) {
 					if (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_DATACUBE)) {
 						if (!flag) {
-							snprintf(cursorcopy, OPH_TERM_MAX_LEN, "%scube=%s;", cursor, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_DATACUBE));
+							snprintf(cursorcopy, max_size, "%scube=%s;", cursor, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_DATACUBE));
 							flag = 1;
 						} else {
 							char *cursorcopy2 = strdup(cursorcopy);
@@ -3211,6 +3266,7 @@ int main(int argc, char **argv, char **envp)
 								(print_json) ? my_fprintf(stderr, "Could not use OPH_DATACUBE [CODE %d]\\n", OPH_TERM_MEMORY_ERROR) : fprintf(stderr,
 																					      "\e[1;31mCould not use OPH_DATACUBE [CODE %d]\e[0m\n",
 																					      OPH_TERM_MEMORY_ERROR);
+								free(cursorcopy);
 								if (print_json)
 									print_oph_term_output_json(hashtbl);
 								if (exec_one_statement) {
@@ -3219,7 +3275,7 @@ int main(int argc, char **argv, char **envp)
 								}
 								continue;
 							}
-							snprintf(cursorcopy, OPH_TERM_MAX_LEN, "%scube=%s;", cursorcopy2, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_DATACUBE));
+							snprintf(cursorcopy, max_size, "%scube=%s;", cursorcopy2, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_DATACUBE));
 							free(cursorcopy2);
 						}
 					}
@@ -3231,6 +3287,7 @@ int main(int argc, char **argv, char **envp)
 							(print_json) ? my_fprintf(stderr, "Could not set cwd [CODE %d]\\n", OPH_TERM_MEMORY_ERROR) : fprintf(stderr,
 																			     "\e[1;31mCould not set cwd [CODE %d]\e[0m\n",
 																			     OPH_TERM_MEMORY_ERROR);
+							free(cursorcopy);
 							if (print_json)
 								print_oph_term_output_json(hashtbl);
 							if (exec_one_statement) {
@@ -3241,7 +3298,7 @@ int main(int argc, char **argv, char **envp)
 						}
 					}
 					if (!flag) {
-						snprintf(cursorcopy, OPH_TERM_MAX_LEN, "%scwd=%s;", cursor, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CWD));
+						snprintf(cursorcopy, max_size, "%scwd=%s;", cursor, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CWD));
 						flag = 1;
 					} else {
 						char *cursorcopy2 = strdup(cursorcopy);
@@ -3249,6 +3306,7 @@ int main(int argc, char **argv, char **envp)
 							(print_json) ? my_fprintf(stderr, "Could not use OPH_CWD [CODE %d]\\n", OPH_TERM_MEMORY_ERROR) : fprintf(stderr,
 																				 "\e[1;31mCould not use OPH_CWD [CODE %d]\e[0m\n",
 																				 OPH_TERM_MEMORY_ERROR);
+							free(cursorcopy);
 							if (print_json)
 								print_oph_term_output_json(hashtbl);
 							if (exec_one_statement) {
@@ -3257,7 +3315,7 @@ int main(int argc, char **argv, char **envp)
 							}
 							continue;
 						}
-						snprintf(cursorcopy, OPH_TERM_MAX_LEN, "%scwd=%s;", cursorcopy2, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CWD));
+						snprintf(cursorcopy, max_size, "%scwd=%s;", cursorcopy2, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CWD));
 						free(cursorcopy2);
 					}
 				}
@@ -3279,6 +3337,7 @@ int main(int argc, char **argv, char **envp)
 							(print_json) ? my_fprintf(stderr, "Could not set cdd [CODE %d]\\n", OPH_TERM_MEMORY_ERROR) : fprintf(stderr,
 																			     "\e[1;31mCould not set cdd [CODE %d]\e[0m\n",
 																			     OPH_TERM_MEMORY_ERROR);
+							free(cursorcopy);
 							if (print_json)
 								print_oph_term_output_json(hashtbl);
 							if (exec_one_statement) {
@@ -3289,7 +3348,7 @@ int main(int argc, char **argv, char **envp)
 						}
 					}
 					if (!flag) {
-						snprintf(cursorcopy, OPH_TERM_MAX_LEN, "%scdd=%s;", cursor, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CDD));
+						snprintf(cursorcopy, max_size, "%scdd=%s;", cursor, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CDD));
 						flag = 1;
 					} else {
 						char *cursorcopy2 = strdup(cursorcopy);
@@ -3297,6 +3356,7 @@ int main(int argc, char **argv, char **envp)
 							(print_json) ? my_fprintf(stderr, "Could not use OPH_CDD [CODE %d]\\n", OPH_TERM_MEMORY_ERROR) : fprintf(stderr,
 																				 "\e[1;31mCould not use OPH_CDD [CODE %d]\e[0m\n",
 																				 OPH_TERM_MEMORY_ERROR);
+							free(cursorcopy);
 							if (print_json)
 								print_oph_term_output_json(hashtbl);
 							if (exec_one_statement) {
@@ -3305,7 +3365,7 @@ int main(int argc, char **argv, char **envp)
 							}
 							continue;
 						}
-						snprintf(cursorcopy, OPH_TERM_MAX_LEN, "%scdd=%s;", cursorcopy2, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CDD));
+						snprintf(cursorcopy, max_size, "%scdd=%s;", cursorcopy2, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CDD));
 						free(cursorcopy2);
 					}
 				}
@@ -3313,7 +3373,7 @@ int main(int argc, char **argv, char **envp)
 				if (!strstr(cursor, ";host_partition=") && strncmp(cursor, "host_partition=", 15)) {
 					if (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_HOST_PARTITION)) {
 						if (!flag) {
-							snprintf(cursorcopy, OPH_TERM_MAX_LEN, "%shost_partition=%s;", cursor, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_HOST_PARTITION));
+							snprintf(cursorcopy, max_size, "%shost_partition=%s;", cursor, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_HOST_PARTITION));
 							flag = 1;
 						} else {
 							char *cursorcopy2 = strdup(cursorcopy);
@@ -3321,6 +3381,7 @@ int main(int argc, char **argv, char **envp)
 								(print_json) ? my_fprintf(stderr, "Could not use OPH_HOST_PARTITION [CODE %d]\\n", OPH_TERM_MEMORY_ERROR) : fprintf(stderr,
 																						    "\e[1;31mCould not use OPH_HOST_PARTITION [CODE %d]\e[0m\n",
 																						    OPH_TERM_MEMORY_ERROR);
+								free(cursorcopy);
 								if (print_json)
 									print_oph_term_output_json(hashtbl);
 								if (exec_one_statement) {
@@ -3329,15 +3390,30 @@ int main(int argc, char **argv, char **envp)
 								}
 								continue;
 							}
-							snprintf(cursorcopy, OPH_TERM_MAX_LEN, "%shost_partition=%s;", cursorcopy2, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_HOST_PARTITION));
+							snprintf(cursorcopy, max_size, "%shost_partition=%s;", cursorcopy2, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_HOST_PARTITION));
 							free(cursorcopy2);
 						}
 					}
 				}
 				//prefix operator name
-				memset(submission_string, 0, OPH_TERM_MAX_LEN);
-				snprintf(submission_string, OPH_TERM_MAX_LEN, "operator=%s;%s", current_operator, cursorcopy);
+				memset(submission_string, 0, max_size);
+				n = snprintf(submission_string, max_size, "operator=%s;%s", current_operator, cursorcopy);
 
+				free(cursorcopy);
+
+				// Check for request buffer
+				if (n >= max_size) {
+					(print_json) ? my_fprintf(stderr, "Request buffer is too small [CODE %d]\\n", OPH_TERM_MEMORY_ERROR) : fprintf(stderr,
+																		       "\e[1;31mRequest buffer is too small [CODE %d]\e[0m\n",
+																		       OPH_TERM_MEMORY_ERROR);
+					if (print_json)
+						print_oph_term_output_json(hashtbl);
+					if (exec_one_statement) {
+						oph_term_return = OPH_TERM_MEMORY_ERROR;
+						break;
+					}
+					continue;
+				}
 				// SUBMISSION
 				if (strstr(submission_string, ";cube=[") || strstr(submission_string, " cube=["))
 					massive_flag = 1;
@@ -3684,15 +3760,13 @@ int main(int argc, char **argv, char **envp)
 				}
 				continue;
 			}
-
-			int n = 0;
 			//set submission string
-			memset(submission_string, 0, OPH_TERM_MAX_LEN);
-			n += snprintf(submission_string + n, OPH_TERM_MAX_LEN - n, OPH_TERM_OPH_RESUME_STRING_NO_SAVE);
+			memset(submission_string, 0, max_size);
+			n += snprintf(submission_string + n, max_size - n, OPH_TERM_OPH_RESUME_STRING_NO_SAVE);
 
 			//sessionid management
 			if (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SESSION_ID))
-				n += snprintf(submission_string + n, OPH_TERM_MAX_LEN - n, "sessionid=%s;", (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SESSION_ID));
+				n += snprintf(submission_string + n, max_size - n, "sessionid=%s;", (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SESSION_ID));
 
 			cursor = strtok_r(NULL, " \t\n", &saveptr);
 			if (!cursor) {
@@ -3727,7 +3801,7 @@ int main(int argc, char **argv, char **envp)
 					char tmp_marker[OPH_TERM_MAX_LEN];
 
 					memset(tmp_job_id, 0, OPH_TERM_MAX_LEN);
-					memset(tmp_submission_string, 0, OPH_TERM_MAX_LEN);
+					memset(tmp_submission_string, 0, max_size);
 					memset(tmp_session, 0, OPH_TERM_MAX_LEN);
 					memset(tmp_marker, 0, OPH_TERM_MAX_LEN);
 					memset(tmp_workflow, 0, OPH_TERM_MAX_LEN);
@@ -3805,8 +3879,21 @@ int main(int argc, char **argv, char **envp)
 						tmp_command = NULL;
 					}
 
-					snprintf(tmp_submission_string, OPH_TERM_MAX_LEN, "%ssession=%s;id=%s;id_type=marker;", submission_string, tmp_session, tmp_marker);
+					n = snprintf(tmp_submission_string, max_size, "%ssession=%s;id=%s;id_type=marker;", submission_string, tmp_session, tmp_marker);
 
+					// Check for request buffer
+					if (n >= max_size) {
+						(print_json) ? my_fprintf(stderr, "Request buffer is too small [CODE %d]\\n", OPH_TERM_MEMORY_ERROR) : fprintf(stderr,
+																			       "\e[1;31mRequest buffer is too small [CODE %d]\e[0m\n",
+																			       OPH_TERM_MEMORY_ERROR);
+						if (print_json)
+							print_oph_term_output_json(hashtbl);
+						if (exec_one_statement) {
+							oph_term_return = OPH_TERM_MEMORY_ERROR;
+							break;
+						}
+						continue;
+					}
 					// Retrieve iterations and interval
 					cursor = strtok_r(NULL, " \t\n", &saveptr);
 					if (cursor) {
@@ -3939,7 +4026,7 @@ int main(int argc, char **argv, char **envp)
 							tmp_command = NULL;
 						}
 
-						n += snprintf(submission_string + n, OPH_TERM_MAX_LEN - n, "id=%s;id_type=marker;", tmp_marker);
+						n += snprintf(submission_string + n, max_size - n, "id=%s;id_type=marker;", tmp_marker);
 
 						cursor = strtok_r(NULL, " \t\n", &saveptr);
 
@@ -3947,9 +4034,22 @@ int main(int argc, char **argv, char **envp)
 						if (cursor && !strcmp(cursor, "-s")) {
 							cursor = strtok_r(NULL, " \t\n", &saveptr);
 							if (cursor) {
-								n += snprintf(submission_string + n, OPH_TERM_MAX_LEN - n, "status_filter=%s;", cursor);
+								n += snprintf(submission_string + n, max_size - n, "status_filter=%s;", cursor);
 								cursor = strtok_r(NULL, " \t\n", &saveptr);
 							}
+						}
+						// Check for request buffer
+						if (n >= max_size) {
+							(print_json) ? my_fprintf(stderr, "Request buffer is too small [CODE %d]\\n", OPH_TERM_MEMORY_ERROR) : fprintf(stderr,
+																				       "\e[1;31mRequest buffer is too small [CODE %d]\e[0m\n",
+																				       OPH_TERM_MEMORY_ERROR);
+							if (print_json)
+								print_oph_term_output_json(hashtbl);
+							if (exec_one_statement) {
+								oph_term_return = OPH_TERM_MEMORY_ERROR;
+								break;
+							}
+							continue;
 						}
 						// Retrieve iterations and interval
 						if (cursor) {
@@ -4071,7 +4171,7 @@ int main(int argc, char **argv, char **envp)
 							tmp_jobid = NULL;
 						}
 
-						n += snprintf(submission_string + n, OPH_TERM_MAX_LEN - n, "id=%s;", tmp_workflow);
+						n += snprintf(submission_string + n, max_size - n, "id=%s;", tmp_workflow);
 
 						cursor = strtok_r(NULL, " \t\n", &saveptr);
 
@@ -4079,9 +4179,22 @@ int main(int argc, char **argv, char **envp)
 						if (cursor && !strcmp(cursor, "-s")) {
 							cursor = strtok_r(NULL, " \t\n", &saveptr);
 							if (cursor) {
-								n += snprintf(submission_string + n, OPH_TERM_MAX_LEN - n, "status_filter=%s;", cursor);
+								n += snprintf(submission_string + n, max_size - n, "status_filter=%s;", cursor);
 								cursor = strtok_r(NULL, " \t\n", &saveptr);
 							}
+						}
+						// Check for request buffer
+						if (n >= max_size) {
+							(print_json) ? my_fprintf(stderr, "Request buffer is too small [CODE %d]\\n", OPH_TERM_MEMORY_ERROR) : fprintf(stderr,
+																				       "\e[1;31mRequest buffer is too small [CODE %d]\e[0m\n",
+																				       OPH_TERM_MEMORY_ERROR);
+							if (print_json)
+								print_oph_term_output_json(hashtbl);
+							if (exec_one_statement) {
+								oph_term_return = OPH_TERM_MEMORY_ERROR;
+								break;
+							}
+							continue;
 						}
 						// Retrieve iterations and interval
 						if (cursor) {
@@ -6266,6 +6379,11 @@ int main(int argc, char **argv, char **envp)
 			continue;
 		}
 	}
+
+	/*CLEAR DYNAMIC VARIABLES */
+	free(fixed_cursor);
+	free(submission_string);
+	free(command_line);
 
 	/* CLEAR HISTORY */
 	clear_history();

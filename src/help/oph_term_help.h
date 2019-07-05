@@ -907,6 +907,14 @@ int oph_term_help(const char *cmd);
 \\t\\t- horizontal_ranked : nodes are arranged from left to right and according to their rank/depth;\\n\
 \\t\\t- vertical_ranked : nodes are arranged from top to bottom and according to their rank/depth.\\n"
 
+#define OPH_TERM_HELP_OPH_REQUEST_BUFFER_SHORT "\"request max size\"\n"
+#define OPH_TERM_HELP_OPH_REQUEST_BUFFER_LONG \
+"\e[1mOPH_REQUEST_BUFFER\e[0m\n\
+\tIt respresents the maximum size (in kB) of a request submitted by Oph_Term.\n"
+#define OPH_TERM_HELP_OPH_REQUEST_BUFFER_LONG2 \
+"OPH_REQUEST_BUFFER\\n\
+\\tIt respresents the maximum size (in kB) of a request submitted by Oph_Term.\\n"
+
 #define OPH_TERM_HELP_OPH_RESPONSE_BUFFER_SHORT "\"response max size\"\n"
 #define OPH_TERM_HELP_OPH_RESPONSE_BUFFER_LONG \
 "\e[1mOPH_RESPONSE_BUFFER\e[0m\n\

@@ -315,6 +315,8 @@ void print_cmd_list()
 			(print_json) ? my_printf("\\t%25s = %s", env_vars[i], OPH_TERM_HELP_OPH_TERM_IMGS_SHORT) : printf("\t%25s = %s", env_vars[i], OPH_TERM_HELP_OPH_TERM_IMGS_SHORT);
 		} else if (!strcmp(env_vars[i], OPH_TERM_ENV_OPH_GRAPH_LAYOUT)) {
 			(print_json) ? my_printf("\\t%25s = %s", env_vars[i], OPH_TERM_HELP_OPH_GRAPH_LAYOUT_SHORT) : printf("\t%25s = %s", env_vars[i], OPH_TERM_HELP_OPH_GRAPH_LAYOUT_SHORT);
+		} else if (!strcmp(env_vars[i], OPH_TERM_ENV_OPH_REQUEST_BUFFER)) {
+			(print_json) ? my_printf("\\t%25s = %s", env_vars[i], OPH_TERM_HELP_OPH_REQUEST_BUFFER_SHORT) : printf("\t%25s = %s", env_vars[i], OPH_TERM_HELP_OPH_REQUEST_BUFFER_SHORT);
 		} else if (!strcmp(env_vars[i], OPH_TERM_ENV_OPH_RESPONSE_BUFFER)) {
 			(print_json) ? my_printf("\\t%25s = %s", env_vars[i], OPH_TERM_HELP_OPH_RESPONSE_BUFFER_SHORT) : printf("\t%25s = %s", env_vars[i], OPH_TERM_HELP_OPH_RESPONSE_BUFFER_SHORT);
 		} else if (!strcmp(env_vars[i], OPH_TERM_ENV_OPH_WORKFLOW_AUTOVIEW)) {
@@ -391,6 +393,8 @@ void print_env_var_usage(const char *var)
 		(print_json) ? my_printf("%s", OPH_TERM_HELP_OPH_TERM_IMGS_LONG2) : printf("%s", OPH_TERM_HELP_OPH_TERM_IMGS_LONG);
 	} else if (!strcmp(var, OPH_TERM_ENV_OPH_GRAPH_LAYOUT)) {
 		(print_json) ? my_printf("%s", OPH_TERM_HELP_OPH_GRAPH_LAYOUT_LONG2) : printf("%s", OPH_TERM_HELP_OPH_GRAPH_LAYOUT_LONG);
+	} else if (!strcmp(var, OPH_TERM_ENV_OPH_REQUEST_BUFFER)) {
+		(print_json) ? my_printf("%s", OPH_TERM_HELP_OPH_REQUEST_BUFFER_LONG2) : printf("%s", OPH_TERM_HELP_OPH_REQUEST_BUFFER_LONG);
 	} else if (!strcmp(var, OPH_TERM_ENV_OPH_RESPONSE_BUFFER)) {
 		(print_json) ? my_printf("%s", OPH_TERM_HELP_OPH_RESPONSE_BUFFER_LONG2) : printf("%s", OPH_TERM_HELP_OPH_RESPONSE_BUFFER_LONG);
 	} else if (!strcmp(var, OPH_TERM_ENV_OPH_WORKFLOW_AUTOVIEW)) {
