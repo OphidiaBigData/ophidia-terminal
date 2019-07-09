@@ -382,7 +382,7 @@ int startup_opt_setup(int argc, char *argv[], char *envp[], HASHTBL * hashtbl, c
 		return OPH_TERM_MEMORY_ERROR;
 	}
 	//preset OPH_REQUEST_BUFFER
-	if (oph_term_setenv(hashtbl, OPH_TERM_ENV_OPH_REQUEST_BUFFER, "1")) {
+	if (oph_term_setenv(hashtbl, OPH_TERM_ENV_OPH_REQUEST_BUFFER, "1024")) {
 		(print_json) ? my_fprintf(stderr, "Could not set variable %s [CODE %d]\\n", OPH_TERM_ENV_OPH_REQUEST_BUFFER, OPH_TERM_MEMORY_ERROR) : fprintf(stderr,
 																			      "\e[1;31mCould not set variable %s [CODE %d]\e[0m\n",
 																			      OPH_TERM_ENV_OPH_REQUEST_BUFFER,

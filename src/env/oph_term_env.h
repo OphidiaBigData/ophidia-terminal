@@ -48,7 +48,6 @@
 #define OPH_TERM_ENV_OPH_MAIN_PARTITION	"auto"
 
 #define OPH_TERM_CMD_MAX_LEN			72
-#define OPH_TERM_WF_MAX_LEN				100*1024
 
 //Variables keys
 #define OPH_TERM_ENV_OPH_TERM_PS1       	"OPH_TERM_PS1"
