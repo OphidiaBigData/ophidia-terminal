@@ -41,6 +41,7 @@
 #define UNUSED(x) {(void)(x);}
 
 extern pthread_mutex_t global_flag;
+extern size_t max_size;
 
 void sigpipe_handle(int);
 
@@ -54,7 +55,7 @@ struct oph__ophResponse {
 } response_global;
 
 char server_global[OPH_MAX_STRING_SIZE];
-char query_global[WORKFLOW_MAX_LEN];
+char *query_global = NULL;
 int wps_call_oph__ophExecuteMain_return;
 char username_global[OPH_MAX_STRING_SIZE];
 char password_global[OPH_MAX_STRING_SIZE];
@@ -514,10 +515,12 @@ int wps_call_oph__ophExecuteMain(char *server_global, char *query_global, char *
 	if (!server_global || !query_global)
 		return 1;
 
+	if (max_size <= 0)
+		return 2;
+
 	// Build XML Request
-	char wpsRequest[WORKFLOW_MAX_LEN];
-	snprintf(wpsRequest, WORKFLOW_MAX_LEN, OPH_WPS_XML_REQUEST, query_global, username, password,
-		 store_result ? "storeExecuteResponse=\"true\" status=\"true\"" : "storeExecuteResponse=\"false\"");
+	char wpsRequest[max_size];
+	snprintf(wpsRequest, max_size, OPH_WPS_XML_REQUEST, query_global, username, password, store_result ? "storeExecuteResponse=\"true\" status=\"true\"" : "storeExecuteResponse=\"false\"");
 
 	// Send the request 
 	CURLcode ret;
@@ -614,9 +617,13 @@ void *wpsthread(void *ptr)
 void oph_execute(char *query, char **newsession, int *return_value, char **out_response, char **out_response_for_viewer, int workflow_wrap, char *username, char *password, HASHTBL * hashtbl,
 		 char *cmd_line)
 {
+	if (max_size <= 0) {
+		*return_value = OPH_TERM_GENERIC_ERROR;
+		return;
+	}
 	//If requested, wrap query in a 1-task workflow
-	char wrapped_query[WORKFLOW_MAX_LEN];
-	memset(wrapped_query, 0, WORKFLOW_MAX_LEN);
+	char wrapped_query[max_size];
+	memset(wrapped_query, 0, max_size);
 	if (workflow_wrap) {
 		int n = 0;
 		char *tmp = NULL;
@@ -630,7 +637,7 @@ void oph_execute(char *query, char **newsession, int *return_value, char **out_r
 		}
 		operator = strndup(query + 9, j - 9);
 
-	      n += snprintf(wrapped_query + n, WORKFLOW_MAX_LEN - n, WRAPPING_WORKFLOW1, operator? operator:"", username);
+	      n += snprintf(wrapped_query + n, max_size - n, WRAPPING_WORKFLOW1, operator? operator:"", username);
 
 		//insert sessionid if present
 		tmp = strstr(query, "sessionid=http");
@@ -639,12 +646,12 @@ void oph_execute(char *query, char **newsession, int *return_value, char **out_r
 			tmp2 = strchr(tmp, ';');
 			int size = strlen((tmp + 10)) - ((tmp2) ? strlen(tmp2) : 0);
 			char *tmp3 = tmp + 10;
-			n += snprintf(wrapped_query + n, WORKFLOW_MAX_LEN - n, WRAPPING_WORKFLOW2);
+			n += snprintf(wrapped_query + n, max_size - n, WRAPPING_WORKFLOW2);
 			int k;
 			for (k = 0; k < size; k++) {
-				n += snprintf(wrapped_query + n, WORKFLOW_MAX_LEN - n, "%c", tmp3[k]);
+				n += snprintf(wrapped_query + n, max_size - n, "%c", tmp3[k]);
 			}
-			n += snprintf(wrapped_query + n, WORKFLOW_MAX_LEN - n, WRAPPING_WORKFLOW2_1);
+			n += snprintf(wrapped_query + n, max_size - n, WRAPPING_WORKFLOW2_1);
 		}
 		//insert exec_mode if present
 		tmp = strstr(query, "exec_mode=");
@@ -653,12 +660,12 @@ void oph_execute(char *query, char **newsession, int *return_value, char **out_r
 			tmp2 = strchr(tmp, ';');
 			int size = strlen((tmp + 10)) - ((tmp2) ? strlen(tmp2) : 0);
 			char *tmp3 = tmp + 10;
-			n += snprintf(wrapped_query + n, WORKFLOW_MAX_LEN - n, WRAPPING_WORKFLOW3);
+			n += snprintf(wrapped_query + n, max_size - n, WRAPPING_WORKFLOW3);
 			int k;
 			for (k = 0; k < size; k++) {
-				n += snprintf(wrapped_query + n, WORKFLOW_MAX_LEN - n, "%c", tmp3[k]);
+				n += snprintf(wrapped_query + n, max_size - n, "%c", tmp3[k]);
 			}
-			n += snprintf(wrapped_query + n, WORKFLOW_MAX_LEN - n, WRAPPING_WORKFLOW3_1);
+			n += snprintf(wrapped_query + n, max_size - n, WRAPPING_WORKFLOW3_1);
 		}
 		//insert callback_url if present
 		tmp = strstr(query, "callback_url=");
@@ -667,17 +674,17 @@ void oph_execute(char *query, char **newsession, int *return_value, char **out_r
 			tmp2 = strchr(tmp, ';');
 			int size = strlen((tmp + 13)) - ((tmp2) ? strlen(tmp2) : 0);
 			char *tmp3 = tmp + 13;
-			n += snprintf(wrapped_query + n, WORKFLOW_MAX_LEN - n, WRAPPING_WORKFLOW4);
+			n += snprintf(wrapped_query + n, max_size - n, WRAPPING_WORKFLOW4);
 			int k;
 			for (k = 0; k < size; k++) {
-				n += snprintf(wrapped_query + n, WORKFLOW_MAX_LEN - n, "%c", tmp3[k]);
+				n += snprintf(wrapped_query + n, max_size - n, "%c", tmp3[k]);
 			}
-			n += snprintf(wrapped_query + n, WORKFLOW_MAX_LEN - n, WRAPPING_WORKFLOW4_1);
+			n += snprintf(wrapped_query + n, max_size - n, WRAPPING_WORKFLOW4_1);
 		}
 
-		n += snprintf(wrapped_query + n, WORKFLOW_MAX_LEN - n, WRAPPING_WORKFLOW5);
-	      n += snprintf(wrapped_query + n, WORKFLOW_MAX_LEN - n, "%s", operator? operator:"");
-		n += snprintf(wrapped_query + n, WORKFLOW_MAX_LEN - n, WRAPPING_WORKFLOW5_1);
+		n += snprintf(wrapped_query + n, max_size - n, WRAPPING_WORKFLOW5);
+	      n += snprintf(wrapped_query + n, max_size - n, "%s", operator? operator:"");
+		n += snprintf(wrapped_query + n, max_size - n, WRAPPING_WORKFLOW5_1);
 
 		if (operator) {
 			free(operator);
@@ -716,9 +723,9 @@ void oph_execute(char *query, char **newsession, int *return_value, char **out_r
 								if (tmp_keyvalue) {
 									substituted++;
 									if (substituted == 1) {
-										n += snprintf(wrapped_query + n, WORKFLOW_MAX_LEN - n, WRAPPING_WORKFLOW6, tmp_keyvalue);
+										n += snprintf(wrapped_query + n, max_size - n, WRAPPING_WORKFLOW6, tmp_keyvalue);
 									} else {
-										n += snprintf(wrapped_query + n, WORKFLOW_MAX_LEN - n, WRAPPING_WORKFLOW7, tmp_keyvalue);
+										n += snprintf(wrapped_query + n, max_size - n, WRAPPING_WORKFLOW7, tmp_keyvalue);
 									}
 									free(tmp_keyvalue);
 									tmp_keyvalue = NULL;
@@ -739,28 +746,27 @@ void oph_execute(char *query, char **newsession, int *return_value, char **out_r
 			tmp_query = NULL;
 		}
 
-		n += snprintf(wrapped_query + n, WORKFLOW_MAX_LEN - n, WRAPPING_WORKFLOW8);
+		n += snprintf(wrapped_query + n, max_size - n, WRAPPING_WORKFLOW8);
 
-		snprintf(query, WORKFLOW_MAX_LEN, "%s", wrapped_query);
+		snprintf(query, max_size, "%s", wrapped_query);
 	}
 
 	store_result_global = 0;
 	// If workflow then insert available env vars and cmd_line in query
-	char fixed_query[WORKFLOW_MAX_LEN];
-	memset(fixed_query, 0, WORKFLOW_MAX_LEN);
+	char fixed_query[max_size];
+	memset(fixed_query, 0, max_size);
 	if (strstr(query, "\"name\"")) {
 		char *query_start = strchr(query, '{'), *tmp;
 		if (query_start) {
 			int n = 0;
-			n += snprintf(fixed_query + n, WORKFLOW_MAX_LEN - n, "{");
+			n += snprintf(fixed_query + n, max_size - n, "{");
 			if (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SESSION_ID)) {
 				if (!strstr(query, "\"sessionid\"")) {
-					n += snprintf(fixed_query + n, WORKFLOW_MAX_LEN - n, "%s%s%s", WRAPPING_WORKFLOW2, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SESSION_ID),
-						      WRAPPING_WORKFLOW2_1);
+					n += snprintf(fixed_query + n, max_size - n, "%s%s%s", WRAPPING_WORKFLOW2, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SESSION_ID), WRAPPING_WORKFLOW2_1);
 				}
 			}
 			if (!(tmp = strstr(query, "\"exec_mode\""))) {
-				n += snprintf(fixed_query + n, WORKFLOW_MAX_LEN - n, "%s%s%s", WRAPPING_WORKFLOW3, "sync", WRAPPING_WORKFLOW3_1);
+				n += snprintf(fixed_query + n, max_size - n, "%s%s%s", WRAPPING_WORKFLOW3, "sync", WRAPPING_WORKFLOW3_1);
 				if ((tmp = hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_EXEC_MODE)) && strstr(tmp, "async"))
 					store_result_global = 1;
 			} else if ((tmp = strstr(tmp, "\"async\""))) {
@@ -770,39 +776,37 @@ void oph_execute(char *query, char **newsession, int *return_value, char **out_r
 			};
 			if (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_NCORES)) {
 				if (!strstr(query, "\"ncores\"")) {
-					n += snprintf(fixed_query + n, WORKFLOW_MAX_LEN - n, "%s%s%s", WRAPPING_WORKFLOW4c, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_NCORES),
-						      WRAPPING_WORKFLOW4c_1);
+					n += snprintf(fixed_query + n, max_size - n, "%s%s%s", WRAPPING_WORKFLOW4c, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_NCORES), WRAPPING_WORKFLOW4c_1);
 				}
 			}
 			if (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CWD)) {
 				if (!strstr(query, "\"cwd\"")) {
-					n += snprintf(fixed_query + n, WORKFLOW_MAX_LEN - n, "%s%s%s", WRAPPING_WORKFLOW4d, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CWD), WRAPPING_WORKFLOW4d_1);
+					n += snprintf(fixed_query + n, max_size - n, "%s%s%s", WRAPPING_WORKFLOW4d, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CWD), WRAPPING_WORKFLOW4d_1);
 				}
 			}
 			if (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_DATACUBE)) {
 				if (!strstr(query, "\"cube\"")) {
-					n += snprintf(fixed_query + n, WORKFLOW_MAX_LEN - n, "%s%s%s", WRAPPING_WORKFLOW4e, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_DATACUBE),
-						      WRAPPING_WORKFLOW4e_1);
+					n += snprintf(fixed_query + n, max_size - n, "%s%s%s", WRAPPING_WORKFLOW4e, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_DATACUBE), WRAPPING_WORKFLOW4e_1);
 				}
 			}
 			if (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CDD)) {
 				if (!strstr(query, "\"cdd\"")) {
-					n += snprintf(fixed_query + n, WORKFLOW_MAX_LEN - n, "%s%s%s", WRAPPING_WORKFLOW4f, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CDD), WRAPPING_WORKFLOW4f_1);
+					n += snprintf(fixed_query + n, max_size - n, "%s%s%s", WRAPPING_WORKFLOW4f, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CDD), WRAPPING_WORKFLOW4f_1);
 				}
 			}
 			char *host_partition = (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_HOST_PARTITION);
 			if (host_partition) {
 				if (!strstr(query, "\"host_partition\"") && strcmp(host_partition, OPH_TERM_ENV_OPH_MAIN_PARTITION)) {
-					n += snprintf(fixed_query + n, WORKFLOW_MAX_LEN - n, "%s%s%s", WRAPPING_WORKFLOW4h, host_partition, WRAPPING_WORKFLOW4h_1);
+					n += snprintf(fixed_query + n, max_size - n, "%s%s%s", WRAPPING_WORKFLOW4h, host_partition, WRAPPING_WORKFLOW4h_1);
 				}
 			}
 			if (cmd_line) {
 				if (!strstr(query, "\"command\"")) {
-					n += snprintf(fixed_query + n, WORKFLOW_MAX_LEN - n, "%s%s%s", WRAPPING_WORKFLOW4b, cmd_line, WRAPPING_WORKFLOW4b_1);
+					n += snprintf(fixed_query + n, max_size - n, "%s%s%s", WRAPPING_WORKFLOW4b, cmd_line, WRAPPING_WORKFLOW4b_1);
 				}
 			}
-			n += snprintf(fixed_query + n, WORKFLOW_MAX_LEN - n, "%s", query_start + 1);
-			snprintf(query, WORKFLOW_MAX_LEN, "%s", fixed_query);
+			n += snprintf(fixed_query + n, max_size - n, "%s", query_start + 1);
+			snprintf(query, max_size, "%s", fixed_query);
 		}
 	}
 
@@ -811,13 +815,13 @@ void oph_execute(char *query, char **newsession, int *return_value, char **out_r
 																     "[WARNING] Session not specified. A new session will be created!\n\n");
 	}
 	// Encoding
-	char result[WORKFLOW_MAX_LEN];
-	if (base64encode(query, strlen(query), result, WORKFLOW_MAX_LEN)) {
+	char result[max_size];
+	if (base64encode(query, strlen(query), result, max_size)) {
 		(print_json) ? my_fprintf(stderr, "Encoding error\\n") : fprintf(stderr, "\e[1;31mEncoding error\e[0m\n");
 		*return_value = OPH_TERM_GENERIC_ERROR;
 		return;
 	}
-	snprintf(query_global, WORKFLOW_MAX_LEN, "%s", result);
+	snprintf(query_global, max_size, "%s", result);
 
 	response_global.response = NULL;
 	response_global.jobid = NULL;
@@ -1094,13 +1098,18 @@ void oph_execute(char *query, char **newsession, int *return_value, char **out_r
 int oph_term_client(char *cmd_line, char *command, char **newsession, char *user, char *password, char *host, char *port, int *return_value, char **out_response, char **out_response_for_viewer,
 		    int workflow_wrap, HASHTBL * hashtbl)
 {
+	if (max_size <= 0)
+		return 2;
 
-	snprintf(query_global, WORKFLOW_MAX_LEN, OPH_DEFAULT_QUERY);
+	if (!query_global)
+		query_global = (char *) malloc(max_size * sizeof(char));
+
+	snprintf(query_global, max_size, OPH_DEFAULT_QUERY);
 
 	char *username = user;
 
 	if (command)
-		snprintf(query_global, WORKFLOW_MAX_LEN, "%s", command);
+		snprintf(query_global, max_size, "%s", command);
 
 	char *query = query_global;
 
