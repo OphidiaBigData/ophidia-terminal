@@ -2870,7 +2870,7 @@ int main(int argc, char **argv, char **envp)
 
 				//prefix operator name
 				memset(submission_string, 0, max_size);
-				n += snprintf(submission_string + n, max_size - n, "operator=%s;", current_operator);
+				n = snprintf(submission_string, max_size, "operator=%s;", current_operator);
 				//sessionid management
 				if (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SESSION_ID))
 					n += snprintf(submission_string + n, max_size - n, "sessionid=%s;", (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SESSION_ID));
@@ -3762,7 +3762,7 @@ int main(int argc, char **argv, char **envp)
 			}
 			//set submission string
 			memset(submission_string, 0, max_size);
-			n += snprintf(submission_string + n, max_size - n, OPH_TERM_OPH_RESUME_STRING_NO_SAVE);
+			n = snprintf(submission_string, max_size, OPH_TERM_OPH_RESUME_STRING_NO_SAVE);
 
 			//sessionid management
 			if (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SESSION_ID))
@@ -3794,14 +3794,15 @@ int main(int argc, char **argv, char **envp)
 						}
 						continue;
 					}
+
+					char tmp_submission_string[max_size];
 					char tmp_job_id[OPH_TERM_MAX_LEN];
-					char tmp_submission_string[OPH_TERM_MAX_LEN];
 					char tmp_session[OPH_TERM_MAX_LEN];
 					char tmp_workflow[OPH_TERM_MAX_LEN];
 					char tmp_marker[OPH_TERM_MAX_LEN];
 
-					memset(tmp_job_id, 0, OPH_TERM_MAX_LEN);
 					memset(tmp_submission_string, 0, max_size);
+					memset(tmp_job_id, 0, OPH_TERM_MAX_LEN);
 					memset(tmp_session, 0, OPH_TERM_MAX_LEN);
 					memset(tmp_marker, 0, OPH_TERM_MAX_LEN);
 					memset(tmp_workflow, 0, OPH_TERM_MAX_LEN);

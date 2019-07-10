@@ -54,16 +54,14 @@ void cleanup(struct soap *soap)
 
 struct soap soap_global;
 char server_global[OPH_MAX_STRING_SIZE];
-char *query_global = NULL;
 struct oph__ophResponse response_global;
 int soap_call_oph__ophExecuteMain_return;
 
-void *soapthread(void *ptr)
+void *soapthread(void *query)
 {
-	UNUSED(ptr);
 	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
-	if (query_global)
-		soap_call_oph__ophExecuteMain_return = soap_call_oph__ophExecuteMain(&soap_global, server_global, "", query_global, &response_global);
+	soap_call_oph__ophExecuteMain_return = soap_call_oph__ophExecuteMain(&soap_global, server_global, "", (char *) query, &response_global);
+	free(query);
 	return NULL;
 }
 
@@ -263,7 +261,7 @@ void oph_execute(struct soap *soap, xsd__string query, char *wps, char **newsess
 	}
 
 	if (!wps) {
-		pthread_create(&tid, NULL, &soapthread, NULL);
+		pthread_create(&tid, NULL, &soapthread, strdup(query));
 		pthread_join(tid, NULL);
 
 		if (soap_call_oph__ophExecuteMain_return == SOAP_OK) {
@@ -480,16 +478,13 @@ int oph_term_client(char *cmd_line, char *command, char **newsession, char *user
 	if (max_size <= 0)
 		return 2;
 
-	if (!query_global)
-		query_global = (char *) malloc(max_size * sizeof(char));
-
-	snprintf(query_global, max_size, OPH_DEFAULT_QUERY);
 	char *wps = 0;
 
+	char query_global[max_size];
+	snprintf(query_global, max_size, OPH_DEFAULT_QUERY);
 	if (command)
 		snprintf(query_global, max_size, "%s", command);
 	char *query = query_global;
-
 	if (!strcasecmp(query, OPH_DEFAULT_QUERY))
 		return 1;
 

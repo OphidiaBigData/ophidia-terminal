@@ -55,7 +55,6 @@ struct oph__ophResponse {
 } response_global;
 
 char server_global[OPH_MAX_STRING_SIZE];
-char *query_global = NULL;
 int wps_call_oph__ophExecuteMain_return;
 char username_global[OPH_MAX_STRING_SIZE];
 char password_global[OPH_MAX_STRING_SIZE];
@@ -510,9 +509,9 @@ int process_response()
 	return 0;
 }
 
-int wps_call_oph__ophExecuteMain(char *server_global, char *query_global, char *username, char *password, int store_result)
+int wps_call_oph__ophExecuteMain(char *server_global, char *query, char *username, char *password, int store_result)
 {
-	if (!server_global || !query_global)
+	if (!server_global || !query)
 		return 1;
 
 	if (max_size <= 0)
@@ -520,7 +519,7 @@ int wps_call_oph__ophExecuteMain(char *server_global, char *query_global, char *
 
 	// Build XML Request
 	char wpsRequest[max_size];
-	snprintf(wpsRequest, max_size, OPH_WPS_XML_REQUEST, query_global, username, password, store_result ? "storeExecuteResponse=\"true\" status=\"true\"" : "storeExecuteResponse=\"false\"");
+	snprintf(wpsRequest, max_size, OPH_WPS_XML_REQUEST, query, username, password, store_result ? "storeExecuteResponse=\"true\" status=\"true\"" : "storeExecuteResponse=\"false\"");
 
 	// Send the request 
 	CURLcode ret;
@@ -604,13 +603,11 @@ int wps_call_oph__ophExecuteMain(char *server_global, char *query_global, char *
 	return process_response();
 }
 
-void *wpsthread(void *ptr)
+void *wpsthread(void *query)
 {
-	UNUSED(ptr);
-
 	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
-	wps_call_oph__ophExecuteMain_return = wps_call_oph__ophExecuteMain(server_global, query_global, username_global, password_global, store_result_global);
-
+	wps_call_oph__ophExecuteMain_return = wps_call_oph__ophExecuteMain(server_global, (char *) query, username_global, password_global, store_result_global);
+	free(query);
 	return NULL;
 }
 
@@ -821,7 +818,6 @@ void oph_execute(char *query, char **newsession, int *return_value, char **out_r
 		*return_value = OPH_TERM_GENERIC_ERROR;
 		return;
 	}
-	snprintf(query_global, max_size, "%s", result);
 
 	response_global.response = NULL;
 	response_global.jobid = NULL;
@@ -842,7 +838,7 @@ void oph_execute(char *query, char **newsession, int *return_value, char **out_r
 	snprintf(username_global, OPH_MAX_STRING_SIZE, "%s", username);
 	snprintf(password_global, OPH_MAX_STRING_SIZE, "%s", password);
 
-	pthread_create(&tid, NULL, &wpsthread, NULL);
+	pthread_create(&tid, NULL, &wpsthread, strdup(result));
 	pthread_join(tid, NULL);
 
 	// Decoding
@@ -1101,18 +1097,13 @@ int oph_term_client(char *cmd_line, char *command, char **newsession, char *user
 	if (max_size <= 0)
 		return 2;
 
-	if (!query_global)
-		query_global = (char *) malloc(max_size * sizeof(char));
-
-	snprintf(query_global, max_size, OPH_DEFAULT_QUERY);
-
 	char *username = user;
 
+	char query_global[max_size];
+	snprintf(query_global, max_size, OPH_DEFAULT_QUERY);
 	if (command)
 		snprintf(query_global, max_size, "%s", command);
-
 	char *query = query_global;
-
 	if (!strcasecmp(query, OPH_DEFAULT_QUERY))
 		return 1;
 
