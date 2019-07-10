@@ -33,6 +33,7 @@
 
 extern pthread_mutex_t global_flag;
 extern size_t max_size;
+extern int last_workflow_id;
 
 int CRYPTO_thread_setup();
 void CRYPTO_thread_cleanup();
@@ -315,8 +316,13 @@ void oph_execute(struct soap *soap, xsd__string query, char *wps, char **newsess
 								*return_value = OPH_TERM_GENERIC_ERROR;
 						}
 
-						char *tmp = NULL;
-						char *ptr = NULL;
+						// Retrieve last workflowid
+						char *tmp = NULL, *ptr = NULL;
+						if (response_global.jobid) {
+							tmp = strstr(response_global.jobid, "?");
+							if (tmp || *tmp)
+								last_workflow_id = strtol(1 + tmp, NULL, 10);
+						}
 
 						if (response_global.jobid && newsession) {
 							//retrieve newsession

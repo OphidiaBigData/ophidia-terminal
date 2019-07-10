@@ -54,6 +54,7 @@ size_t max_size = OPH_TERM_MAX_LEN;
 char *fixed_cursor = NULL;
 char *submission_string = NULL;
 char *command_line = NULL;
+int last_workflow_id = 0;
 
 const char *cmds[cmds_num] = {
 	OPH_TERM_CMD_VERSION,
@@ -3764,8 +3765,9 @@ int main(int argc, char **argv, char **envp)
 			if (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SESSION_ID))
 				n += snprintf(submission_string + n, max_size - n, "sessionid=%s;", (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SESSION_ID));
 
+			char lwi[OPH_TERM_MAX_LEN], lwi_flag = 0;
 			cursor = strtok_r(NULL, " \t\n", &saveptr);
-			if (!cursor) {
+			if (!cursor && !last_workflow_id) {
 				(print_json) ? my_fprintf(stderr, "Job not specified [CODE %d]\\n", OPH_TERM_INVALID_PARAM_VALUE) : fprintf(stderr, "\e[1;31mJob not specified [CODE %d]\e[0m\n",
 																	    OPH_TERM_INVALID_PARAM_VALUE);
 				if (print_json)
@@ -3775,7 +3777,12 @@ int main(int argc, char **argv, char **envp)
 					break;
 				}
 				continue;
-			} else {
+			} else if (!cursor) {
+				snprintf(lwi, OPH_TERM_MAX_LEN, "%d", last_workflow_id);
+				lwi_flag = 1;
+				cursor = lwi;
+			}
+			if (cursor) {
 				if (!strcmp(cursor, "-j")) {	//view -j JobID
 					cursor = strtok_r(NULL, " \t\n", &saveptr);
 					if (!cursor) {
@@ -4025,7 +4032,10 @@ int main(int argc, char **argv, char **envp)
 
 						n += snprintf(submission_string + n, max_size - n, "id=%s;id_type=marker;", tmp_marker);
 
-						cursor = strtok_r(NULL, " \t\n", &saveptr);
+						if (!lwi_flag)
+							cursor = strtok_r(NULL, " \t\n", &saveptr);
+						else
+							cursor = NULL;
 
 						// Retrieve status filter
 						if (cursor && !strcmp(cursor, "-s")) {
