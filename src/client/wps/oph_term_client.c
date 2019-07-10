@@ -41,6 +41,7 @@
 #define UNUSED(x) {(void)(x);}
 
 extern pthread_mutex_t global_flag;
+extern int last_workflow_id;
 
 void sigpipe_handle(int);
 
@@ -935,8 +936,13 @@ void oph_execute(char *query, char **newsession, int *return_value, char **out_r
 							*return_value = OPH_TERM_GENERIC_ERROR;
 					}
 
-					char *tmp = NULL;
-					char *ptr = NULL;
+					// Retrieve last workflowid
+					char *tmp = NULL, *ptr = NULL;
+					if (response_global.jobid) {
+						tmp = strstr(response_global.jobid, "?");
+						if (tmp || *tmp)
+							last_workflow_id = strtol(1 + tmp, NULL, 10);
+					}
 
 					if (newsession) {
 						//retrieve newsession
