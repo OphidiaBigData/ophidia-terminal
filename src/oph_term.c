@@ -466,7 +466,6 @@ int startup_opt_setup(int argc, char *argv[], char *envp[], HASHTBL * hashtbl, c
 	char buf[OPH_TERM_MAX_LEN];
 	for (i = 0; envp[i]; i++) {
 		if (!strncmp(envp[i], OPH_TERM_USERVAR_PATTERN, 17)) {
-			memset(buf, 0, OPH_TERM_MAX_LEN);
 			snprintf(buf, OPH_TERM_MAX_LEN, "%s", envp[i]);
 			size_t q, z;
 			for (q = 0; q < strlen(buf); q++)
@@ -500,7 +499,6 @@ int startup_opt_setup(int argc, char *argv[], char *envp[], HASHTBL * hashtbl, c
 	//get user-defined aliases from shell env
 	for (i = 0; envp[i]; i++) {
 		if (!strncmp(envp[i], OPH_TERM_ALIAS_PATTERN, 15)) {
-			memset(buf, 0, OPH_TERM_MAX_LEN);
 			snprintf(buf, OPH_TERM_MAX_LEN, "%s", envp[i]);
 			size_t q, z;
 			for (q = 0; q < strlen(buf); q++)
@@ -1487,10 +1485,10 @@ void print_oph_term_output_json(HASHTBL * hashtbl)
 	else
 		printf(OUTPUT_JSON_STRING, oph_term_request_exp, oph_term_jobid_exp, oph_term_response ? oph_term_response : "{}", oph_term_output_exp, oph_term_error_exp);
 
-	memset(oph_term_request, 0, OUTPUT_MAX_LEN);
-	memset(oph_term_jobid, 0, OUTPUT_MAX_LEN);
-	memset(oph_term_output, 0, OUTPUT_MAX_LEN);
-	memset(oph_term_error, 0, OUTPUT_MAX_LEN);
+	*oph_term_request = 0;
+	*oph_term_jobid = 0;
+	*oph_term_output = 0;
+	*oph_term_error = 0;
 	if (oph_term_response) {
 		free(oph_term_response);
 		oph_term_response = NULL;
@@ -1584,12 +1582,19 @@ int main(int argc, char **argv, char **envp)
 
 	char xml_path_extended[OPH_TERM_MAX_LEN];
 
-	fixed_cursor = (char *) calloc(max_size, sizeof(char));
-	submission_string = (char *) calloc(max_size, sizeof(char));
-	command_line = (char *) calloc(max_size, sizeof(char));
+	fixed_cursor = (char *) malloc(max_size * sizeof(char));
+	submission_string = (char *) malloc(max_size * sizeof(char));
+	command_line = (char *) malloc(max_size * sizeof(char));
 
+	if (!fixed_cursor || !submission_string || !command_line) {
+		(print_json) ? my_fprintf(stderr, "Error: reallocation failed\\n") : fprintf(stderr, "\e[1;31mError: reallocation failed\e[0m\n");
+		oph_term_env_clear(hashtbl);
+		oph_term_alias_clear(aliases);
+		if (print_json)
+			print_oph_term_output_json(hashtbl);
+		return OPH_TERM_MEMORY_ERROR;
+	}
 	// Set command line (excluding passwords)
-	memset(command_line, 0, max_size);
 	for (i = 0; i < argc; i++) {
 		if (!strncmp(argv[i], "--password=", 11) || (!strncmp(argv[i], "-p", 2) && argv[i][2] != 0))
 			continue;
@@ -1956,7 +1961,6 @@ int main(int argc, char **argv, char **envp)
 			char var[10];
 			tmparg = strtok_r((char *) hashtbl_get(hashtbl, OPH_TERM_OPT_W_ARGS), OPH_TERM_OPT_W_ARGS_DELIMITER, &tmpsaveptr);
 			while (tmparg) {
-				memset(var, 0, 10);
 				snprintf(var, 10, "%d", count);
 				if (oph_term_var_expansion(submission_workflow, var, tmparg, &tmpworkflow)) {
 					(print_json) ? my_fprintf(stderr, "Error performing argument substitution\\n") : fprintf(stderr, "\e[1;31mError performing argument substitution\e[0m\n");
@@ -2207,7 +2211,6 @@ int main(int argc, char **argv, char **envp)
 				}
 				// call "view last_jobid iterations interval"
 				char view_string[OPH_TERM_MAX_LEN];
-				memset(view_string, 0, OPH_TERM_MAX_LEN);
 				snprintf(view_string, OPH_TERM_MAX_LEN, "view %d %d %d", last_jobid, iterations, interval);
 				exec_statement = strdup((const char *) view_string);
 				if (!exec_statement) {
@@ -2328,7 +2331,6 @@ int main(int argc, char **argv, char **envp)
 				}
 			}
 			if (tmpurl) {
-				memset(xml_path_extended, 0, OPH_TERM_MAX_LEN);
 				snprintf(xml_path_extended, OPH_TERM_MAX_LEN, "%s/%s", xml_path, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST));
 				if (mkdir(xml_path_extended, 0777)) {
 					if (errno != EEXIST) {
@@ -2446,11 +2448,11 @@ int main(int argc, char **argv, char **envp)
 					line = strdup(stored_line);
 				else {
 					char tmp_prompt[OPH_TERM_MAX_LEN];
-					memset(tmp_prompt, 0, OPH_TERM_MAX_LEN);
+					*tmp_prompt = 0;
 					char tmp_session_code[OPH_TERM_MAX_LEN];
-					memset(tmp_session_code, 0, OPH_TERM_MAX_LEN);
+					*tmp_session_code = 0;
 					char tmp_session_code2[OPH_TERM_MAX_LEN];
-					memset(tmp_session_code2, 0, OPH_TERM_MAX_LEN);
+					*tmp_session_code2 = 0;
 					if (!signal_raise) {
 						if (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SESSION_ID)) {
 							if (oph_term_get_session_code((char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SESSION_ID), tmp_session_code)) {
@@ -2559,10 +2561,8 @@ int main(int argc, char **argv, char **envp)
 			continue;
 		}
 		// Set command line at each iteration
-		if (!exec_one_statement && !exec_alias) {
-			memset(command_line, 0, max_size);
+		if (!exec_one_statement && !exec_alias)
 			snprintf(command_line, max_size, "%s", line);
-		}
 
 		cursor = strtok_r(linecopy, " \t\n", &saveptr);	// extract cmd name
 		if (!cursor) {
@@ -2869,7 +2869,6 @@ int main(int argc, char **argv, char **envp)
 				char *newcdd = NULL;
 
 				//prefix operator name
-				memset(submission_string, 0, max_size);
 				n = snprintf(submission_string, max_size, "operator=%s;", current_operator);
 				//sessionid management
 				if (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SESSION_ID))
@@ -3189,7 +3188,6 @@ int main(int argc, char **argv, char **envp)
 					}
 				}
 				if (cursor[strlen(cursor) - 1] != ';') {
-					memset(fixed_cursor, 0, max_size);
 					snprintf(fixed_cursor, max_size, "%s;", cursor);
 					cursor = fixed_cursor;
 				}
@@ -3396,7 +3394,6 @@ int main(int argc, char **argv, char **envp)
 					}
 				}
 				//prefix operator name
-				memset(submission_string, 0, max_size);
 				n = snprintf(submission_string, max_size, "operator=%s;%s", current_operator, cursorcopy);
 
 				free(cursorcopy);
@@ -3761,7 +3758,6 @@ int main(int argc, char **argv, char **envp)
 				continue;
 			}
 			//set submission string
-			memset(submission_string, 0, max_size);
 			n = snprintf(submission_string, max_size, OPH_TERM_OPH_RESUME_STRING_NO_SAVE);
 
 			//sessionid management
@@ -3801,11 +3797,11 @@ int main(int argc, char **argv, char **envp)
 					char tmp_workflow[OPH_TERM_MAX_LEN];
 					char tmp_marker[OPH_TERM_MAX_LEN];
 
-					memset(tmp_submission_string, 0, max_size);
-					memset(tmp_job_id, 0, OPH_TERM_MAX_LEN);
-					memset(tmp_session, 0, OPH_TERM_MAX_LEN);
-					memset(tmp_marker, 0, OPH_TERM_MAX_LEN);
-					memset(tmp_workflow, 0, OPH_TERM_MAX_LEN);
+					*tmp_submission_string = 0;
+					*tmp_job_id = 0;
+					*tmp_session = 0;
+					*tmp_marker = 0;
+					*tmp_workflow = 0;
 
 					char *saveptr2 = NULL, *tmp_cursor;
 					snprintf(tmp_job_id, OPH_TERM_MAX_LEN, "%s", cursor);
@@ -3964,8 +3960,8 @@ int main(int argc, char **argv, char **envp)
 					char tmp_workflow[OPH_TERM_MAX_LEN];
 					char tmp_marker[OPH_TERM_MAX_LEN];
 
-					memset(tmp_marker, 0, OPH_TERM_MAX_LEN);
-					memset(tmp_workflow, 0, OPH_TERM_MAX_LEN);
+					*tmp_marker = 0;
+					*tmp_workflow = 0;
 
 					char *saveptr2 = NULL, *tmp_cursor;
 					tmp_cursor = strtok_r(cursor, OPH_TERM_MARKER_DELIMITER, &saveptr2);
@@ -4389,7 +4385,7 @@ int main(int argc, char **argv, char **envp)
 			int last_njobs = 10;	//default
 			int is_verbose = 0;
 			char tmp_session[OPH_TERM_MAX_LEN];
-			memset(tmp_session, 0, OPH_TERM_MAX_LEN);
+			*tmp_session = 0;
 			cursor = strtok_r(NULL, " \t\n", &saveptr);
 			if (!cursor) {	//resume
 				snprintf(tmp_session, OPH_TERM_MAX_LEN, "%s", (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SESSION_ID));
@@ -4865,7 +4861,6 @@ int main(int argc, char **argv, char **envp)
 						continue;
 					}
 
-					memset(xml_path_extended, 0, OPH_TERM_MAX_LEN);
 					snprintf(xml_path_extended, OPH_TERM_MAX_LEN, "%s/%s", xml_path, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST));
 					if (mkdir(xml_path, 0777)) {
 						if (errno != EEXIST) {
@@ -4957,7 +4952,6 @@ int main(int argc, char **argv, char **envp)
 						continue;
 					}
 
-					memset(xml_path_extended, 0, OPH_TERM_MAX_LEN);
 					snprintf(xml_path_extended, OPH_TERM_MAX_LEN, "%s/%s", xml_path, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST));
 					if (mkdir(xml_path, 0777)) {
 						if (errno != EEXIST) {
@@ -5214,7 +5208,6 @@ int main(int argc, char **argv, char **envp)
 			char var[10];
 			cursor = strtok_r(NULL, " \t\n\"", &saveptr);
 			while (cursor) {
-				memset(var, 0, 10);
 				snprintf(var, 10, "%d", count);
 				if (oph_term_var_expansion(submission_workflow, var, cursor, &tmpworkflow)) {
 					(print_json) ? my_fprintf(stderr, "Error performing argument substitution\\n") : fprintf(stderr, "\e[1;31mError performing argument substitution\e[0m\n");
@@ -5568,7 +5561,6 @@ int main(int argc, char **argv, char **envp)
 					// call "view last_jobid iterations interval"
 					free(line);
 					char view_string[OPH_TERM_MAX_LEN];
-					memset(view_string, 0, OPH_TERM_MAX_LEN);
 					snprintf(view_string, OPH_TERM_MAX_LEN, "view %d %d %d", last_jobid, iterations, interval);
 					line = strdup((const char *) view_string);
 					if (!line) {
@@ -5715,7 +5707,6 @@ int main(int argc, char **argv, char **envp)
 				char var[10];
 				cursor = strtok_r(NULL, " \t\n\"", &saveptr);
 				while (cursor) {
-					memset(var, 0, 10);
 					snprintf(var, 10, "%d", count);
 					if (oph_term_var_expansion(submission_workflow, var, cursor, &tmpworkflow)) {
 						(print_json) ? my_fprintf(stderr, "Error performing argument substitution\\n") : fprintf(stderr,
@@ -6050,7 +6041,6 @@ int main(int argc, char **argv, char **envp)
 			char var[10];
 			cursor = strtok_r(NULL, " \t\n\"", &saveptr);
 			while (cursor) {
-				memset(var, 0, 10);
 				snprintf(var, 10, "%d", count);
 				if (oph_term_var_expansion(param_string, var, cursor, &new_line)) {
 					(print_json) ? my_fprintf(stderr, "Error performing argument substitution\\n") : fprintf(stderr, "\e[1;31mError performing argument substitution\e[0m\n");

@@ -225,9 +225,13 @@ int oph_term_setenv(HASHTBL * hashtbl, const char *key, const char *value)
 		free(fixed_cursor);
 		free(submission_string);
 		free(command_line);
-		fixed_cursor = (char *) calloc(max_size, sizeof(char));
-		submission_string = (char *) calloc(max_size, sizeof(char));
-		command_line = (char *) calloc(max_size, sizeof(char));
+		fixed_cursor = (char *) malloc(max_size * sizeof(char));
+		submission_string = (char *) malloc(max_size * sizeof(char));
+		command_line = (char *) malloc(max_size * sizeof(char));
+		if (!fixed_cursor || !submission_string || !command_line) {
+			(print_json) ? my_fprintf(stderr, "Error: reallocation failed\\n") : fprintf(stderr, "\e[1;31mError: reallocation failed\e[0m\n");
+			return OPH_TERM_MEMORY_ERROR;
+		}
 	}
 	return OPH_TERM_SUCCESS;
 }
