@@ -940,7 +940,7 @@ void oph_execute(char *query, char **newsession, int *return_value, char **out_r
 					char *tmp = NULL, *ptr = NULL;
 					if (response_global.jobid) {
 						tmp = strstr(response_global.jobid, "?");
-						if (tmp || *tmp)
+						if (tmp && *tmp)
 							last_workflow_id = strtol(1 + tmp, NULL, 10);
 					}
 
