@@ -4382,7 +4382,7 @@ int main(int argc, char **argv, char **envp)
 							tmp_status = exit_status[size - i - 1];
 							if (!strcmp(tmp_status, "OPH_STATUS_COMPLETED"))
 								format = 2;
-							else if (!strcmp(tmp_status, "OPH_STATUS_RUNNING"))
+							else if (!strcmp(tmp_status, "OPH_STATUS_RUNNING") || !strcmp(tmp_status, "OPH_STATUS_SKIPPED"))
 								format = 3;
 							else if (!strcmp(tmp_status, "OPH_STATUS_WAITING"))
 								format = 4;
