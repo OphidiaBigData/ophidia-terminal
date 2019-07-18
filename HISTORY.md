@@ -7,6 +7,7 @@
 
 ### Changed:
 
+- Color associated with status 'OPH_STATUS_SKIPPED'
 - Default host partition to 'auto'
 
 ## v1.5.0 - 2019-01-24
