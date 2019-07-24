@@ -348,9 +348,10 @@ const char *get_color_char_of(const char *value)
 	else if (!strcmp(value, "OPH_STATUS_WAITING"))
 		return OPH_TERM_VIEWER_CYAN_CHAR;
 	else if (!strcmp(value, "OPH_STATUS_RUNNING") || !strcmp(value, "OPH_STATUS_SET_ENV") || !strcmp(value, "OPH_STATUS_INIT") || !strcmp(value, "OPH_STATUS_DISTRIBUTE")
-		 || !strcmp(value, "OPH_STATUS_EXECUTE") || !strcmp(value, "OPH_STATUS_REDUCE") || !strcmp(value, "OPH_STATUS_DESTROY") || !strcmp(value, "OPH_STATUS_UNSET_ENV"))
+		 || !strcmp(value, "OPH_STATUS_EXECUTE") || !strcmp(value, "OPH_STATUS_REDUCE") || !strcmp(value, "OPH_STATUS_DESTROY") || !strcmp(value, "OPH_STATUS_UNSET_ENV")
+		 || !strcmp(value, "OPH_STATUS_SKIPPED"))
 		return OPH_TERM_VIEWER_YELLOW_CHAR;
-	else if (!strcmp(value, "OPH_STATUS_COMPLETED") || !strcmp(value, "OPH_STATUS_SKIPPED") || !strcmp(value, "OPH_STATUS_ACTIVE"))
+	else if (!strcmp(value, "OPH_STATUS_COMPLETED") || !strcmp(value, "OPH_STATUS_ACTIVE"))
 		return OPH_TERM_VIEWER_GREEN_CHAR;
 	else if (strstr(value, "_ERROR") || !strcmp(value, "OPH_STATUS_ABORTED") || !strcmp(value, "OPH_STATUS_EXPIRED") || !strcmp(value, "OPH_STATUS_INACTIVE"))
 		return OPH_TERM_VIEWER_RED_CHAR;
