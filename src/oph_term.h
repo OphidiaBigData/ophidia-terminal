@@ -172,7 +172,7 @@ extern int oph_term_error_cur;
 #define OPH_TERM_DEFAULT_ALIAS_VAL_10 	"oph_man function=$1;"
 #define OPH_TERM_DEFAULT_ALIAS_VAL_11 	"oph_list path=$1;level=2;"
 #define OPH_TERM_DEFAULT_ALIAS_VAL_12 	"oph_list path=$1;level=2;recursive=yes;"
-#define OPH_TERM_DEFAULT_ALIAS_VAL_13 	"oph_randcube dim=lat|lon|time;dim_size=$1|$2|$3;exp_ndim=2;host_partition=main;measure=example_measure;measure_type=double;nfrag=$1;ntuple=$2;compressed=no;concept_level=c|c|d;hierarchy=oph_base|oph_base|oph_time;nhost=1;"
+#define OPH_TERM_DEFAULT_ALIAS_VAL_13 	"oph_randcube container=$1;dim=lat|lon|time;dim_size=$2|$3|$4;exp_ndim=2;host_partition=main;measure=example_measure;measure_type=double;nfrag=$2;ntuple=$3;compressed=no;concept_level=c|c|d;nhost=1;"
 #define OPH_TERM_DEFAULT_ALIAS_VAL_14 	"oph_cancel id=$1"
 #define OPH_TERM_DEFAULT_ALIAS_VAL_15 	"oph_fs command=ls;dpath=$1;"
 #define OPH_TERM_DEFAULT_ALIAS_VAL_16 	"oph_fs command=cd;dpath=$1;"
@@ -180,7 +180,7 @@ extern int oph_term_error_cur;
 #define OPH_TERM_DEFAULT_ALIAS_VAL_18 	"oph_resume level=0;id=$1;"
 #define OPH_TERM_DEFAULT_ALIAS_VAL_19 	"oph_explorecube show_time=yes;"
 #define OPH_TERM_DEFAULT_ALIAS_VAL_20 	"oph_manage_session action=new;"
-#define OPH_TERM_DEFAULT_ALIAS_VAL_21 	"del [*]"
+#define OPH_TERM_DEFAULT_ALIAS_VAL_21 	"oph_delete cube=[*];exec_mode=async;"
 #define OPH_TERM_DEFAULT_ALIAS_VAL_22 	"oph_loggingbk job_level=1;mask=010;session_filter=@OPH_SESSION_ID;parent_job_filter=%;"
 #define OPH_TERM_DEFAULT_ALIAS_VAL_23 	"oph_explorenc src_path=$1;"
 #define OPH_TERM_DEFAULT_ALIAS_VAL_24 	"oph_fs command=mkdir;dpath=$1;"
@@ -197,8 +197,8 @@ extern const int pre_defined_aliases_num;
 
 extern pthread_t tid;
 
-#define OPH_TERM_VERSION "Oph_Term - the Ophidia shell, version " PACKAGE_VERSION "\nCopyright (C) 2012-2018 CMCC Foundation - www.cmcc.it\n"
-#define OPH_TERM_VERSION2 "Oph_Term - the Ophidia shell, version " PACKAGE_VERSION "\\nCopyright (C) 2012-2018 CMCC Foundation - www.cmcc.it\\n"
+#define OPH_TERM_VERSION "Oph_Term - the Ophidia shell, version " PACKAGE_VERSION "\nCopyright (C) 2012-2019 CMCC Foundation - www.cmcc.it\n"
+#define OPH_TERM_VERSION2 "Oph_Term - the Ophidia shell, version " PACKAGE_VERSION "\\nCopyright (C) 2012-2019 CMCC Foundation - www.cmcc.it\\n"
 
 #define OPH_TERM_DISCLAIMER "This program comes with ABSOLUTELY NO WARRANTY; for details type `oph_term -x'.\nThis is free software, and you are welcome to redistribute it\nunder certain conditions; type `oph_term -z' for details.\n"
 #define OPH_TERM_DISCLAIMER2 "This program comes with ABSOLUTELY NO WARRANTY; for details type `oph_term -x'.\\nThis is free software, and you are welcome to redistribute it\nunder certain conditions; type `oph_term -z' for details.\\n"
