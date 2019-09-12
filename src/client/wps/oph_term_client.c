@@ -435,7 +435,7 @@ int process_response()
 		xmlXPathFreeObject(xpathObj);
 	} else			// Sync mode
 	{
-		xpathObj = xmlXPathEvalExpression((const xmlChar *) "/wps:ExecuteResponse/wps:ProcessOutputs/wps:Output[ows:Identifier/text()='return']/wps:Data/wps:LiteralData/text()", xpathCtx);
+		xpathObj = xmlXPathEvalExpression((const xmlChar *) "/wps:ExecuteResponse/wps:ProcessOutputs/wps:Output[ows:Identifier/text()='return_code']/wps:Data/wps:LiteralData/text()", xpathCtx);
 		if (!xpathObj || !xpathObj->nodesetval || !xpathObj->nodesetval->nodeNr) {
 			(print_json) ? my_fprintf(stderr, "Error: unable to evaluate xpath expression\\n") : fprintf(stderr, "\e[1;31mError: unable to evaluate xpath expression\e[0m\n");
 			xmlXPathFreeContext(xpathCtx);

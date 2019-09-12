@@ -8,6 +8,7 @@
 
 ### Changed:
 
+- Name of parameter 'return' of WPS interface
 - Color associated with status 'OPH_STATUS_SKIPPED'
 - Default host partition to 'auto'
 
