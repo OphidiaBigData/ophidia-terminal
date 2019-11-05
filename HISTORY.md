@@ -1,6 +1,11 @@
 
 ## New features
 
+### Added:
+
+- New environment variable 'OPH_REQUEST_BUFFER' to define request max size [#18](https://github.com/OphidiaBigData/ophidia-terminal/pull/18/)
+- Default value for 'view' as the workflowid of last submitted command
+
 ### Fixed:
 
 - Bug in executing 'resume' [#17](https://github.com/OphidiaBigData/ophidia-terminal/issues/17)
@@ -8,9 +13,11 @@
 
 ### Changed:
 
-- Name of parameter 'return' of WPS interface
+- Update 'deploy_status' command to be compliant with IM interface [#19](https://github.com/OphidiaBigData/ophidia-terminal/pull/19/) 
+- Name of parameter 'return' and mimeType of WPS interface
 - Color associated with status 'OPH_STATUS_SKIPPED'
 - Default host partition to 'auto'
+- Drop alias in order to use async execution mode
 
 ## v1.5.0 - 2019-01-24
 
