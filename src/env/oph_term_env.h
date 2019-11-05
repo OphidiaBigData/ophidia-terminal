@@ -201,11 +201,17 @@ int is_alias(HASHTBL * hashtbl, const char *key);
 /*IM related functions*/
 #define OPH_IM_SERVER_SUFFIX "/vms/0"
 #define OPH_IM_SERVER_DEFAULT_PORT "11732"
-#define OPH_IM_STATUS_FINISHED "INFO - Process finished\\n\\n\"}"
-#define OPH_IM_STATUS_EMPTY "\"vm_list\": [], \"cont_out\": \"\""
-#define OPH_IM_STATUS_ERROR "error"
+#define OPH_IM_STATUS_OFF "\"state\": \"off\""
+#define OPH_IM_STATUS_CONFIGURED "\"state\": \"configured\""
+#define OPH_IM_STATUS_UNCONFIGURED "\"state\": \"unconfigured\""
+#define OPH_IM_STATUS_PENDING "\"state\": \"pending\""
+#define OPH_IM_STATUS_RUNNING "\"state\": \"running\""
+#define OPH_IM_STATUS_STOPPED "\"state\": \"stopped\""
+#define OPH_IM_STATUS_FAILED "\"state\": \"failed\""
+#define OPH_IM_STATUS_UNKNOWN "\"state\": \"unknown\""
 #define OPH_IM_SERVER_INTERFACE "net_interface.0.ip = '"
 #define OPH_IM_INFRASTRUCTURES_NAME "/infrastructures"
+#define OPH_IM_INFRASTRUCTURES_STATE "%s/state"
 #define OPH_IM_VMS_TOKEN "/vms/"
 #define OPH_IM_MAX_LEN 102400
 // Deploy an Ophidia cluster with IM and set OPH_INFRASTRUCTURE_URL

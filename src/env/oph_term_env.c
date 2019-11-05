@@ -1980,6 +1980,8 @@ int oph_term_env_deploy(const char *auth_header, const char *infrastructure_url,
 	mybuf.len = 0;		/* no data at this point */
 	CURL *hnd = curl_easy_init();
 	slist = curl_slist_append(slist, auth_header);
+
+	slist = curl_slist_append(slist, "Content-Type: text/plain");
 	curl_easy_setopt(hnd, CURLOPT_WRITEDATA, &mybuf);
 	curl_easy_setopt(hnd, CURLOPT_WRITEFUNCTION, _write_callback);
 	curl_easy_setopt(hnd, CURLOPT_INFILESIZE_LARGE, (curl_off_t) - 1);
@@ -2103,10 +2105,14 @@ int oph_term_env_deploy_status(const char *auth_header, const char *infrastructu
 	mybuf.buffer = malloc(1);	/* will be grown as needed by the realloc */
 	mybuf.len = 0;		/* no data at this point */
 	CURL *hnd = curl_easy_init();
+
+	char infr_state_url[OPH_IM_MAX_LEN];
+	snprintf(infr_state_url, OPH_IM_MAX_LEN, OPH_IM_INFRASTRUCTURES_STATE, infrastructure_url);
+
 	slist = curl_slist_append(slist, auth_header);
 	curl_easy_setopt(hnd, CURLOPT_WRITEDATA, &mybuf);
 	curl_easy_setopt(hnd, CURLOPT_WRITEFUNCTION, _write_callback);
-	curl_easy_setopt(hnd, CURLOPT_URL, infrastructure_url);
+	curl_easy_setopt(hnd, CURLOPT_URL, infr_state_url);
 	curl_easy_setopt(hnd, CURLOPT_FOLLOWLOCATION, 1L);
 	curl_easy_setopt(hnd, CURLOPT_UNRESTRICTED_AUTH, 1L);
 	curl_easy_setopt(hnd, CURLOPT_MAXREDIRS, 50);
@@ -2126,14 +2132,22 @@ int oph_term_env_deploy_status(const char *auth_header, const char *infrastructu
 	}
 	curl_easy_cleanup(hnd);
 
-	if (strstr(mybuf.buffer, OPH_IM_STATUS_FINISHED)) {
-		(print_json) ? my_printf("Installation and configuration FINISHED.\\n") : printf("Installation and configuration \e[1;32mFINISHED\e[0m.\n");
-	} else if (strcasestr(mybuf.buffer, OPH_IM_STATUS_ERROR)) {
-		(print_json) ? my_printf("Installation and configuration ERROR.\\n") : printf("Installation and configuration \e[1;31mERROR\e[0m.\n");
-	} else if (strstr(mybuf.buffer, OPH_IM_STATUS_EMPTY)) {
-		(print_json) ? my_printf("Installation and configuration EMPTY.\\n") : printf("Installation and configuration \e[1;31mEMPTY\e[0m.\n");
+	if (strstr(mybuf.buffer, OPH_IM_STATUS_OFF)) {
+		(print_json) ? my_printf("Deployment status is: OFF.\\n") : printf("Deployment status is \e[1;31mOFF\e[0m.\n");
+	} else if (strstr(mybuf.buffer, OPH_IM_STATUS_CONFIGURED)) {
+		(print_json) ? my_printf("Deployment status is: CONFIGURED.\\n") : printf("Deployment status is \e[1;32mCONFIGURED\e[0m.\n");
+	} else if (strstr(mybuf.buffer, OPH_IM_STATUS_UNCONFIGURED)) {
+		(print_json) ? my_printf("Deployment status is: UNCONFIGURED.\\n") : printf("Deployment status is \e[1;32mUNCONFIGURED\e[0m.\n");
+	} else if (strstr(mybuf.buffer, OPH_IM_STATUS_PENDING)) {
+		(print_json) ? my_printf("Deployment status is: PENDING.\\n") : printf("Deployment status is \e[1;36mPENDING\e[0m.\n");
+	} else if (strstr(mybuf.buffer, OPH_IM_STATUS_RUNNING)) {
+		(print_json) ? my_printf("Deployment status is: RUNNING.\\n") : printf("Deployment status is \e[1;36mRUNNING\e[0m.\n");
+	} else if (strstr(mybuf.buffer, OPH_IM_STATUS_STOPPED)) {
+		(print_json) ? my_printf("Deployment status is: STOPPED.\\n") : printf("Deployment status is \e[1;31mSTOPPED\e[0m.\n");
+	} else if (strstr(mybuf.buffer, OPH_IM_STATUS_FAILED)) {
+		(print_json) ? my_printf("Deployment status is: FAILED.\\n") : printf("Deployment status is \e[1;31mFAILED\e[0m.\n");
 	} else {
-		(print_json) ? my_printf("Installation and configuration RUNNING.\\n") : printf("Installation and configuration \e[1;36mRUNNING\e[0m.\n");
+		(print_json) ? my_printf("Deployment status is: UNKNOWN.\\n") : printf("Deployment status is \e[1;36mUNKNOWN\e[0m.\n");
 	}
 
 	if (mybuf.buffer)
