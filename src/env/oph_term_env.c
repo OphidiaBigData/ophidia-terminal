@@ -36,6 +36,7 @@ const char *env_vars[env_vars_num] = {
 	OPH_TERM_ENV_OPH_TERM_IMGS,
 	OPH_TERM_ENV_OPH_TERM_FORMAT,
 	OPH_TERM_ENV_OPH_GRAPH_LAYOUT,
+	OPH_TERM_ENV_OPH_REQUEST_BUFFER,
 	OPH_TERM_ENV_OPH_RESPONSE_BUFFER,
 	OPH_TERM_ENV_OPH_WORKFLOW_AUTOVIEW,
 	OPH_TERM_ENV_OPH_HOST_PARTITION,
@@ -54,6 +55,10 @@ extern char *_passwd;
 extern pthread_mutex_t global_flag;
 extern char get_config;
 extern char *oph_base_src_path;
+extern size_t max_size;
+extern char *fixed_cursor;
+extern char *submission_string;
+extern char *command_line;
 
 //Alloc hashtable
 int _oph_term_env_init(HASHTBL ** hashtbl, int hashtbl_size)
@@ -207,6 +212,26 @@ int oph_term_setenv(HASHTBL * hashtbl, const char *key, const char *value)
 	if (hashtbl_insert(hashtbl, key, (void *) value, strlen(value) + 1)) {
 		(print_json) ? my_fprintf(stderr, "Error: setenv failed\\n") : fprintf(stderr, "\e[1;31mError: setenv failed\e[0m\n");
 		return OPH_TERM_MEMORY_ERROR;
+	}
+	if (!strcmp(key, OPH_TERM_ENV_OPH_REQUEST_BUFFER)) {
+		size_t new_size = strtol(value, NULL, 10);
+		if (new_size > 0)
+			max_size = 1024 * new_size;
+		else {
+			(print_json) ? my_fprintf(stderr, "Could not set variable [CODE %d]\\n", OPH_TERM_INVALID_PARAM_VALUE) : fprintf(stderr, "\e[1;31mCould not set variable [CODE %d]\e[0m\n",
+																	 OPH_TERM_INVALID_PARAM_VALUE);
+			return OPH_TERM_INVALID_PARAM_VALUE;
+		}
+		free(fixed_cursor);
+		free(submission_string);
+		free(command_line);
+		fixed_cursor = (char *) malloc(max_size * sizeof(char));
+		submission_string = (char *) malloc(max_size * sizeof(char));
+		command_line = (char *) malloc(max_size * sizeof(char));
+		if (!fixed_cursor || !submission_string || !command_line) {
+			(print_json) ? my_fprintf(stderr, "Error: reallocation failed\\n") : fprintf(stderr, "\e[1;31mError: reallocation failed\e[0m\n");
+			return OPH_TERM_MEMORY_ERROR;
+		}
 	}
 	return OPH_TERM_SUCCESS;
 }
@@ -1420,17 +1445,17 @@ int oph_term_var_expansion(char *param_string, char *variable, char *value, char
 		return OPH_TERM_INVALID_PARAM_VALUE;
 	}
 
-	char buf[OPH_TERM_WF_MAX_LEN];
+	char buf[max_size];
 	int i, j, m;
 	char c;
 
-	*expanded_string = (char *) calloc(OPH_TERM_WF_MAX_LEN, sizeof(char));
+	*expanded_string = (char *) calloc(max_size, sizeof(char));
 	if (!*expanded_string) {
 		(print_json) ? my_fprintf(stderr, "Error allocating expanded string\\n") : fprintf(stderr, "Error allocating expanded string\n");
 		return OPH_TERM_MEMORY_ERROR;
 	}
 
-	snprintf(*expanded_string, OPH_TERM_WF_MAX_LEN, "%s", param_string);
+	snprintf(*expanded_string, max_size, "%s", param_string);
 
 	for (i = 0; i < (int) strlen(*expanded_string); i++) {
 		if ((*expanded_string)[i] == '$' && (*expanded_string)[i + 1] != '{') {
@@ -1445,10 +1470,10 @@ int oph_term_var_expansion(char *param_string, char *variable, char *value, char
 				(*expanded_string)[j] = c;
 				if (m == 0) {
 					(*expanded_string)[i] = 0;
-					memset(buf, 0, OPH_TERM_WF_MAX_LEN);
-					snprintf(buf, OPH_TERM_WF_MAX_LEN, "%s%s%s", *expanded_string, value, (*expanded_string) + j);
-					memset(*expanded_string, 0, OPH_TERM_WF_MAX_LEN);
-					snprintf(*expanded_string, OPH_TERM_WF_MAX_LEN, "%s", buf);
+					memset(buf, 0, max_size);
+					snprintf(buf, max_size, "%s%s%s", *expanded_string, value, (*expanded_string) + j);
+					memset(*expanded_string, 0, max_size);
+					snprintf(*expanded_string, max_size, "%s", buf);
 					i += strlen(value) - 1;
 				}
 			}
@@ -1464,10 +1489,10 @@ int oph_term_var_expansion(char *param_string, char *variable, char *value, char
 				(*expanded_string)[j] = c;
 				if (m == 0) {
 					(*expanded_string)[i] = 0;
-					memset(buf, 0, OPH_TERM_WF_MAX_LEN);
-					snprintf(buf, OPH_TERM_WF_MAX_LEN, "%s%s%s", *expanded_string, value, (*expanded_string) + j + 1);
-					memset(*expanded_string, 0, OPH_TERM_WF_MAX_LEN);
-					snprintf(*expanded_string, OPH_TERM_WF_MAX_LEN, "%s", buf);
+					memset(buf, 0, max_size);
+					snprintf(buf, max_size, "%s%s%s", *expanded_string, value, (*expanded_string) + j + 1);
+					memset(*expanded_string, 0, max_size);
+					snprintf(*expanded_string, max_size, "%s", buf);
 					i += strlen(value) - 1;
 				}
 			}
@@ -1484,18 +1509,18 @@ int oph_term_full_var_expansion(char *param_string, HASHTBL * hashtbl, char **ex
 		return OPH_TERM_INVALID_PARAM_VALUE;
 	}
 
-	char buf[OPH_TERM_WF_MAX_LEN];
-	char buf2[OPH_TERM_WF_MAX_LEN];
+	char buf[max_size];
+	char buf2[max_size];
 	int i, j, m, z;
 	char c;
 
-	*expanded_string = (char *) calloc(OPH_TERM_WF_MAX_LEN, sizeof(char));
+	*expanded_string = (char *) calloc(max_size, sizeof(char));
 	if (!*expanded_string) {
 		(print_json) ? my_fprintf(stderr, "Error allocating expanded string\\n") : fprintf(stderr, "Error allocating expanded string\n");
 		return OPH_TERM_MEMORY_ERROR;
 	}
 
-	snprintf(*expanded_string, OPH_TERM_WF_MAX_LEN, "%s", param_string);
+	snprintf(*expanded_string, max_size, "%s", param_string);
 
 	z = 0;
 	while (strchr(*expanded_string, '$') && (z < OPH_TERM_SUBSTITUTION_MAX_CYCLES)) {
@@ -1507,23 +1532,23 @@ int oph_term_full_var_expansion(char *param_string, HASHTBL * hashtbl, char **ex
 				}
 				c = (*expanded_string)[j];
 				(*expanded_string)[j] = 0;
-				memset(buf2, 0, OPH_TERM_WF_MAX_LEN);
-				snprintf(buf2, OPH_TERM_WF_MAX_LEN, "%s", (*expanded_string) + i + 1);
+				memset(buf2, 0, max_size);
+				snprintf(buf2, max_size, "%s", (*expanded_string) + i + 1);
 				m = (hashtbl_get(hashtbl, buf2)) ? 1 : 0;
 				(*expanded_string)[j] = c;
 				if (m) {
 					(*expanded_string)[i] = 0;
-					memset(buf, 0, OPH_TERM_WF_MAX_LEN);
-					snprintf(buf, OPH_TERM_WF_MAX_LEN, "%s%s%s", *expanded_string, (char *) hashtbl_get(hashtbl, buf2), (*expanded_string) + j);
-					memset(*expanded_string, 0, OPH_TERM_WF_MAX_LEN);
-					snprintf(*expanded_string, OPH_TERM_WF_MAX_LEN, "%s", buf);
+					memset(buf, 0, max_size);
+					snprintf(buf, max_size, "%s%s%s", *expanded_string, (char *) hashtbl_get(hashtbl, buf2), (*expanded_string) + j);
+					memset(*expanded_string, 0, max_size);
+					snprintf(*expanded_string, max_size, "%s", buf);
 					i += strlen((char *) hashtbl_get(hashtbl, buf2)) - 1;
 				} else {
 					(*expanded_string)[i] = 0;
-					memset(buf, 0, OPH_TERM_WF_MAX_LEN);
-					snprintf(buf, OPH_TERM_WF_MAX_LEN, "%s%s", *expanded_string, (*expanded_string) + j);
-					memset(*expanded_string, 0, OPH_TERM_WF_MAX_LEN);
-					snprintf(*expanded_string, OPH_TERM_WF_MAX_LEN, "%s", buf);
+					memset(buf, 0, max_size);
+					snprintf(buf, max_size, "%s%s", *expanded_string, (*expanded_string) + j);
+					memset(*expanded_string, 0, max_size);
+					snprintf(*expanded_string, max_size, "%s", buf);
 					i -= 1;
 				}
 				z++;
@@ -1534,24 +1559,24 @@ int oph_term_full_var_expansion(char *param_string, HASHTBL * hashtbl, char **ex
 				}
 				c = (*expanded_string)[j];
 				(*expanded_string)[j] = 0;
-				memset(buf2, 0, OPH_TERM_WF_MAX_LEN);
-				snprintf(buf2, OPH_TERM_WF_MAX_LEN, "%s", (*expanded_string) + i + 2);
+				memset(buf2, 0, max_size);
+				snprintf(buf2, max_size, "%s", (*expanded_string) + i + 2);
 				m = (hashtbl_get(hashtbl, buf2)) ? 1 : 0;
 				(*expanded_string)[j] = c;
 				if (m) {
 					(*expanded_string)[i] = 0;
-					memset(buf, 0, OPH_TERM_WF_MAX_LEN);
-					snprintf(buf, OPH_TERM_WF_MAX_LEN, "%s%s%s", *expanded_string, (char *) hashtbl_get(hashtbl, buf2),
+					memset(buf, 0, max_size);
+					snprintf(buf, max_size, "%s%s%s", *expanded_string, (char *) hashtbl_get(hashtbl, buf2),
 						 ((*expanded_string)[j] == '\0') ? (*expanded_string) + j : (*expanded_string) + j + 1);
-					memset(*expanded_string, 0, OPH_TERM_WF_MAX_LEN);
-					snprintf(*expanded_string, OPH_TERM_WF_MAX_LEN, "%s", buf);
+					memset(*expanded_string, 0, max_size);
+					snprintf(*expanded_string, max_size, "%s", buf);
 					i += strlen((char *) hashtbl_get(hashtbl, buf2)) - 1;
 				} else {
 					(*expanded_string)[i] = 0;
-					memset(buf, 0, OPH_TERM_WF_MAX_LEN);
-					snprintf(buf, OPH_TERM_WF_MAX_LEN, "%s%s", *expanded_string, ((*expanded_string)[j] == '\0') ? (*expanded_string) + j : (*expanded_string) + j + 1);
-					memset(*expanded_string, 0, OPH_TERM_WF_MAX_LEN);
-					snprintf(*expanded_string, OPH_TERM_WF_MAX_LEN, "%s", buf);
+					memset(buf, 0, max_size);
+					snprintf(buf, max_size, "%s%s", *expanded_string, ((*expanded_string)[j] == '\0') ? (*expanded_string) + j : (*expanded_string) + j + 1);
+					memset(*expanded_string, 0, max_size);
+					snprintf(*expanded_string, max_size, "%s", buf);
 					i -= 1;
 				}
 				z++;
