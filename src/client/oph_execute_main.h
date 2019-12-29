@@ -21,11 +21,12 @@
 
 #import "oph_term_defs.h"
 
-//gsoap oph  schema namespace:      urn:oph
-//gsoap oph  service method-protocol:      ophExecuteMain SOAP
-//gsoap oph  service method-style:         ophExecuteMain document
-//gsoap oph  service method-action:        ophExecuteMain ""
-//gsoap oph  service method-documentation: ophExecuteMain Execute a command using the oph-parallel-framework
+//gsoap oph service name:                 oph
+//gsoap oph service namespace:            urn:oph
+//gsoap oph service method-protocol:      ophExecuteMain SOAP
+//gsoap oph service method-style:         ophExecuteMain document
+//gsoap oph service method-action:        ophExecuteMain ""
+//gsoap oph service method-documentation: ophExecuteMain Execute a command using Ophidia analytics framework
 
 struct oph__ophResponse {
 	xsd__string jobid;
@@ -33,6 +34,5 @@ struct oph__ophResponse {
 	xsd__int error;
 };
 int oph__ophExecuteMain(xsd__string ophExecuteMainRequest, struct oph__ophResponse *ophExecuteMainResponse);
-
 
 #endif				/* OPH_EXECUTE_MAIN_H_ */
