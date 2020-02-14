@@ -1174,7 +1174,11 @@ char **oph_term_completion(char *text, int start, int end)
 
 	if (text[0] == '.' || text[0] == '/') {
 		int i = 0;
-		char chddir[max_size], bsp = 0;
+		char bsp = 0;
+		char *chddir = (char *) malloc(max_size);
+		if (!chddir)
+			return NULL;
+
 		if (oph_base_src_path && (strlen(oph_base_src_path) > 1) && (*text == '/')) {
 			snprintf(chddir, max_size, "%s%s", oph_base_src_path, text);
 			text = chddir;
@@ -1198,6 +1202,7 @@ char **oph_term_completion(char *text, int start, int end)
 				matches[i] = strdup(chddir);
 			}
 		}
+		free(chddir);
 	} else if (rl_line_buffer[(start - 1 < 0) ? start : start - 1] == '$'
 		   || (rl_line_buffer[(start - 2 < 0) ? start : start - 2] == '$' && rl_line_buffer[(start - 1 < 0) ? start : start - 1] == '{')) {
 		// completion over env vars (def+user)
@@ -3798,7 +3803,20 @@ int main(int argc, char **argv, char **envp)
 						continue;
 					}
 
-					char tmp_submission_string[max_size];
+					char *tmp_submission_string = (char *) malloc(max_size);
+					if (!tmp_submission_string) {
+						(print_json) ? my_fprintf(stderr, "JobID not specified [CODE %d]\\n", OPH_TERM_INVALID_PARAM_VALUE) : fprintf(stderr,
+																			      "\e[1;31mJobID not specified [CODE %d]\e[0m\n",
+																			      OPH_TERM_INVALID_PARAM_VALUE);
+						if (print_json)
+							print_oph_term_output_json(hashtbl);
+						if (exec_one_statement) {
+							oph_term_return = OPH_TERM_MEMORY_ERROR;
+							break;
+						}
+						continue;
+					}
+
 					char tmp_job_id[OPH_TERM_MAX_LEN];
 					char tmp_session[OPH_TERM_MAX_LEN];
 					char tmp_workflow[OPH_TERM_MAX_LEN];
@@ -3817,6 +3835,7 @@ int main(int argc, char **argv, char **envp)
 						(print_json) ? my_fprintf(stderr, "JobID not valid [CODE %d]\\n", OPH_TERM_INVALID_PARAM_VALUE) : fprintf(stderr,
 																			  "\e[1;31mJobID not valid [CODE %d]\e[0m\n",
 																			  OPH_TERM_INVALID_PARAM_VALUE);
+						free(tmp_submission_string);
 						if (print_json)
 							print_oph_term_output_json(hashtbl);
 						if (exec_one_statement) {
@@ -3831,6 +3850,7 @@ int main(int argc, char **argv, char **envp)
 						(print_json) ? my_fprintf(stderr, "JobID not valid [CODE %d]\\n", OPH_TERM_INVALID_PARAM_VALUE) : fprintf(stderr,
 																			  "\e[1;31mJobID not valid [CODE %d]\e[0m\n",
 																			  OPH_TERM_INVALID_PARAM_VALUE);
+						free(tmp_submission_string);
 						if (print_json)
 							print_oph_term_output_json(hashtbl);
 						if (exec_one_statement) {
@@ -3845,6 +3865,7 @@ int main(int argc, char **argv, char **envp)
 						(print_json) ? my_fprintf(stderr, "JobID not valid [CODE %d]\\n", OPH_TERM_INVALID_PARAM_VALUE) : fprintf(stderr,
 																			  "\e[1;31mJobID not valid [CODE %d]\e[0m\n",
 																			  OPH_TERM_INVALID_PARAM_VALUE);
+						free(tmp_submission_string);
 						if (print_json)
 							print_oph_term_output_json(hashtbl);
 						if (exec_one_statement) {
@@ -3858,6 +3879,7 @@ int main(int argc, char **argv, char **envp)
 					if (oph_term_check_wid_mkid
 					    (tmp_session, tmp_workflow, tmp_marker, _user, _passwd, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST),
 					     (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT), &oph_term_return, hashtbl)) {
+						free(tmp_submission_string);
 						if (print_json)
 							print_oph_term_output_json(hashtbl);
 						if (exec_one_statement)
@@ -3869,6 +3891,7 @@ int main(int argc, char **argv, char **envp)
 					if (oph_term_get_request_with_marker
 					    (tmp_session, tmp_marker, _user, _passwd, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST),
 					     (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT), &oph_term_return, &tmp_command, NULL, hashtbl)) {
+						free(tmp_submission_string);
 						if (print_json)
 							print_oph_term_output_json(hashtbl);
 						if (exec_one_statement)
@@ -3890,6 +3913,7 @@ int main(int argc, char **argv, char **envp)
 						(print_json) ? my_fprintf(stderr, "Request buffer is too small [CODE %d]\\n", OPH_TERM_MEMORY_ERROR) : fprintf(stderr,
 																			       "\e[1;31mRequest buffer is too small [CODE %d]\e[0m\n",
 																			       OPH_TERM_MEMORY_ERROR);
+						free(tmp_submission_string);
 						if (print_json)
 							print_oph_term_output_json(hashtbl);
 						if (exec_one_statement) {
@@ -3907,6 +3931,7 @@ int main(int argc, char **argv, char **envp)
 										  OPH_TERM_INVALID_PARAM_VALUE) : fprintf(stderr,
 															  "\e[1;31mThis command cannot be repeated during watching [CODE %d]\e[0m\n",
 															  OPH_TERM_INVALID_PARAM_VALUE);
+							free(tmp_submission_string);
 							if (print_json)
 								print_oph_term_output_json(hashtbl);
 							if (exec_one_statement) {
@@ -3920,6 +3945,7 @@ int main(int argc, char **argv, char **envp)
 							(print_json) ? my_fprintf(stderr, "Iterations must be >= 0 [CODE %d]\\n", OPH_TERM_INVALID_PARAM_VALUE) : fprintf(stderr,
 																					  "\e[1;31mIterations must be >= 1 [CODE %d]\e[0m\n",
 																					  OPH_TERM_INVALID_PARAM_VALUE);
+							free(tmp_submission_string);
 							if (print_json)
 								print_oph_term_output_json(hashtbl);
 							if (exec_one_statement) {
@@ -3935,6 +3961,7 @@ int main(int argc, char **argv, char **envp)
 								(print_json) ? my_fprintf(stderr, "Time interval must be >= 1 seconds [CODE %d]\\n", OPH_TERM_INVALID_PARAM_VALUE) : fprintf(stderr,
 																							     "\e[1;31mTime interval must be >= 1 seconds [CODE %d]\e[0m\n",
 																							     OPH_TERM_INVALID_PARAM_VALUE);
+								free(tmp_submission_string);
 								if (print_json)
 									print_oph_term_output_json(hashtbl);
 								if (exec_one_statement) {
@@ -3955,6 +3982,7 @@ int main(int argc, char **argv, char **envp)
 						(print_json) ? my_fprintf(stderr, "Error viewing status [CODE %d]\\n", OPH_TERM_GENERIC_ERROR) : fprintf(stderr,
 																			 "\e[1;31mError viewing status [CODE %d]\e[0m\n",
 																			 OPH_TERM_GENERIC_ERROR);
+						free(tmp_submission_string);
 						if (print_json)
 							print_oph_term_output_json(hashtbl);
 						if (exec_one_statement) {
@@ -3963,6 +3991,7 @@ int main(int argc, char **argv, char **envp)
 						}
 						continue;
 					}
+					free(tmp_submission_string);
 				} else {	//view wid[#mkid]
 					char tmp_workflow[OPH_TERM_MAX_LEN];
 					char tmp_marker[OPH_TERM_MAX_LEN];

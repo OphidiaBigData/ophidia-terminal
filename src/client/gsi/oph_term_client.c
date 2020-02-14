@@ -74,7 +74,11 @@ void oph_execute(struct soap *soap, xsd__string query, char *wps, char **newsess
 		return;
 	}
 	//If requested, wrap query in a 1-task workflow
-	char wrapped_query[max_size];
+	char *wrapped_query = (char *) malloc(max_size);
+	if (!wrapped_query) {
+		*return_value = OPH_TERM_MEMORY_ERROR;
+		return;
+	}
 	memset(wrapped_query, 0, max_size);
 	if (workflow_wrap) {
 		int n = 0;
@@ -202,8 +206,14 @@ void oph_execute(struct soap *soap, xsd__string query, char *wps, char **newsess
 
 		snprintf(query, max_size, "%s", wrapped_query);
 	}
+	free(wrapped_query);
+	wrapped_query = NULL;
 	// If workflow then insert available env vars and cmd_line in query
-	char fixed_query[max_size];
+	char *fixed_query = (char *) malloc(max_size);
+	if (!fixed_query) {
+		*return_value = OPH_TERM_MEMORY_ERROR;
+		return;
+	}
 	memset(fixed_query, 0, max_size);
 	if (strstr(query, "\"name\"")) {
 		char *query_start = strchr(query, '{');
@@ -255,6 +265,8 @@ void oph_execute(struct soap *soap, xsd__string query, char *wps, char **newsess
 			snprintf(query, max_size, "%s", fixed_query);
 		}
 	}
+	free(fixed_query);
+	fixed_query = NULL;
 
 	if (out_response_for_viewer && !strstr(query, "\"sessionid\"")) {
 		(print_json) ? my_fprintf(stderr, "[WARNING] Session not specified. A new session will be created!\\n\\n") : fprintf(stderr,
@@ -486,13 +498,18 @@ int oph_term_client(char *cmd_line, char *command, char **newsession, char *user
 
 	char *wps = 0;
 
-	char query_global[max_size];
+	char *query_global = (char *) malloc(max_size);
+	if (!query_global)
+		return 2;
+
 	snprintf(query_global, max_size, OPH_DEFAULT_QUERY);
 	if (command)
 		snprintf(query_global, max_size, "%s", command);
 	char *query = query_global;
-	if (!strcasecmp(query, OPH_DEFAULT_QUERY))
+	if (!strcasecmp(query, OPH_DEFAULT_QUERY)) {
+		free(query_global);
 		return 1;
+	}
 
 	/* Need SIGPIPE handler on Unix/Linux systems to catch broken pipes: */
 	signal(SIGPIPE, sigpipe_handle);
@@ -504,6 +521,7 @@ int oph_term_client(char *cmd_line, char *command, char **newsession, char *user
 	if (soap_register_plugin(&soap_global, globus_gsi)) {
 		soap_print_fault(&soap_global, stderr);
 		cleanup(&soap_global);
+		free(query_global);
 		return -3;
 	}
 	/* setup of authorization and credential renewal callbacks */
@@ -514,6 +532,7 @@ int oph_term_client(char *cmd_line, char *command, char **newsession, char *user
 	int rc = gsi_acquire_credential(&soap_global);
 	if (rc) {
 		cleanup(&soap_global);
+		free(query_global);
 		return -4;
 	}
 
@@ -542,6 +561,7 @@ int oph_term_client(char *cmd_line, char *command, char **newsession, char *user
 	struct gsi_plugin_data *data = (struct gsi_plugin_data *) soap_lookup_plugin(&soap_global, GSI_PLUGIN_ID);
 	if (!data) {
 		cleanup(&soap_global);
+		free(query_global);
 		return -4;
 	}
 
@@ -551,6 +571,7 @@ int oph_term_client(char *cmd_line, char *command, char **newsession, char *user
 	oph_execute(&soap_global, query, wps, newsession, return_value, out_response, out_response_for_viewer, workflow_wrap, username, hashtbl, cmd_line);
 
 	cleanup(&soap_global);
+	free(query_global);
 	return 0;
 }
 

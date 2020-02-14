@@ -520,7 +520,10 @@ int wps_call_oph__ophExecuteMain(char *server_global, char *query, char *usernam
 		return 2;
 
 	// Build XML Request
-	char wpsRequest[max_size];
+	char *wpsRequest = (char *) malloc(max_size);
+	if (!wpsRequest)
+		return 2;
+
 	snprintf(wpsRequest, max_size, OPH_WPS_XML_REQUEST, query, username, password, store_result ? "storeExecuteResponse=\"true\" status=\"true\"" : "storeExecuteResponse=\"false\"");
 
 	// Send the request 
@@ -600,6 +603,8 @@ int wps_call_oph__ophExecuteMain(char *server_global, char *query, char *usernam
 	curl_easy_setopt(hnd, CURLOPT_POSTREDIR, 0);
 	ret = curl_easy_perform(hnd);
 	curl_easy_cleanup(hnd);
+	free(wpsRequest);
+
 	if (ret)
 		return ret;
 	return process_response();
@@ -621,7 +626,11 @@ void oph_execute(char *query, char **newsession, int *return_value, char **out_r
 		return;
 	}
 	//If requested, wrap query in a 1-task workflow
-	char wrapped_query[max_size];
+	char *wrapped_query = (char *) malloc(max_size);
+	if (!wrapped_query) {
+		*return_value = OPH_TERM_MEMORY_ERROR;
+		return;
+	}
 	memset(wrapped_query, 0, max_size);
 	if (workflow_wrap) {
 		int n = 0;
@@ -751,8 +760,14 @@ void oph_execute(char *query, char **newsession, int *return_value, char **out_r
 	}
 
 	store_result_global = 0;
+	free(wrapped_query);
+	wrapped_query = NULL;
 	// If workflow then insert available env vars and cmd_line in query
-	char fixed_query[max_size];
+	char *fixed_query = (char *) malloc(max_size);
+	if (!fixed_query) {
+		*return_value = OPH_TERM_MEMORY_ERROR;
+		return;
+	}
 	memset(fixed_query, 0, max_size);
 	if (strstr(query, "\"name\"")) {
 		char *query_start = strchr(query, '{'), *tmp;
@@ -808,15 +823,24 @@ void oph_execute(char *query, char **newsession, int *return_value, char **out_r
 			snprintf(query, max_size, "%s", fixed_query);
 		}
 	}
+	free(fixed_query);
+	fixed_query = NULL;
 
 	if (out_response_for_viewer && !strstr(query, "\"sessionid\"")) {
 		(print_json) ? my_fprintf(stderr, "[WARNING] Session not specified. A new session will be created!\\n\\n") : fprintf(stderr,
 																     "[WARNING] Session not specified. A new session will be created!\n\n");
 	}
 	// Encoding
-	char result[max_size];
+	char *result = (char *) malloc(max_size);
+	if (!result) {
+		(print_json) ? my_fprintf(stderr, "Encoding error\\n") : fprintf(stderr, "\e[1;31mEncoding error\e[0m\n");
+		*return_value = OPH_TERM_MEMORY_ERROR;
+		return;
+	}
+
 	if (base64encode(query, strlen(query), result, max_size)) {
 		(print_json) ? my_fprintf(stderr, "Encoding error\\n") : fprintf(stderr, "\e[1;31mEncoding error\e[0m\n");
+		free(result);
 		*return_value = OPH_TERM_GENERIC_ERROR;
 		return;
 	}
@@ -842,6 +866,7 @@ void oph_execute(char *query, char **newsession, int *return_value, char **out_r
 
 	pthread_create(&tid, NULL, &wpsthread, strdup(result));
 	pthread_join(tid, NULL);
+	free(result);
 
 	// Decoding
 	if (!response_global.error && response_global.response) {
@@ -1106,13 +1131,18 @@ int oph_term_client(char *cmd_line, char *command, char **newsession, char *user
 
 	char *username = user;
 
-	char query_global[max_size];
+	char *query_global = (char *) malloc(max_size);
+	if (!query_global)
+		return 2;
+
 	snprintf(query_global, max_size, OPH_DEFAULT_QUERY);
 	if (command)
 		snprintf(query_global, max_size, "%s", command);
 	char *query = query_global;
-	if (!strcasecmp(query, OPH_DEFAULT_QUERY))
+	if (!strcasecmp(query, OPH_DEFAULT_QUERY)) {
+		free(query_global);
 		return 1;
+	}
 
 	/* Need SIGPIPE handler on Unix/Linux systems to catch broken pipes: */
 	signal(SIGPIPE, sigpipe_handle);
@@ -1122,6 +1152,7 @@ int oph_term_client(char *cmd_line, char *command, char **newsession, char *user
 
 	oph_execute(query, newsession, return_value, out_response, out_response_for_viewer, workflow_wrap, username, password, hashtbl, cmd_line);
 
+	free(query_global);
 	return 0;
 }
 

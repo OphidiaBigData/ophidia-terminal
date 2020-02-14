@@ -1445,13 +1445,19 @@ int oph_term_var_expansion(char *param_string, char *variable, char *value, char
 		return OPH_TERM_INVALID_PARAM_VALUE;
 	}
 
-	char buf[max_size];
+	char *buf = (char *) malloc(max_size);
+	if (!buf) {
+		(print_json) ? my_fprintf(stderr, "Error allocating expanded string\\n") : fprintf(stderr, "Error allocating expanded string\n");
+		return OPH_TERM_MEMORY_ERROR;
+	}
+
 	int i, j, m;
 	char c;
 
 	*expanded_string = (char *) calloc(max_size, sizeof(char));
 	if (!*expanded_string) {
 		(print_json) ? my_fprintf(stderr, "Error allocating expanded string\\n") : fprintf(stderr, "Error allocating expanded string\n");
+		free(buf);
 		return OPH_TERM_MEMORY_ERROR;
 	}
 
@@ -1499,6 +1505,7 @@ int oph_term_var_expansion(char *param_string, char *variable, char *value, char
 		}
 	}
 
+	free(buf);
 	return OPH_TERM_SUCCESS;
 }
 
@@ -1509,14 +1516,26 @@ int oph_term_full_var_expansion(char *param_string, HASHTBL * hashtbl, char **ex
 		return OPH_TERM_INVALID_PARAM_VALUE;
 	}
 
-	char buf[max_size];
-	char buf2[max_size];
+	char *buf = (char *) malloc(max_size);
+	char *buf2 = (char *) malloc(max_size);
+
+	if (!buf || !buf2) {
+		(print_json) ? my_fprintf(stderr, "Error allocating expanded string\\n") : fprintf(stderr, "Error allocating expanded string\n");
+		if (buf)
+			free(buf);
+		if (buf2)
+			free(buf2);
+		return OPH_TERM_MEMORY_ERROR;
+	}
+
 	int i, j, m, z;
 	char c;
 
 	*expanded_string = (char *) calloc(max_size, sizeof(char));
 	if (!*expanded_string) {
 		(print_json) ? my_fprintf(stderr, "Error allocating expanded string\\n") : fprintf(stderr, "Error allocating expanded string\n");
+		free(buf);
+		free(buf2);
 		return OPH_TERM_MEMORY_ERROR;
 	}
 
@@ -1590,9 +1609,13 @@ int oph_term_full_var_expansion(char *param_string, HASHTBL * hashtbl, char **ex
 		}
 		(print_json) ? my_fprintf(stderr, "Too much substitutions! Perhaps there are one or more cycles.\\n") : fprintf(stderr,
 																"Too much substitutions! Perhaps there are one or more cycles.\n");
+		free(buf);
+		free(buf2);
 		return OPH_TERM_INVALID_PARAM_VALUE;
 	}
 
+	free(buf);
+	free(buf2);
 	return OPH_TERM_SUCCESS;
 }
 
