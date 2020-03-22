@@ -77,10 +77,10 @@ int oph_workflow_load(char *json_string, char *username, oph_workflow ** workflo
 
 	//unpack global vars
 	char *name = NULL, *author = NULL, *abstract = NULL, *sessionid = NULL, *exec_mode = NULL, *ncores = NULL, *cwd = NULL, *cdd = NULL, *cube = NULL, *callback_url = NULL, *on_error =
-	    NULL, *command = NULL, *on_exit = NULL, *run = NULL, *output_format = NULL, *host_partition = NULL, *url = NULL;
-	json_unpack(jansson, "{s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s}", "name", &name, "author", &author, "abstract", &abstract, "sessionid", &sessionid, "exec_mode",
-		    &exec_mode, "ncores", &ncores, "cwd", &cwd, "cdd", &cdd, "cube", &cube, "callback_url", &callback_url, "on_error", &on_error, "command", &command, "on_exit", &on_exit, "run", &run,
-		    "output_format", &output_format, "host_partition", &host_partition, "url", &url);
+	    NULL, *command = NULL, *on_exit = NULL, *run = NULL, *output_format = NULL, *host_partition = NULL, *url = NULL, *nhosts = NULL, *nthreads = NULL;
+	json_unpack(jansson, "{s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s}", "name", &name, "author", &author, "abstract", &abstract, "sessionid", &sessionid,
+		    "exec_mode", &exec_mode, "ncores", &ncores, "cwd", &cwd, "cdd", &cdd, "cube", &cube, "callback_url", &callback_url, "on_error", &on_error, "command", &command, "on_exit", &on_exit,
+		    "run", &run, "output_format", &output_format, "host_partition", &host_partition, "url", &url, "nhost", &nhosts, "nthreads", &nthreads);
 
 	//add global vars
 	if (!name || !author || !abstract) {
@@ -144,9 +144,12 @@ int oph_workflow_load(char *json_string, char *username, oph_workflow ** workflo
 			return OPH_WORKFLOW_EXIT_MEMORY_ERROR;
 		}
 	}
-	if (ncores) {
+	if (ncores)
 		(*workflow)->ncores = (int) strtol((const char *) ncores, NULL, 10);
-	}
+	if (nhosts)
+		(*workflow)->nhosts = (int) strtol((const char *) nhosts, NULL, 10);
+	if (nthreads)
+		(*workflow)->nthreads = (int) strtol((const char *) nthreads, NULL, 10);
 	if (cwd && strlen(cwd)) {
 		(*workflow)->cwd = (char *) strdup((const char *) cwd);
 		if (!((*workflow)->cwd)) {
@@ -635,8 +638,64 @@ int oph_workflow_load(char *json_string, char *username, oph_workflow ** workflo
 				}
 			}
 		}
+		if ((*workflow)->tasks[i].ncores < 0) {
+			oph_workflow_free(*workflow);
+			(print_json) ? my_fprintf(stderr, "Error: ncores cannot be negative\\n\\n") : fprintf(stderr, "\e[1;31mError: ncores cannot be negative\e[0m\n\n");
+			return OPH_WORKFLOW_EXIT_GENERIC_ERROR;
+		}
 	}
-	//cwd
+	//nhosts
+	if ((*workflow)->nhosts != 0) {
+		char buf[OPH_WORKFLOW_MIN_STRING];
+		snprintf(buf, OPH_WORKFLOW_MIN_STRING, "%d", (*workflow)->nhosts);
+		if (_oph_workflow_substitute_var("nhost", buf, (*workflow)->tasks, (*workflow)->tasks_num)) {
+			oph_workflow_free(*workflow);
+			(print_json) ? my_fprintf(stderr, "Error: nhost global substitution\\n\\n") : fprintf(stderr, "\e[1;31mError: nhost global substitution\e[0m\n\n");
+			return OPH_WORKFLOW_EXIT_GENERIC_ERROR;
+		}
+	}
+	// Finalize nhosts
+	for (i = 0; i < (*workflow)->tasks_num; i++) {
+		if (!(*workflow)->tasks[i].nhosts) {
+			for (j = 0; j < (*workflow)->tasks[i].arguments_num; j++) {
+				if (!strcmp((*workflow)->tasks[i].arguments_keys[j], "nhost")) {
+					(*workflow)->tasks[i].nhosts = (int) strtol((*workflow)->tasks[i].arguments_values[j], NULL, 10);
+					break;
+				}
+			}
+		}
+		if ((*workflow)->tasks[i].nhosts < 0) {
+			oph_workflow_free(*workflow);
+			(print_json) ? my_fprintf(stderr, "Error: nhost cannot be negative\\n\\n") : fprintf(stderr, "\e[1;31mError: nhost cannot be negative\e[0m\n\n");
+			return OPH_WORKFLOW_EXIT_GENERIC_ERROR;
+		}
+	}
+	//nthreads
+	if ((*workflow)->nthreads != 0) {
+		char buf[OPH_WORKFLOW_MIN_STRING];
+		snprintf(buf, OPH_WORKFLOW_MIN_STRING, "%d", (*workflow)->nthreads);
+		if (_oph_workflow_substitute_var("nthreads", buf, (*workflow)->tasks, (*workflow)->tasks_num)) {
+			oph_workflow_free(*workflow);
+			(print_json) ? my_fprintf(stderr, "Error: nthreads global substitution\\n\\n") : fprintf(stderr, "\e[1;31mError: nthreads global substitution\e[0m\n\n");
+			return OPH_WORKFLOW_EXIT_GENERIC_ERROR;
+		}
+	}
+	// Finalize nthreads
+	for (i = 0; i < (*workflow)->tasks_num; i++) {
+		if (!(*workflow)->tasks[i].nthreads) {
+			for (j = 0; j < (*workflow)->tasks[i].arguments_num; j++) {
+				if (!strcmp((*workflow)->tasks[i].arguments_keys[j], "nthreads")) {
+					(*workflow)->tasks[i].nthreads = (int) strtol((*workflow)->tasks[i].arguments_values[j], NULL, 10);
+					break;
+				}
+			}
+		}
+		if ((*workflow)->tasks[i].nthreads < 0) {
+			oph_workflow_free(*workflow);
+			(print_json) ? my_fprintf(stderr, "Error: nthreads cannot be negative\\n\\n") : fprintf(stderr, "\e[1;31mError: nthreads cannot be negative\e[0m\n\n");
+			return OPH_WORKFLOW_EXIT_GENERIC_ERROR;
+		}
+	}			//cwd
 	if (!(*workflow)->cwd)
 		(*workflow)->cwd = strdup(OPH_WORKFLOW_ROOT_FOLDER);
 	if (_oph_workflow_substitute_var("cwd", (*workflow)->cwd, (*workflow)->tasks, (*workflow)->tasks_num)) {
@@ -689,6 +748,8 @@ int _oph_workflow_alloc(oph_workflow ** workflow)
 	(*workflow)->markerid = -1;
 	(*workflow)->name = NULL;
 	(*workflow)->ncores = 0;
+	(*workflow)->nhosts = 0;
+	(*workflow)->nthreads = 0;
 	(*workflow)->residual_tasks_num = 0;
 	(*workflow)->sessionid = NULL;
 	(*workflow)->status = OPH_WORKFLOW_STATUS_PENDING;
@@ -718,6 +779,10 @@ int _oph_workflow_substitute_var(char *key, char *value, oph_workflow_task * tas
 		if (tasks[i].arguments_num == 0) {
 			if (!strcmp(key, "ncores")) {
 				tasks[i].ncores = (int) strtol(value, NULL, 10);
+			} else if (!strcmp(key, "nhost")) {
+				tasks[i].nhosts = (int) strtol(value, NULL, 10);
+			} else if (!strcmp(key, "nthreads")) {
+				tasks[i].nthreads = (int) strtol(value, NULL, 10);
 			} else {
 				tasks[i].arguments_keys = (char **) calloc(1, sizeof(char *));
 				if (!(tasks[i].arguments_keys)) {
@@ -744,8 +809,13 @@ int _oph_workflow_substitute_var(char *key, char *value, oph_workflow_task * tas
 			for (j = 0; j < tasks[i].arguments_num; j++) {
 				if (!strcmp(tasks[i].arguments_keys[j], key)) {
 					found = 1;
-					if (!strcmp(key, "ncores")) {
-						tasks[i].ncores = (int) strtol(tasks[i].arguments_values[j], NULL, 10);
+					if (!strcmp(key, "ncores") || !strcmp(key, "nhost") || !strcmp(key, "nthreads")) {
+						if (!strcmp(key, "ncores"))
+							tasks[i].ncores = (int) strtol(tasks[i].arguments_values[j], NULL, 10);
+						else if (!strcmp(key, "nhost"))
+							tasks[i].nhosts = (int) strtol(tasks[i].arguments_values[j], NULL, 10);
+						else
+							tasks[i].nthreads = (int) strtol(tasks[i].arguments_values[j], NULL, 10);
 						free(tasks[i].arguments_keys[j]);
 						tasks[i].arguments_keys[j] = NULL;
 						free(tasks[i].arguments_values[j]);
@@ -779,6 +849,10 @@ int _oph_workflow_substitute_var(char *key, char *value, oph_workflow_task * tas
 			if (!found) {
 				if (!strcmp(key, "ncores")) {
 					tasks[i].ncores = (int) strtol(value, NULL, 10);
+				} else if (!strcmp(key, "nhost")) {
+					tasks[i].nhosts = (int) strtol(value, NULL, 10);
+				} else if (!strcmp(key, "nthreads")) {
+					tasks[i].nthreads = (int) strtol(value, NULL, 10);
 				} else {
 					char **tmpkeys = tasks[i].arguments_keys;
 					char **tmpvalues = tasks[i].arguments_values;

@@ -5,6 +5,7 @@
 
 - New environment variable 'OPH_REQUEST_BUFFER' to define request max size [#18](https://github.com/OphidiaBigData/ophidia-terminal/pull/18/)
 - Default value for 'view' as the workflowid of last submitted command
+- Check for arguments 'nhost' and 'nthreads'
 
 ### Fixed:
 
@@ -18,6 +19,7 @@
 - Color associated with status 'OPH_STATUS_SKIPPED'
 - Default host partition to 'auto'
 - Drop alias in order to use async execution mode
+- Check for argument 'ncores'
 
 ## v1.5.0 - 2019-01-24
 
