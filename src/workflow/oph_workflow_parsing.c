@@ -293,8 +293,8 @@ int oph_workflow_load(char *json_string, char *username, oph_workflow ** workflo
 			return OPH_WORKFLOW_EXIT_GENERIC_ERROR;
 		}
 		//unpack name and operator
-		char *name = NULL, *operator= NULL, *on_error_task = NULL, *on_exit_task = NULL, *run_task = NULL;
-		json_unpack(task, "{s?s,s?s,s?s,s?s,s?s}", "name", &name, "operator", &operator, "on_error", &on_error_task, "on_exit", &on_exit_task, "run", &run_task);
+		char *name = NULL, *operator= NULL, *on_error_task = NULL, *on_exit_task = NULL, *run_task = NULL, *type = NULL;
+		json_unpack(task, "{s?s,s?s,s?s,s?s,s?s,s?s}", "name", &name, "operator", &operator, "on_error", &on_error_task, "on_exit", &on_exit_task, "run", &run_task, "type", &type);
 
 		//add name and operator
 		if (!name || !operator) {
@@ -318,6 +318,24 @@ int oph_workflow_load(char *json_string, char *username, oph_workflow ** workflo
 			if (jansson)
 				json_decref(jansson);
 			(print_json) ? my_fprintf(stderr, "Error: task %d operator allocation\\n\\n", i) : fprintf(stderr, "\e[1;31mError: task %d operator allocation\e[0m\n\n", i);
+			return OPH_WORKFLOW_EXIT_MEMORY_ERROR;
+		}
+		if (type) {
+			if (strcmp(type, "ophidia") && strcmp(type, "cdo")) {
+				oph_workflow_free(*workflow);
+				if (jansson)
+					json_decref(jansson);
+				(print_json) ? my_fprintf(stderr, "Error: task %d type not allowed\\n\\n", i) : fprintf(stderr, "\e[1;31mError: task %d type not allowed\e[0m\n\n", i);
+				return OPH_WORKFLOW_EXIT_BAD_PARAM_ERROR;
+			}
+			(*workflow)->tasks[i].type = (char *) strdup((const char *) type);
+		} else
+			(*workflow)->tasks[i].type = (char *) strdup("ophidia");
+		if (!((*workflow)->tasks[i].type)) {
+			oph_workflow_free(*workflow);
+			if (jansson)
+				json_decref(jansson);
+			(print_json) ? my_fprintf(stderr, "Error: task %d type allocation\\n\\n", i) : fprintf(stderr, "\e[1;31mError: task %d type allocation\e[0m\n\n", i);
 			return OPH_WORKFLOW_EXIT_MEMORY_ERROR;
 		}
 		//unpack arguments
@@ -483,9 +501,10 @@ int oph_workflow_load(char *json_string, char *username, oph_workflow ** workflo
 								return OPH_WORKFLOW_EXIT_BAD_PARAM_ERROR;
 							}
 							(*workflow)->tasks[i].deps[j].type = (char *) strdup((const char *) type);
-						} else {
+						} else if (argument)
+							(*workflow)->tasks[i].deps[j].type = (char *) strdup((const char *) "all");
+						else
 							(*workflow)->tasks[i].deps[j].type = (char *) strdup((const char *) "embedded");
-						}
 						if (!((*workflow)->tasks[i].deps[j].type)) {
 							oph_workflow_free(*workflow);
 							if (jansson)
