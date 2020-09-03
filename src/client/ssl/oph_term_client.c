@@ -198,6 +198,9 @@ void oph_execute(struct soap *soap, xsd__string query, char *wps, char **newsess
 
 		n += snprintf(wrapped_query + n, max_size - n, WRAPPING_WORKFLOW8);
 
+		if (n >= max_size)
+			(print_json) ? my_fprintf(stderr, "Error in compiling the JSON Request\\n") : fprintf(stderr, "\e[1;31mError in compiling the JSON Request\e[0m\n");
+
 		snprintf(query, max_size, "%s", wrapped_query);
 	}
 	free(wrapped_query);
@@ -210,62 +213,61 @@ void oph_execute(struct soap *soap, xsd__string query, char *wps, char **newsess
 	}
 	memset(fixed_query, 0, max_size);
 	if (strstr(query, "\"name\"")) {
-		char *query_start = strchr(query, '{');
+		char *query_start = strchr(query, '{'), *value;
 		if (query_start) {
+
 			int n = 0;
 			n += snprintf(fixed_query + n, max_size - n, "{");
-			if (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SESSION_ID)) {
-				if (!strstr(query, "\"sessionid\"")) {
-					n += snprintf(fixed_query + n, max_size - n, "%s%s%s", WRAPPING_WORKFLOW2, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SESSION_ID), WRAPPING_WORKFLOW2_1);
-				}
-			}
-			if (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_EXEC_MODE)) {
-				if (!strstr(query, "\"exec_mode\"")) {
-					n += snprintf(fixed_query + n, max_size - n, "%s%s%s", WRAPPING_WORKFLOW3, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_EXEC_MODE), WRAPPING_WORKFLOW3_1);
-				}
-			}
-			if (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_NCORES)) {
-				if (!strstr(query, "\"ncores\"")) {
-					n += snprintf(fixed_query + n, max_size - n, "%s%s%s", WRAPPING_WORKFLOW4c, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_NCORES), WRAPPING_WORKFLOW4c_1);
-				}
-			}
-			if (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CWD)) {
-				if (!strstr(query, "\"cwd\"")) {
-					n += snprintf(fixed_query + n, max_size - n, "%s%s%s", WRAPPING_WORKFLOW4d, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CWD), WRAPPING_WORKFLOW4d_1);
-				}
-			}
-			if (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_DATACUBE)) {
-				if (!strstr(query, "\"cube\"")) {
-					n += snprintf(fixed_query + n, max_size - n, "%s%s%s", WRAPPING_WORKFLOW4e, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_DATACUBE), WRAPPING_WORKFLOW4e_1);
-				}
-			}
-			if (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CDD)) {
-				if (!strstr(query, "\"cdd\"")) {
-					n += snprintf(fixed_query + n, max_size - n, "%s%s%s", WRAPPING_WORKFLOW4f, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CDD), WRAPPING_WORKFLOW4f_1);
-				}
-			}
-			char *host_partition = (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_HOST_PARTITION);
-			if (host_partition) {
-				if (!strstr(query, "\"host_partition\"") && strcmp(host_partition, OPH_TERM_ENV_OPH_MAIN_PARTITION)) {
-					n += snprintf(fixed_query + n, max_size - n, "%s%s%s", WRAPPING_WORKFLOW4h, host_partition, WRAPPING_WORKFLOW4h_1);
-				}
-			}
-			if (cmd_line) {
-				if (!strstr(query, "\"command\"")) {
-					n += snprintf(fixed_query + n, max_size - n, "%s%s%s", WRAPPING_WORKFLOW4b, cmd_line, WRAPPING_WORKFLOW4b_1);
-				}
-			}
+
+			value = hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SESSION_ID);
+			if (value && !strstr(query, "\"sessionid\""))
+				n += snprintf(fixed_query + n, max_size - n, "%s%s%s", WRAPPING_WORKFLOW2, value, WRAPPING_WORKFLOW2_1);
+
+			value = hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_EXEC_MODE);
+			if (value && !strstr(query, "\"exec_mode\""))
+				n += snprintf(fixed_query + n, max_size - n, "%s%s%s", WRAPPING_WORKFLOW3, value, WRAPPING_WORKFLOW3_1);
+
+			value = hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_NCORES);
+			if (value && !strstr(query, "\"ncores\""))
+				n += snprintf(fixed_query + n, max_size - n, "%s%s%s", WRAPPING_WORKFLOW4c, value, WRAPPING_WORKFLOW4c_1);
+
+			value = hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CWD);
+			if (value && !strstr(query, "\"cwd\""))
+				n += snprintf(fixed_query + n, max_size - n, "%s%s%s", WRAPPING_WORKFLOW4d, value, WRAPPING_WORKFLOW4d_1);
+
+			value = hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_DATACUBE);
+			if (value && !strstr(query, "\"cube\""))
+				n += snprintf(fixed_query + n, max_size - n, "%s%s%s", WRAPPING_WORKFLOW4e, value, WRAPPING_WORKFLOW4e_1);
+
+			value = hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CDD);
+			if (value && !strstr(query, "\"cdd\""))
+				n += snprintf(fixed_query + n, max_size - n, "%s%s%s", WRAPPING_WORKFLOW4f, value, WRAPPING_WORKFLOW4f_1);
+
+			value = hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_HOST_PARTITION);
+			if (value && strlen(value) && !strstr(query, "\"host_partition\"") && strcmp(value, OPH_TERM_ENV_OPH_MAIN_PARTITION))
+				n += snprintf(fixed_query + n, max_size - n, "%s%s%s", WRAPPING_WORKFLOW4h, value, WRAPPING_WORKFLOW4h_1);
+
+			value = hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_PROJECT);
+			if (value && strlen(value) && !strstr(query, "\"project\""))
+				n += snprintf(fixed_query + n, max_size - n, "%s%s%s", WRAPPING_WORKFLOW4i, value, WRAPPING_WORKFLOW4i_1);
+
+			if (cmd_line && !strstr(query, "\"command\""))
+				n += snprintf(fixed_query + n, max_size - n, "%s%s%s", WRAPPING_WORKFLOW4b, cmd_line, WRAPPING_WORKFLOW4b_1);
+
 			n += snprintf(fixed_query + n, max_size - n, "%s", query_start + 1);
+
+			if (n >= max_size)
+				(print_json) ? my_fprintf(stderr, "Error in compiling the JSON Request\\n") : fprintf(stderr, "\e[1;31mError in compiling the JSON Request\e[0m\n");
+
 			snprintf(query, max_size, "%s", fixed_query);
 		}
 	}
 	free(fixed_query);
 	fixed_query = NULL;
 
-	if (out_response_for_viewer && !strstr(query, "\"sessionid\"")) {
+	if (out_response_for_viewer && !strstr(query, "\"sessionid\""))
 		(print_json) ? my_fprintf(stderr, "[WARNING] Session not specified. A new session will be created!\\n\\n") : fprintf(stderr,
 																     "[WARNING] Session not specified. A new session will be created!\n\n");
-	}
 
 	if (!wps) {
 		pthread_create(&tid, NULL, &soapthread, strdup(query));
