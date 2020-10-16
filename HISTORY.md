@@ -1,5 +1,5 @@
 
-## New features
+## v1.6.0 - 2020-07-27
 
 ### Added:
 
@@ -9,8 +9,10 @@
 
 ### Fixed:
 
+- Output format when OPH_TERM_FORMAT is set to 'compact'
 - Bug in executing 'resume' [#17](https://github.com/OphidiaBigData/ophidia-terminal/issues/17)
 - Memory leak raised in case XML description of an operator is not correctly formatted
+- Bug related to allocation of char buffers in stack memory
 
 ### Changed:
 
