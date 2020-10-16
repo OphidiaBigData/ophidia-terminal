@@ -45,6 +45,8 @@
 #define WRAPPING_WORKFLOW4f_1 "\","
 #define WRAPPING_WORKFLOW4h "\n  \"host_partition\":\""
 #define WRAPPING_WORKFLOW4h_1 "\","
+#define WRAPPING_WORKFLOW4i "\n  \"output_format\":\""
+#define WRAPPING_WORKFLOW4i_1 "\","
 #define WRAPPING_WORKFLOW5 "\n  \"tasks\": [\n    {\n      \"name\":\"Task 0\",\n      \"operator\":\""
 #define WRAPPING_WORKFLOW5_1 "\",\n      \"arguments\": ["
 #define WRAPPING_WORKFLOW6 "\"%s\""

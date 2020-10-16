@@ -256,6 +256,12 @@ void oph_execute(struct soap *soap, xsd__string query, char *wps, char **newsess
 					n += snprintf(fixed_query + n, max_size - n, "%s%s%s", WRAPPING_WORKFLOW4h, host_partition, WRAPPING_WORKFLOW4h_1);
 				}
 			}
+			char *output_format = (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_FORMAT);
+			if (output_format) {
+				if (!strstr(query, "\"output_format\"")) {
+					n += snprintf(fixed_query + n, max_size - n, "%s%s%s", WRAPPING_WORKFLOW4i, output_format, WRAPPING_WORKFLOW4i_1);
+				}
+			}
 			if (cmd_line) {
 				if (!strstr(query, "\"command\"")) {
 					n += snprintf(fixed_query + n, max_size - n, "%s%s%s", WRAPPING_WORKFLOW4b, cmd_line, WRAPPING_WORKFLOW4b_1);
