@@ -61,6 +61,43 @@ char username_global[OPH_MAX_STRING_SIZE];
 char password_global[OPH_MAX_STRING_SIZE];
 int store_result_global;
 
+#ifdef AUTH_BEARER
+
+#define OPH_AUTH_BEARER "Authorization: Bearer %s"
+
+#define OPH_WPS_XML_REQUEST "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\
+<wps:Execute service=\"WPS\" version=\"1.0.0\" xmlns:wps=\"http://www.opengis.net/wps/1.0.0\" xmlns:ows=\"http://www.opengis.net/ows/1.1\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.opengis.net/wps/1.0.0\
+../wpsExecute_request.xsd\">\
+	<ows:Identifier>ophexecutemain</ows:Identifier>\
+	<wps:DataInputs>\
+		<wps:Input>\
+			<ows:Identifier>request</ows:Identifier>\
+			<ows:Title>JSON Request</ows:Title>\
+			<wps:Data>\
+				<wps:ComplexData mimeType=\"application/json\" encoding=\"base64\">%s</wps:ComplexData>\
+			</wps:Data>\
+		</wps:Input>\
+	</wps:DataInputs>\
+	<wps:ResponseForm>\
+		<wps:ResponseDocument lineage=\"true\" %s>\
+			<wps:Output>\
+				<ows:Identifier>jobid</ows:Identifier>\
+				<ows:Title>Ophidia JobID</ows:Title>\
+			</wps:Output>\
+			<wps:Output asReference=\"false\">\
+				<ows:Identifier>response</ows:Identifier>\
+				<ows:Title>JSON Response</ows:Title>\
+			</wps:Output>\
+			<wps:Output>\
+				<ows:Identifier>return</ows:Identifier>\
+				<ows:Title>Return code</ows:Title>\
+			</wps:Output>\
+		</wps:ResponseDocument>\
+	</wps:ResponseForm>\
+</wps:Execute>"
+
+#else
+
 #define OPH_WPS_XML_REQUEST "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\
 <wps:Execute service=\"WPS\" version=\"1.0.0\" xmlns:wps=\"http://www.opengis.net/wps/1.0.0\" xmlns:ows=\"http://www.opengis.net/ows/1.1\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.opengis.net/wps/1.0.0\
 ../wpsExecute_request.xsd\">\
@@ -105,6 +142,8 @@ int store_result_global;
 		</wps:ResponseDocument>\
 	</wps:ResponseForm>\
 </wps:Execute>"
+
+#endif
 
 int base64encode(const void *data_buf, size_t dataLength, char *result, size_t resultSize)
 {
@@ -524,7 +563,11 @@ int wps_call_oph__ophExecuteMain(char *server_global, char *query, char *usernam
 	if (!wpsRequest)
 		return 2;
 
+#ifdef AUTH_BEARER
+	snprintf(wpsRequest, max_size, OPH_WPS_XML_REQUEST, query, store_result ? "storeExecuteResponse=\"true\" status=\"true\"" : "storeExecuteResponse=\"false\"");
+#else
 	snprintf(wpsRequest, max_size, OPH_WPS_XML_REQUEST, query, username, password, store_result ? "storeExecuteResponse=\"true\" status=\"true\"" : "storeExecuteResponse=\"false\"");
+#endif
 
 	// Send the request 
 	CURLcode ret;
@@ -601,7 +644,21 @@ int wps_call_oph__ophExecuteMain(char *server_global, char *query, char *usernam
 	curl_easy_setopt(hnd, CURLOPT_FTP_ALTERNATIVE_TO_USER, NULL);
 	curl_easy_setopt(hnd, CURLOPT_SSL_SESSIONID_CACHE, 1);
 	curl_easy_setopt(hnd, CURLOPT_POSTREDIR, 0);
+
+#ifdef AUTH_BEARER
+	struct curl_slist *slist = NULL;
+	char auth_header[OPH_MAX_STRING_SIZE];
+	snprintf(auth_header, OPH_MAX_STRING_SIZE, OPH_AUTH_BEARER, password);
+	slist = curl_slist_append(slist, auth_header);
+	curl_easy_setopt(hnd, CURLOPT_HTTPHEADER, slist);
+#endif
+
 	ret = curl_easy_perform(hnd);
+
+#ifdef AUTH_BEARER
+	curl_slist_free_all(slist);
+#endif
+
 	curl_easy_cleanup(hnd);
 	free(wpsRequest);
 
@@ -1154,7 +1211,6 @@ int oph_term_client(char *cmd_line, char *command, char **newsession, char *user
 	signal(SIGPIPE, sigpipe_handle);
 
 	snprintf(server_global, OPH_MAX_STRING_SIZE, "https://%s:%s/%s", host, port, OPH_WPS_BASE_DIR);
-	//snprintf(server_global,OPH_MAX_STRING_SIZE,"https://%s/%s",host,OPH_WPS_BASE_DIR);
 
 	oph_execute(query, newsession, return_value, out_response, out_response_for_viewer, workflow_wrap, username, password, hashtbl, cmd_line);
 
