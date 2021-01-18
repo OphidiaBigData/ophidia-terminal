@@ -23,6 +23,10 @@
 - Drop alias in order to use async execution mode
 - Check for argument 'ncores'
 
+### Removed:
+
+- Necessity of the suffix '/wps' in WPS URLs
+
 ## v1.5.0 - 2019-01-24
 
 ### Fixed:

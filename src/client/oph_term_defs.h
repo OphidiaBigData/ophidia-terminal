@@ -63,8 +63,4 @@ typedef char *xsd__token;
 #define OPH_SERVER_WRONG_PARAMETER_ERROR 7
 #define OPH_SERVER_NO_RESPONSE 8
 
-// Other consts
-#define OPH_MAX_STRING_SIZE 1024
-#define OPH_SHORT_STRING_SIZE 128
-
 #endif
