@@ -34,7 +34,6 @@
 
 #define OPH_DEFAULT_NLOOPS 1
 #define OPH_DEFAULT_QUERY "OPH_NULL"
-#define OPH_WPS_BASE_DIR "wps/"
 #define OPH_WPS_TITLE "<title>"
 #define OPH_WPS_TITLE_END "</title>"
 
@@ -1210,7 +1209,7 @@ int oph_term_client(char *cmd_line, char *command, char **newsession, char *user
 	/* Need SIGPIPE handler on Unix/Linux systems to catch broken pipes: */
 	signal(SIGPIPE, sigpipe_handle);
 
-	snprintf(server_global, OPH_MAX_STRING_SIZE, "https://%s:%s/%s", host, port, OPH_WPS_BASE_DIR);
+	snprintf(server_global, OPH_MAX_STRING_SIZE, "https://%s:%s/%s", host, port);
 
 	oph_execute(query, newsession, return_value, out_response, out_response_for_viewer, workflow_wrap, username, password, hashtbl, cmd_line);
 
