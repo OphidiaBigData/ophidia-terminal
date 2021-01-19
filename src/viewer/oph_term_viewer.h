@@ -26,8 +26,8 @@
 
 #define OUTPUT_MAX_LEN 500*1024	// 500 KB
 #define OUTPUT_JSON_STRING "{\n  \"request\":\"%s\",\n  \"jobid\":\"%s\",\n  \"response\":%s,\n  \"stdout\":\"%s\",\n  \"stderr\":\"%s\"\n}"
-extern int print_json;
-extern int print_debug_data;
+extern char print_json;
+extern char print_debug_data;
 extern char oph_term_request[OUTPUT_MAX_LEN];
 extern char oph_term_jobid[OUTPUT_MAX_LEN];
 extern char *oph_term_response;
