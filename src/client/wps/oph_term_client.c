@@ -39,6 +39,8 @@
 
 #define UNUSED(x) {(void)(x);}
 
+extern char print_debug_data;
+
 extern pthread_mutex_t global_flag;
 extern size_t max_size;
 extern int last_workflow_id;
@@ -332,6 +334,9 @@ int process_response()
 		free(mem->xml);
 	mem->xml = NULL;
 
+	if (print_debug_data)
+		(print_json) ? my_fprintf(stderr, "\\nXML Response:\\n%s\\n\\n", mem->buffer) : fprintf(stderr, "\e[2m\nXML Response:\n%s\e[0m\n\n", mem->buffer);
+
 	xmlParserCtxtPtr ctxt;
 	xmlDocPtr doc;
 	xmlNodePtr node;
@@ -567,6 +572,9 @@ int wps_call_oph__ophExecuteMain(char *server_global, char *query, char *usernam
 #else
 	snprintf(wpsRequest, max_size, OPH_WPS_XML_REQUEST, query, username, password, store_result ? "storeExecuteResponse=\"true\" status=\"true\"" : "storeExecuteResponse=\"false\"");
 #endif
+
+	if (print_debug_data)
+		(print_json) ? my_fprintf(stderr, "\\nXML Request:\\n%s\\n\\n", wpsRequest) : fprintf(stderr, "\e[2m\nXML Request:\n%s\e[0m\n\n", wpsRequest);
 
 	// Send the request 
 	CURLcode ret;

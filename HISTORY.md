@@ -3,6 +3,7 @@
 
 ### Added:
 
+- Option '-d' for debug mode
 - New environment variable 'OPH_REQUEST_BUFFER' to define request max size [#18](https://github.com/OphidiaBigData/ophidia-terminal/pull/18/)
 - Default value for 'view' as the workflowid of last submitted command
 - Check for arguments 'nhost' and 'nthreads'
