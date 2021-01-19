@@ -335,7 +335,7 @@ int process_response()
 	mem->xml = NULL;
 
 	if (print_debug_data)
-		(print_json) ? my_fprintf(stderr, "\\nXML Response:\\n%s\\n\\n", mem->buffer) : fprintf(stderr, "\e[2m\nXML Response:\n%s\e[0m\n\n", mem->buffer);
+		(print_json) ? my_fprintf(stderr, "XML Response:\\n%s\\n\\n", mem->buffer) : fprintf(stderr, "\e[2mXML Response:\n%s\e[0m\n\n", mem->buffer);
 
 	xmlParserCtxtPtr ctxt;
 	xmlDocPtr doc;
@@ -569,6 +569,10 @@ int wps_call_oph__ophExecuteMain(char *server_global, char *query, char *usernam
 
 #ifdef AUTH_BEARER
 	snprintf(wpsRequest, max_size, OPH_WPS_XML_REQUEST, query, store_result ? "storeExecuteResponse=\"true\" status=\"true\"" : "storeExecuteResponse=\"false\"");
+	char auth_header[OPH_MAX_STRING_SIZE];
+	snprintf(auth_header, OPH_MAX_STRING_SIZE, OPH_AUTH_BEARER, password);
+	if (print_debug_data)
+		(print_json) ? my_fprintf(stderr, "\\nHTTP Header\\n%s\\n", auth_header) : fprintf(stderr, "\e[2m\nHTTP Header:\n%s\e[0m\n", auth_header);
 #else
 	snprintf(wpsRequest, max_size, OPH_WPS_XML_REQUEST, query, username, password, store_result ? "storeExecuteResponse=\"true\" status=\"true\"" : "storeExecuteResponse=\"false\"");
 #endif
@@ -653,10 +657,7 @@ int wps_call_oph__ophExecuteMain(char *server_global, char *query, char *usernam
 	curl_easy_setopt(hnd, CURLOPT_POSTREDIR, 0);
 
 #ifdef AUTH_BEARER
-	struct curl_slist *slist = NULL;
-	char auth_header[OPH_MAX_STRING_SIZE];
-	snprintf(auth_header, OPH_MAX_STRING_SIZE, OPH_AUTH_BEARER, password);
-	slist = curl_slist_append(slist, auth_header);
+	struct curl_slist *slist = curl_slist_append(NULL, auth_header);
 	curl_easy_setopt(hnd, CURLOPT_HTTPHEADER, slist);
 #endif
 
