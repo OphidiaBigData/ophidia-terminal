@@ -578,6 +578,9 @@ int wps_call_oph__ophExecuteMain(char *server_global, char *query, char *usernam
 #endif
 
 	if (print_debug_data)
+		(print_json) ? my_fprintf(stderr, "\\nSend WPS Request to %s\\n\\n", server_global) : fprintf(stderr, "\e[2m\nSend WPS Request to %s\e[0m\n\n", server_global);
+
+	if (print_debug_data)
 		(print_json) ? my_fprintf(stderr, "\\nXML Request:\\n%s\\n\\n", wpsRequest) : fprintf(stderr, "\e[2m\nXML Request:\n%s\e[0m\n\n", wpsRequest);
 
 	// Send the request 
@@ -1218,7 +1221,7 @@ int oph_term_client(char *cmd_line, char *command, char **newsession, char *user
 	/* Need SIGPIPE handler on Unix/Linux systems to catch broken pipes: */
 	signal(SIGPIPE, sigpipe_handle);
 
-	snprintf(server_global, OPH_MAX_STRING_SIZE, "https://%s:%s/%s", host, port);
+	snprintf(server_global, OPH_MAX_STRING_SIZE, "https://%s:%s", host, port);
 
 	oph_execute(query, newsession, return_value, out_response, out_response_for_viewer, workflow_wrap, username, password, hashtbl, cmd_line);
 
