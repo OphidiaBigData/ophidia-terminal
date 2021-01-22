@@ -531,7 +531,7 @@ int wps_call_oph__ophExecuteMain(char *server_global, char *query, char *usernam
 	snprintf(wpsRequest, max_size, OPH_WPS_XML_REQUEST, query, username, password, store_result ? "storeExecuteResponse=\"true\" status=\"true\"" : "storeExecuteResponse=\"false\"");
 
 	if (print_debug_data)
-		(print_json) ? my_fprintf(stderr, "\\nSend WPS Request to %s\\n\\n", server_global) : fprintf(stderr, "\e[2m\nSend WPS Request to %s\e[0m\n\n", server_global);
+		(print_json) ? my_fprintf(stderr, "\\nSend WPS Request to %s\\n", server_global) : fprintf(stderr, "\e[2m\nSend WPS Request to %s\e[0m\n", server_global);
 
 	if (print_debug_data)
 		(print_json) ? my_fprintf(stderr, "\\nXML Request:\\n%s\\n\\n", wpsRequest) : fprintf(stderr, "\e[2m\nXML Request:\n%s\e[0m\n\n", wpsRequest);
