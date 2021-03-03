@@ -3,12 +3,14 @@
 
 ### Added:
 
+- Option '-d' for debug mode
 - New environment variable 'OPH_REQUEST_BUFFER' to define request max size [#18](https://github.com/OphidiaBigData/ophidia-terminal/pull/18/)
 - Default value for 'view' as the workflowid of last submitted command
 - Check for arguments 'nhost' and 'nthreads'
 
 ### Fixed:
 
+- Output format when OPH_TERM_FORMAT is set to 'compact'
 - Bug in executing 'resume' [#17](https://github.com/OphidiaBigData/ophidia-terminal/issues/17)
 - Memory leak raised in case XML description of an operator is not correctly formatted
 - Bug related to allocation of char buffers in stack memory
@@ -21,6 +23,10 @@
 - Default host partition to 'auto'
 - Drop alias in order to use async execution mode
 - Check for argument 'ncores'
+
+### Removed:
+
+- Necessity of the suffix '/wps' in WPS URLs
 
 ## v1.5.0 - 2019-01-24
 

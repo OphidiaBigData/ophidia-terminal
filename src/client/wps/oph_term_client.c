@@ -34,11 +34,12 @@
 
 #define OPH_DEFAULT_NLOOPS 1
 #define OPH_DEFAULT_QUERY "OPH_NULL"
-#define OPH_WPS_BASE_DIR "wps/"
 #define OPH_WPS_TITLE "<title>"
 #define OPH_WPS_TITLE_END "</title>"
 
 #define UNUSED(x) {(void)(x);}
+
+extern char print_debug_data;
 
 extern pthread_mutex_t global_flag;
 extern size_t max_size;
@@ -294,6 +295,9 @@ int process_response()
 		free(mem->xml);
 	mem->xml = NULL;
 
+	if (print_debug_data)
+		(print_json) ? my_fprintf(stderr, "\\nXML Response:\\n%s\\n\\n", mem->buffer) : fprintf(stderr, "\e[2m\nXML Response:\n%s\e[0m\n\n", mem->buffer);
+
 	xmlParserCtxtPtr ctxt;
 	xmlDocPtr doc;
 	xmlNodePtr node;
@@ -525,6 +529,12 @@ int wps_call_oph__ophExecuteMain(char *server_global, char *query, char *usernam
 		return 2;
 
 	snprintf(wpsRequest, max_size, OPH_WPS_XML_REQUEST, query, username, password, store_result ? "storeExecuteResponse=\"true\" status=\"true\"" : "storeExecuteResponse=\"false\"");
+
+	if (print_debug_data)
+		(print_json) ? my_fprintf(stderr, "\\nSend WPS Request to %s\\n", server_global) : fprintf(stderr, "\e[2m\nSend WPS Request to %s\e[0m\n", server_global);
+
+	if (print_debug_data)
+		(print_json) ? my_fprintf(stderr, "\\nXML Request:\\n%s\\n\\n", wpsRequest) : fprintf(stderr, "\e[2m\nXML Request:\n%s\e[0m\n\n", wpsRequest);
 
 	// Send the request 
 	CURLcode ret;
@@ -813,9 +823,13 @@ void oph_execute(char *query, char **newsession, int *return_value, char **out_r
 			if (value && strlen(value) && !strstr(query, "\"host_partition\"") && strcmp(value, OPH_TERM_ENV_OPH_MAIN_PARTITION))
 				n += snprintf(fixed_query + n, max_size - n, "%s%s%s", WRAPPING_WORKFLOW4h, value, WRAPPING_WORKFLOW4h_1);
 
+			value = hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_FORMAT);
+			if (value && strlen(value) && !strstr(query, "\"output_format\""))
+				n += snprintf(fixed_query + n, max_size - n, "%s%s%s", WRAPPING_WORKFLOW4i, value, WRAPPING_WORKFLOW4i_1);
+
 			value = hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_PROJECT);
 			if (value && strlen(value) && !strstr(query, "\"project\""))
-				n += snprintf(fixed_query + n, max_size - n, "%s%s%s", WRAPPING_WORKFLOW4i, value, WRAPPING_WORKFLOW4i_1);
+				n += snprintf(fixed_query + n, max_size - n, "%s%s%s", WRAPPING_WORKFLOW4l, value, WRAPPING_WORKFLOW4l_1);
 
 			if (cmd_line && !strstr(query, "\"command\""))
 				n += snprintf(fixed_query + n, max_size - n, "%s%s%s", WRAPPING_WORKFLOW4b, cmd_line, WRAPPING_WORKFLOW4b_1);
@@ -1152,8 +1166,7 @@ int oph_term_client(char *cmd_line, char *command, char **newsession, char *user
 	/* Need SIGPIPE handler on Unix/Linux systems to catch broken pipes: */
 	signal(SIGPIPE, sigpipe_handle);
 
-	snprintf(server_global, OPH_MAX_STRING_SIZE, "https://%s:%s/%s", host, port, OPH_WPS_BASE_DIR);
-	//snprintf(server_global,OPH_MAX_STRING_SIZE,"https://%s/%s",host,OPH_WPS_BASE_DIR);
+	snprintf(server_global, OPH_MAX_STRING_SIZE, "https://%s:%s", host, port);
 
 	oph_execute(query, newsession, return_value, out_response, out_response_for_viewer, workflow_wrap, username, password, hashtbl, cmd_line);
 

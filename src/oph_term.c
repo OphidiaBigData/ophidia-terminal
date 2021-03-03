@@ -35,11 +35,11 @@ int watching = 0;
 char *stored_line = NULL;
 int signal_raise = 0;
 
-int print_json = 0;
+char print_json = 0;
 #ifdef DEBUG_LEVEL
-int print_debug_data = 1;
+char print_debug_data = 1;
 #else
-int print_debug_data = 0;
+char print_debug_data = 0;
 #endif
 char oph_term_request[OUTPUT_MAX_LEN] = "\0";
 char oph_term_jobid[OUTPUT_MAX_LEN] = "\0";
@@ -537,8 +537,11 @@ int startup_opt_setup(int argc, char *argv[], char *envp[], HASHTBL * hashtbl, c
 		}
 	}
 
-	while ((opt = getopt_long(argc, argv, "hvu:p:H:P:e:w:a:jt:xz", long_options, &long_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "a:de:H:hjP:p:t:vu:w:xz", long_options, &long_index)) != -1) {
 		switch (opt) {
+			case 'd':
+				print_debug_data = 1;
+				break;
 			case 'h':
 				print_startup_usage(argv[0], stdout);
 				if (*exec_statement) {

@@ -253,9 +253,13 @@ void oph_execute(struct soap *soap, xsd__string query, char *wps, char **newsess
 			if (value && strlen(value) && !strstr(query, "\"host_partition\"") && strcmp(value, OPH_TERM_ENV_OPH_MAIN_PARTITION))
 				n += snprintf(fixed_query + n, max_size - n, "%s%s%s", WRAPPING_WORKFLOW4h, value, WRAPPING_WORKFLOW4h_1);
 
+			value = hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_FORMAT);
+			if (value && strlen(value) && !strstr(query, "\"output_format\""))
+				n += snprintf(fixed_query + n, max_size - n, "%s%s%s", WRAPPING_WORKFLOW4i, value, WRAPPING_WORKFLOW4i_1);
+
 			value = hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_PROJECT);
 			if (value && strlen(value) && !strstr(query, "\"project\""))
-				n += snprintf(fixed_query + n, max_size - n, "%s%s%s", WRAPPING_WORKFLOW4i, value, WRAPPING_WORKFLOW4i_1);
+				n += snprintf(fixed_query + n, max_size - n, "%s%s%s", WRAPPING_WORKFLOW4l, value, WRAPPING_WORKFLOW4l_1);
 
 			if (cmd_line && !strstr(query, "\"command\""))
 				n += snprintf(fixed_query + n, max_size - n, "%s%s%s", WRAPPING_WORKFLOW4b, cmd_line, WRAPPING_WORKFLOW4b_1);
