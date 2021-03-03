@@ -377,6 +377,17 @@ if test "x${xml_ssl_check}" = "xno"; then
     OPT+=" -DNO_XML_SSL_CHECK"
 fi
 
+auth_bearer="no"
+AC_ARG_ENABLE(auth_bearer,
+        [  --enable-auth-bearer Enable token-passing via Authorization Bearer for WPS interface],
+        [auth_bearer="yes" ],
+        [auth_bearer="no" ]
+        )
+if test "x${auth_bearer}" = "xyes"; then
+    AC_MSG_NOTICE("Enabled Authorization Bearer")
+    OPT+=" -DAUTH_BEARER"
+fi
+
 case "${host}" in
         *-*-solaris*)   PLATFORM=SUN_OS
                         SAMPLE_EXTRA_LIBS="-lxnet -lsocket -lnsl"
