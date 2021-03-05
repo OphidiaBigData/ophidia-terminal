@@ -1,6 +1,6 @@
 /*
     Ophidia Terminal
-    Copyright (C) 2012-2020 CMCC Foundation
+    Copyright (C) 2012-2021 CMCC Foundation
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -201,8 +201,8 @@ extern const int pre_defined_aliases_num;
 
 extern pthread_t tid;
 
-#define OPH_TERM_VERSION "Oph_Term - the Ophidia shell, version " PACKAGE_VERSION "\nCopyright (C) 2012-2020 CMCC Foundation - www.cmcc.it\n"
-#define OPH_TERM_VERSION2 "Oph_Term - the Ophidia shell, version " PACKAGE_VERSION "\\nCopyright (C) 2012-2020 CMCC Foundation - www.cmcc.it\\n"
+#define OPH_TERM_VERSION "Oph_Term - the Ophidia shell, version " PACKAGE_VERSION "\nCopyright (C) 2012-2021 CMCC Foundation - www.cmcc.it\n"
+#define OPH_TERM_VERSION2 "Oph_Term - the Ophidia shell, version " PACKAGE_VERSION "\\nCopyright (C) 2012-2021 CMCC Foundation - www.cmcc.it\\n"
 
 #define OPH_TERM_DISCLAIMER "This program comes with ABSOLUTELY NO WARRANTY; for details type `oph_term -x'.\nThis is free software, and you are welcome to redistribute it\nunder certain conditions; type `oph_term -z' for details.\n"
 #define OPH_TERM_DISCLAIMER2 "This program comes with ABSOLUTELY NO WARRANTY; for details type `oph_term -x'.\\nThis is free software, and you are welcome to redistribute it\nunder certain conditions; type `oph_term -z' for details.\\n"
