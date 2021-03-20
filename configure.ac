@@ -1,6 +1,6 @@
 #
 #    Ophidia Terminal
-#    Copyright (C) 2012-2020 CMCC Foundation
+#    Copyright (C) 2012-2021 CMCC Foundation
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -375,6 +375,17 @@ AC_ARG_ENABLE(xml_ssl_check,
 if test "x${xml_ssl_check}" = "xno"; then
     AC_MSG_NOTICE("Disabled XML SSL certificate check")
     OPT+=" -DNO_XML_SSL_CHECK"
+fi
+
+auth_bearer="no"
+AC_ARG_ENABLE(auth_bearer,
+        [  --enable-auth-bearer Enable token-passing via Authorization Bearer for WPS interface],
+        [auth_bearer="yes" ],
+        [auth_bearer="no" ]
+        )
+if test "x${auth_bearer}" = "xyes"; then
+    AC_MSG_NOTICE("Enabled Authorization Bearer")
+    OPT+=" -DAUTH_BEARER"
 fi
 
 case "${host}" in

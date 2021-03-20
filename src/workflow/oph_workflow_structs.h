@@ -1,6 +1,6 @@
 /*
     Ophidia Terminal
-    Copyright (C) 2012-2020 CMCC Foundation
+    Copyright (C) 2012-2021 CMCC Foundation
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -161,6 +161,7 @@ typedef struct _oph_workflow_task {
  * \param exit_values Values to be used in the operation executed on the end of workflow
  * \param output_format Format to code workflow output
  * \param host_partition Host partition to be used during the workflow
+ * \param project Project name
  */
 typedef struct _oph_workflow {
 	int idjob;
@@ -193,6 +194,7 @@ typedef struct _oph_workflow {
 	char *run;
 	int output_format;
 	char *host_partition;
+	char *project;
 } oph_workflow;
 
 /* Functions for structs cleanup */

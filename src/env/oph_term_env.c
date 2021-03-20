@@ -1,6 +1,6 @@
 /*
     Ophidia Terminal
-    Copyright (C) 2012-2020 CMCC Foundation
+    Copyright (C) 2012-2021 CMCC Foundation
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -41,7 +41,8 @@ const char *env_vars[env_vars_num] = {
 	OPH_TERM_ENV_OPH_WORKFLOW_AUTOVIEW,
 	OPH_TERM_ENV_OPH_HOST_PARTITION,
 	OPH_TERM_ENV_OPH_TOKEN,
-	OPH_TERM_ENV_OPH_TIMEOUT
+	OPH_TERM_ENV_OPH_TIMEOUT,
+	OPH_TERM_ENV_OPH_PROJECT
 #ifdef WITH_IM_SUPPORT
 	    ,
 	OPH_TERM_ENV_OPH_INFRASTRUCTURE_URL,

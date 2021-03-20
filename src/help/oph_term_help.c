@@ -1,6 +1,6 @@
 /*
     Ophidia Terminal
-    Copyright (C) 2012-2020 CMCC Foundation
+    Copyright (C) 2012-2021 CMCC Foundation
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -328,6 +328,8 @@ void print_cmd_list()
 			(print_json) ? my_printf("\\t%25s = %s", env_vars[i], OPH_TERM_HELP_OPH_TOKEN_SHORT) : printf("\t%25s = %s", env_vars[i], OPH_TERM_HELP_OPH_TOKEN_SHORT);
 		} else if (!strcmp(env_vars[i], OPH_TERM_ENV_OPH_TIMEOUT)) {
 			(print_json) ? my_printf("\\t%25s = %s", env_vars[i], OPH_TERM_HELP_OPH_TIMEOUT_SHORT) : printf("\t%25s = %s", env_vars[i], OPH_TERM_HELP_OPH_TIMEOUT_SHORT);
+		} else if (!strcmp(env_vars[i], OPH_TERM_ENV_OPH_PROJECT)) {
+			(print_json) ? my_printf("\\t%25s = %s", env_vars[i], OPH_TERM_HELP_OPH_PROJECT_SHORT) : printf("\t%25s = %s", env_vars[i], OPH_TERM_HELP_OPH_PROJECT_SHORT);
 		}
 #ifdef WITH_IM_SUPPORT
 		else if (!strcmp(env_vars[i], OPH_TERM_ENV_OPH_INFRASTRUCTURE_URL)) {
@@ -405,6 +407,8 @@ void print_env_var_usage(const char *var)
 		(print_json) ? my_printf("%s", OPH_TERM_HELP_OPH_TOKEN_LONG2) : printf("%s", OPH_TERM_HELP_OPH_TOKEN_LONG);
 	} else if (!strcmp(var, OPH_TERM_ENV_OPH_TIMEOUT)) {
 		(print_json) ? my_printf("%s", OPH_TERM_HELP_OPH_TIMEOUT_LONG2) : printf("%s", OPH_TERM_HELP_OPH_TIMEOUT_LONG);
+	} else if (!strcmp(var, OPH_TERM_ENV_OPH_PROJECT)) {
+		(print_json) ? my_printf("%s", OPH_TERM_HELP_OPH_PROJECT_LONG2) : printf("%s", OPH_TERM_HELP_OPH_PROJECT_LONG);
 	}
 #ifdef WITH_IM_SUPPORT
 	else if (!strcmp(var, OPH_TERM_ENV_OPH_INFRASTRUCTURE_URL)) {

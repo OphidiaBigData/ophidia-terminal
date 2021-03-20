@@ -1,6 +1,6 @@
 /*
     Ophidia Terminal
-    Copyright (C) 2012-2020 CMCC Foundation
+    Copyright (C) 2012-2021 CMCC Foundation
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@
 #define OPH_SERVER_SYSTEM_ERROR 6
 #define OPH_SERVER_WRONG_PARAMETER_ERROR 7
 #define OPH_SERVER_NO_RESPONSE 8
-#define OPH_MAX_STRING_SIZE 1024
+#define OPH_MAX_STRING_SIZE 2048
 #define OPH_SHORT_STRING_SIZE 128
 #endif
 

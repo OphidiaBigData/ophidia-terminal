@@ -1,6 +1,6 @@
 /*
     Ophidia Terminal
-    Copyright (C) 2012-2020 CMCC Foundation
+    Copyright (C) 2012-2021 CMCC Foundation
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -77,10 +77,10 @@ int oph_workflow_load(char *json_string, char *username, oph_workflow ** workflo
 
 	//unpack global vars
 	char *name = NULL, *author = NULL, *abstract = NULL, *sessionid = NULL, *exec_mode = NULL, *ncores = NULL, *cwd = NULL, *cdd = NULL, *cube = NULL, *callback_url = NULL, *on_error =
-	    NULL, *command = NULL, *on_exit = NULL, *run = NULL, *output_format = NULL, *host_partition = NULL, *url = NULL, *nhosts = NULL, *nthreads = NULL;
+	    NULL, *command = NULL, *on_exit = NULL, *run = NULL, *output_format = NULL, *host_partition = NULL, *url = NULL, *nhosts = NULL, *nthreads = NULL, *project = NULL;
 	json_unpack(jansson, "{s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s,s?s}", "name", &name, "author", &author, "abstract", &abstract, "sessionid", &sessionid,
 		    "exec_mode", &exec_mode, "ncores", &ncores, "cwd", &cwd, "cdd", &cdd, "cube", &cube, "callback_url", &callback_url, "on_error", &on_error, "command", &command, "on_exit", &on_exit,
-		    "run", &run, "output_format", &output_format, "host_partition", &host_partition, "url", &url, "nhost", &nhosts, "nthreads", &nthreads);
+		    "run", &run, "output_format", &output_format, "host_partition", &host_partition, "url", &url, "nhost", &nhosts, "nthreads", &nthreads, "project", &project);
 
 	//add global vars
 	if (!name || !author || !abstract) {
@@ -248,6 +248,16 @@ int oph_workflow_load(char *json_string, char *username, oph_workflow ** workflo
 			if (jansson)
 				json_decref(jansson);
 			(print_json) ? my_fprintf(stderr, "Error: host_partition allocation\\n\\n") : fprintf(stderr, "\e[1;31mError: host_partition allocation\e[0m\n\n");
+			return OPH_WORKFLOW_EXIT_MEMORY_ERROR;
+		}
+	}
+	if (project && strlen(project)) {
+		(*workflow)->project = (char *) strdup((const char *) project);
+		if (!((*workflow)->project)) {
+			oph_workflow_free(*workflow);
+			if (jansson)
+				json_decref(jansson);
+			(print_json) ? my_fprintf(stderr, "Error: project allocation\\n\\n") : fprintf(stderr, "\e[1;31mError: project allocation\e[0m\n\n");
 			return OPH_WORKFLOW_EXIT_MEMORY_ERROR;
 		}
 	}
@@ -737,6 +747,12 @@ int oph_workflow_load(char *json_string, char *username, oph_workflow ** workflo
 			(print_json) ? my_fprintf(stderr, "Error: cube global substitution\\n\\n") : fprintf(stderr, "\e[1;31mError: cube global substitution\e[0m\n\n");
 			return OPH_WORKFLOW_EXIT_GENERIC_ERROR;
 		}
+	}
+	//project
+	if ((*workflow)->project && _oph_workflow_substitute_var("project", (*workflow)->project, (*workflow)->tasks, (*workflow)->tasks_num)) {
+		oph_workflow_free(*workflow);
+		(print_json) ? my_fprintf(stderr, "Error: project global substitution\\n\\n") : fprintf(stderr, "\e[1;31mError: project global substitution\e[0m\n\n");
+		return OPH_WORKFLOW_EXIT_GENERIC_ERROR;
 	}
 
 	return OPH_WORKFLOW_EXIT_SUCCESS;

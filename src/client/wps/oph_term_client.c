@@ -1,6 +1,6 @@
 /*
     Ophidia Terminal
-    Copyright (C) 2012-2020 CMCC Foundation
+    Copyright (C) 2012-2021 CMCC Foundation
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -34,11 +34,12 @@
 
 #define OPH_DEFAULT_NLOOPS 1
 #define OPH_DEFAULT_QUERY "OPH_NULL"
-#define OPH_WPS_BASE_DIR "wps/"
 #define OPH_WPS_TITLE "<title>"
 #define OPH_WPS_TITLE_END "</title>"
 
 #define UNUSED(x) {(void)(x);}
+
+extern char print_debug_data;
 
 extern pthread_mutex_t global_flag;
 extern size_t max_size;
@@ -60,6 +61,43 @@ int wps_call_oph__ophExecuteMain_return;
 char username_global[OPH_MAX_STRING_SIZE];
 char password_global[OPH_MAX_STRING_SIZE];
 int store_result_global;
+
+#ifdef AUTH_BEARER
+
+#define OPH_AUTH_BEARER "Authorization: Bearer %s"
+
+#define OPH_WPS_XML_REQUEST "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\
+<wps:Execute service=\"WPS\" version=\"1.0.0\" xmlns:wps=\"http://www.opengis.net/wps/1.0.0\" xmlns:ows=\"http://www.opengis.net/ows/1.1\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.opengis.net/wps/1.0.0\
+../wpsExecute_request.xsd\">\
+	<ows:Identifier>ophexecutemain</ows:Identifier>\
+	<wps:DataInputs>\
+		<wps:Input>\
+			<ows:Identifier>request</ows:Identifier>\
+			<ows:Title>JSON Request</ows:Title>\
+			<wps:Data>\
+				<wps:ComplexData mimeType=\"application/json\" encoding=\"base64\">%s</wps:ComplexData>\
+			</wps:Data>\
+		</wps:Input>\
+	</wps:DataInputs>\
+	<wps:ResponseForm>\
+		<wps:ResponseDocument lineage=\"true\" %s>\
+			<wps:Output>\
+				<ows:Identifier>jobid</ows:Identifier>\
+				<ows:Title>Ophidia JobID</ows:Title>\
+			</wps:Output>\
+			<wps:Output asReference=\"false\">\
+				<ows:Identifier>response</ows:Identifier>\
+				<ows:Title>JSON Response</ows:Title>\
+			</wps:Output>\
+			<wps:Output>\
+				<ows:Identifier>return</ows:Identifier>\
+				<ows:Title>Return code</ows:Title>\
+			</wps:Output>\
+		</wps:ResponseDocument>\
+	</wps:ResponseForm>\
+</wps:Execute>"
+
+#else
 
 #define OPH_WPS_XML_REQUEST "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\
 <wps:Execute service=\"WPS\" version=\"1.0.0\" xmlns:wps=\"http://www.opengis.net/wps/1.0.0\" xmlns:ows=\"http://www.opengis.net/ows/1.1\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.opengis.net/wps/1.0.0\
@@ -105,6 +143,8 @@ int store_result_global;
 		</wps:ResponseDocument>\
 	</wps:ResponseForm>\
 </wps:Execute>"
+
+#endif
 
 int base64encode(const void *data_buf, size_t dataLength, char *result, size_t resultSize)
 {
@@ -293,6 +333,9 @@ int process_response()
 	if (mem->xml)
 		free(mem->xml);
 	mem->xml = NULL;
+
+	if (print_debug_data)
+		(print_json) ? my_fprintf(stderr, "XML Response:\\n%s\\n\\n", mem->buffer) : fprintf(stderr, "\e[2mXML Response:\n%s\e[0m\n\n", mem->buffer);
 
 	xmlParserCtxtPtr ctxt;
 	xmlDocPtr doc;
@@ -524,7 +567,21 @@ int wps_call_oph__ophExecuteMain(char *server_global, char *query, char *usernam
 	if (!wpsRequest)
 		return 2;
 
+#ifdef AUTH_BEARER
+	snprintf(wpsRequest, max_size, OPH_WPS_XML_REQUEST, query, store_result ? "storeExecuteResponse=\"true\" status=\"true\"" : "storeExecuteResponse=\"false\"");
+	char auth_header[OPH_MAX_STRING_SIZE];
+	snprintf(auth_header, OPH_MAX_STRING_SIZE, OPH_AUTH_BEARER, password);
+	if (print_debug_data)
+		(print_json) ? my_fprintf(stderr, "\\nHTTP Header\\n%s\\n", auth_header) : fprintf(stderr, "\e[2m\nHTTP Header:\n%s\e[0m\n", auth_header);
+#else
 	snprintf(wpsRequest, max_size, OPH_WPS_XML_REQUEST, query, username, password, store_result ? "storeExecuteResponse=\"true\" status=\"true\"" : "storeExecuteResponse=\"false\"");
+#endif
+
+	if (print_debug_data)
+		(print_json) ? my_fprintf(stderr, "\\nSend WPS Request to %s\\n", server_global) : fprintf(stderr, "\e[2m\nSend WPS Request to %s\e[0m\n", server_global);
+
+	if (print_debug_data)
+		(print_json) ? my_fprintf(stderr, "\\nXML Request:\\n%s\\n\\n", wpsRequest) : fprintf(stderr, "\e[2m\nXML Request:\n%s\e[0m\n\n", wpsRequest);
 
 	// Send the request 
 	CURLcode ret;
@@ -601,7 +658,18 @@ int wps_call_oph__ophExecuteMain(char *server_global, char *query, char *usernam
 	curl_easy_setopt(hnd, CURLOPT_FTP_ALTERNATIVE_TO_USER, NULL);
 	curl_easy_setopt(hnd, CURLOPT_SSL_SESSIONID_CACHE, 1);
 	curl_easy_setopt(hnd, CURLOPT_POSTREDIR, 0);
+
+#ifdef AUTH_BEARER
+	struct curl_slist *slist = curl_slist_append(NULL, auth_header);
+	curl_easy_setopt(hnd, CURLOPT_HTTPHEADER, slist);
+#endif
+
 	ret = curl_easy_perform(hnd);
+
+#ifdef AUTH_BEARER
+	curl_slist_free_all(slist);
+#endif
+
 	curl_easy_cleanup(hnd);
 	free(wpsRequest);
 
@@ -756,6 +824,9 @@ void oph_execute(char *query, char **newsession, int *return_value, char **out_r
 
 		n += snprintf(wrapped_query + n, max_size - n, WRAPPING_WORKFLOW8);
 
+		if (n >= max_size)
+			(print_json) ? my_fprintf(stderr, "Error in compiling the JSON Request\\n") : fprintf(stderr, "\e[1;31mError in compiling the JSON Request\e[0m\n");
+
 		snprintf(query, max_size, "%s", wrapped_query);
 	}
 
@@ -770,72 +841,72 @@ void oph_execute(char *query, char **newsession, int *return_value, char **out_r
 	}
 	memset(fixed_query, 0, max_size);
 	if (strstr(query, "\"name\"")) {
-		char *query_start = strchr(query, '{'), *tmp;
+		char *query_start = strchr(query, '{'), *value;
 		if (query_start) {
+
 			int n = 0;
 			n += snprintf(fixed_query + n, max_size - n, "{");
-			if (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SESSION_ID)) {
-				if (!strstr(query, "\"sessionid\"")) {
-					n += snprintf(fixed_query + n, max_size - n, "%s%s%s", WRAPPING_WORKFLOW2, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SESSION_ID), WRAPPING_WORKFLOW2_1);
-				}
-			}
-			if (!(tmp = strstr(query, "\"exec_mode\""))) {
+
+			value = hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SESSION_ID);
+			if (value && !strstr(query, "\"sessionid\""))
+				n += snprintf(fixed_query + n, max_size - n, "%s%s%s", WRAPPING_WORKFLOW2, value, WRAPPING_WORKFLOW2_1);
+
+			if (!(value = strstr(query, "\"exec_mode\""))) {
 				n += snprintf(fixed_query + n, max_size - n, "%s%s%s", WRAPPING_WORKFLOW3, "sync", WRAPPING_WORKFLOW3_1);
-				if ((tmp = hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_EXEC_MODE)) && strstr(tmp, "async"))
+				if ((value = hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_EXEC_MODE)) && strstr(value, "async"))
 					store_result_global = 1;
-			} else if ((tmp = strstr(tmp, "\"async\""))) {
-				*tmp = ' ';
-				*(tmp + 1) = '\"';
+			} else if ((value = strstr(value, "\"async\""))) {
+				*value = ' ';
+				*(value + 1) = '\"';
 				store_result_global = 1;
-			};
-			if (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_NCORES)) {
-				if (!strstr(query, "\"ncores\"")) {
-					n += snprintf(fixed_query + n, max_size - n, "%s%s%s", WRAPPING_WORKFLOW4c, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_NCORES), WRAPPING_WORKFLOW4c_1);
-				}
 			}
-			if (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CWD)) {
-				if (!strstr(query, "\"cwd\"")) {
-					n += snprintf(fixed_query + n, max_size - n, "%s%s%s", WRAPPING_WORKFLOW4d, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CWD), WRAPPING_WORKFLOW4d_1);
-				}
-			}
-			if (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_DATACUBE)) {
-				if (!strstr(query, "\"cube\"")) {
-					n += snprintf(fixed_query + n, max_size - n, "%s%s%s", WRAPPING_WORKFLOW4e, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_DATACUBE), WRAPPING_WORKFLOW4e_1);
-				}
-			}
-			if (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CDD)) {
-				if (!strstr(query, "\"cdd\"")) {
-					n += snprintf(fixed_query + n, max_size - n, "%s%s%s", WRAPPING_WORKFLOW4f, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CDD), WRAPPING_WORKFLOW4f_1);
-				}
-			}
-			char *host_partition = (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_HOST_PARTITION);
-			if (host_partition) {
-				if (!strstr(query, "\"host_partition\"") && strcmp(host_partition, OPH_TERM_ENV_OPH_MAIN_PARTITION)) {
-					n += snprintf(fixed_query + n, max_size - n, "%s%s%s", WRAPPING_WORKFLOW4h, host_partition, WRAPPING_WORKFLOW4h_1);
-				}
-			}
-			char *output_format = (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_FORMAT);
-			if (output_format) {
-				if (!strstr(query, "\"output_format\"")) {
-					n += snprintf(fixed_query + n, max_size - n, "%s%s%s", WRAPPING_WORKFLOW4i, output_format, WRAPPING_WORKFLOW4i_1);
-				}
-			}
-			if (cmd_line) {
-				if (!strstr(query, "\"command\"")) {
-					n += snprintf(fixed_query + n, max_size - n, "%s%s%s", WRAPPING_WORKFLOW4b, cmd_line, WRAPPING_WORKFLOW4b_1);
-				}
-			}
+
+			value = hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_NCORES);
+			if (value && !strstr(query, "\"ncores\""))
+				n += snprintf(fixed_query + n, max_size - n, "%s%s%s", WRAPPING_WORKFLOW4c, value, WRAPPING_WORKFLOW4c_1);
+
+			value = hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CWD);
+			if (value && !strstr(query, "\"cwd\""))
+				n += snprintf(fixed_query + n, max_size - n, "%s%s%s", WRAPPING_WORKFLOW4d, value, WRAPPING_WORKFLOW4d_1);
+
+			value = hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_DATACUBE);
+			if (value && !strstr(query, "\"cube\""))
+				n += snprintf(fixed_query + n, max_size - n, "%s%s%s", WRAPPING_WORKFLOW4e, value, WRAPPING_WORKFLOW4e_1);
+
+			value = hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_CDD);
+			if (value && !strstr(query, "\"cdd\""))
+				n += snprintf(fixed_query + n, max_size - n, "%s%s%s", WRAPPING_WORKFLOW4f, value, WRAPPING_WORKFLOW4f_1);
+
+			value = hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_HOST_PARTITION);
+			if (value && strlen(value) && !strstr(query, "\"host_partition\"") && strcmp(value, OPH_TERM_ENV_OPH_MAIN_PARTITION))
+				n += snprintf(fixed_query + n, max_size - n, "%s%s%s", WRAPPING_WORKFLOW4h, value, WRAPPING_WORKFLOW4h_1);
+
+			value = hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_FORMAT);
+			if (value && strlen(value) && !strstr(query, "\"output_format\""))
+				n += snprintf(fixed_query + n, max_size - n, "%s%s%s", WRAPPING_WORKFLOW4i, value, WRAPPING_WORKFLOW4i_1);
+
+			value = hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_PROJECT);
+			if (value && strlen(value) && !strstr(query, "\"project\""))
+				n += snprintf(fixed_query + n, max_size - n, "%s%s%s", WRAPPING_WORKFLOW4l, value, WRAPPING_WORKFLOW4l_1);
+
+			if (cmd_line && !strstr(query, "\"command\""))
+				n += snprintf(fixed_query + n, max_size - n, "%s%s%s", WRAPPING_WORKFLOW4b, cmd_line, WRAPPING_WORKFLOW4b_1);
+
 			n += snprintf(fixed_query + n, max_size - n, "%s", query_start + 1);
+
+			if (n >= max_size)
+				(print_json) ? my_fprintf(stderr, "Error in compiling the JSON Request\\n") : fprintf(stderr, "\e[1;31mError in compiling the JSON Request\e[0m\n");
+
 			snprintf(query, max_size, "%s", fixed_query);
 		}
 	}
 	free(fixed_query);
 	fixed_query = NULL;
 
-	if (out_response_for_viewer && !strstr(query, "\"sessionid\"")) {
+	if (out_response_for_viewer && !strstr(query, "\"sessionid\""))
 		(print_json) ? my_fprintf(stderr, "[WARNING] Session not specified. A new session will be created!\\n\\n") : fprintf(stderr,
 																     "[WARNING] Session not specified. A new session will be created!\n\n");
-	}
+
 	// Encoding
 	char *result = (char *) malloc(max_size);
 	if (!result) {
@@ -1153,8 +1224,7 @@ int oph_term_client(char *cmd_line, char *command, char **newsession, char *user
 	/* Need SIGPIPE handler on Unix/Linux systems to catch broken pipes: */
 	signal(SIGPIPE, sigpipe_handle);
 
-	snprintf(server_global, OPH_MAX_STRING_SIZE, "https://%s:%s/%s", host, port, OPH_WPS_BASE_DIR);
-	//snprintf(server_global,OPH_MAX_STRING_SIZE,"https://%s/%s",host,OPH_WPS_BASE_DIR);
+	snprintf(server_global, OPH_MAX_STRING_SIZE, "https://%s:%s", host, port);
 
 	oph_execute(query, newsession, return_value, out_response, out_response_for_viewer, workflow_wrap, username, password, hashtbl, cmd_line);
 

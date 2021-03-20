@@ -1,6 +1,6 @@
 /*
     Ophidia Terminal
-    Copyright (C) 2012-2020 CMCC Foundation
+    Copyright (C) 2012-2021 CMCC Foundation
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
 
 #define OUTPUT_MAX_LEN 500*1024	// 500 KB
 #define OUTPUT_JSON_STRING "{\n  \"request\":\"%s\",\n  \"jobid\":\"%s\",\n  \"response\":%s,\n  \"stdout\":\"%s\",\n  \"stderr\":\"%s\"\n}"
-extern int print_json;
+extern char print_json;
 extern char oph_term_request[OUTPUT_MAX_LEN];
 extern char oph_term_jobid[OUTPUT_MAX_LEN];
 extern char oph_term_output[OUTPUT_MAX_LEN];

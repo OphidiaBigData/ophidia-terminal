@@ -1,6 +1,6 @@
 /*
     Ophidia Terminal
-    Copyright (C) 2012-2020 CMCC Foundation
+    Copyright (C) 2012-2021 CMCC Foundation
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -770,6 +770,14 @@ int oph_term_help(const char *cmd);
 #define OPH_TERM_HELP_OPH_TIMEOUT_LONG2 \
 "OPH_TIMEOUT\\n\
 \\tMaximum connection duration in seconds. By default is 3600 s. The terminal remains connected for the entire execution time of any synchronous command.\\n"
+
+#define OPH_TERM_HELP_OPH_PROJECT_SHORT "\"project\"\n"
+#define OPH_TERM_HELP_OPH_PROJECT_LONG \
+"\e[1mOPH_PROJECT\e[0m\n\
+\tName of default project.\n"
+#define OPH_TERM_HELP_OPH_PROJECT_LONG2 \
+"OPH_PROJECT\\n\
+\\tName of default project.\\n"
 
 #define OPH_TERM_HELP_OPH_SERVER_HOST_SHORT "\"server address\"\n"
 #define OPH_TERM_HELP_OPH_SERVER_HOST_LONG \

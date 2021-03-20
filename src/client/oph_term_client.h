@@ -1,6 +1,6 @@
 /*
     Ophidia Terminal
-    Copyright (C) 2012-2020 CMCC Foundation
+    Copyright (C) 2012-2021 CMCC Foundation
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -47,6 +47,8 @@
 #define WRAPPING_WORKFLOW4h_1 "\","
 #define WRAPPING_WORKFLOW4i "\n  \"output_format\":\""
 #define WRAPPING_WORKFLOW4i_1 "\","
+#define WRAPPING_WORKFLOW4l "\n  \"project\":\""
+#define WRAPPING_WORKFLOW4l_1 "\","
 #define WRAPPING_WORKFLOW5 "\n  \"tasks\": [\n    {\n      \"name\":\"Task 0\",\n      \"operator\":\""
 #define WRAPPING_WORKFLOW5_1 "\",\n      \"arguments\": ["
 #define WRAPPING_WORKFLOW6 "\"%s\""

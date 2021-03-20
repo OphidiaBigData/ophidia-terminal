@@ -1,8 +1,11 @@
 
-## v1.6.0 - 2020-07-27
+## v1.6.0 - 2021-03-05
 
 ### Added:
 
+- Support to append Authorization Bearer to WPS Requests [#21](https://github.com/OphidiaBigData/ophidia-terminal/pull/21/)
+- Field 'project' to header of JSON Request as well as new environment variable OPH_PROJECT [#20](https://github.com/OphidiaBigData/ophidia-terminal/pull/20/)
+- Option '-d' for debug mode
 - New environment variable 'OPH_REQUEST_BUFFER' to define request max size [#18](https://github.com/OphidiaBigData/ophidia-terminal/pull/18/)
 - Default value for 'view' as the workflowid of last submitted command
 - Check for arguments 'nhost' and 'nthreads'
@@ -22,6 +25,10 @@
 - Default host partition to 'auto'
 - Drop alias in order to use async execution mode
 - Check for argument 'ncores'
+
+### Removed:
+
+- Necessity of the suffix '/wps' in WPS URLs
 
 ## v1.5.0 - 2019-01-24
 

@@ -1,6 +1,6 @@
 /*
     Ophidia Terminal
-    Copyright (C) 2012-2020 CMCC Foundation
+    Copyright (C) 2012-2021 CMCC Foundation
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -35,11 +35,11 @@ int watching = 0;
 char *stored_line = NULL;
 int signal_raise = 0;
 
-int print_json = 0;
+char print_json = 0;
 #ifdef DEBUG_LEVEL
-int print_debug_data = 1;
+char print_debug_data = 1;
 #else
-int print_debug_data = 0;
+char print_debug_data = 0;
 #endif
 char oph_term_request[OUTPUT_MAX_LEN] = "\0";
 char oph_term_jobid[OUTPUT_MAX_LEN] = "\0";
@@ -428,6 +428,13 @@ int startup_opt_setup(int argc, char *argv[], char *envp[], HASHTBL * hashtbl, c
 																		       OPH_TERM_ENV_OPH_TIMEOUT, OPH_TERM_MEMORY_ERROR);
 		return OPH_TERM_MEMORY_ERROR;
 	}
+	//preset OPH_PROJECT
+	if (oph_term_setenv(hashtbl, OPH_TERM_ENV_OPH_PROJECT, "")) {
+		(print_json) ? my_fprintf(stderr, "Could not set variable %s [CODE %d]\\n", OPH_TERM_ENV_OPH_PROJECT, OPH_TERM_MEMORY_ERROR) : fprintf(stderr,
+																		       "\e[1;31mCould not set variable %s [CODE %d]\e[0m\n",
+																		       OPH_TERM_ENV_OPH_PROJECT, OPH_TERM_MEMORY_ERROR);
+		return OPH_TERM_MEMORY_ERROR;
+	}
 	//preset useful aliases
 	int z;
 	for (z = 0; z < pre_defined_aliases_num; z++) {
@@ -530,8 +537,11 @@ int startup_opt_setup(int argc, char *argv[], char *envp[], HASHTBL * hashtbl, c
 		}
 	}
 
-	while ((opt = getopt_long(argc, argv, "hvu:p:H:P:e:w:a:jt:xz", long_options, &long_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "a:de:H:hjP:p:t:vu:w:xz", long_options, &long_index)) != -1) {
 		switch (opt) {
+			case 'd':
+				print_debug_data = 1;
+				break;
 			case 'h':
 				print_startup_usage(argv[0], stdout);
 				if (*exec_statement) {
@@ -5825,6 +5835,10 @@ int main(int argc, char **argv, char **envp)
 					if (tmp_workflow->url) {
 						expand_escapes(expanded_field, tmp_workflow->url);
 						(print_json) ? my_printf("URL\\n--------\\n%s\\n\\n", expanded_field) : printf("URL\n--------\n%s\n\n", tmp_workflow->url);
+					}
+					if (tmp_workflow->project) {
+						expand_escapes(expanded_field, tmp_workflow->project);
+						(print_json) ? my_printf("Project: %s\\n", expanded_field) : printf("Project: %s\n", tmp_workflow->project);
 					}
 
 					(print_json) ? my_printf("Other info\\n----------\\n") : printf("Other info\n----------\n");
