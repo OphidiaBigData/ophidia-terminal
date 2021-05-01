@@ -331,7 +331,7 @@ int oph_workflow_load(char *json_string, char *username, oph_workflow ** workflo
 			return OPH_WORKFLOW_EXIT_MEMORY_ERROR;
 		}
 		if (type) {
-			if (strcmp(type, "ophidia") && strcmp(type, "cdo") && strcmp(type, "generic")) {
+			if (strcmp(type, "ophidia") && strcmp(type, "cdo") && strcmp(type, "generic") && strcmp(type, "control")) {
 				oph_workflow_free(*workflow);
 				if (jansson)
 					json_decref(jansson);
@@ -339,6 +339,19 @@ int oph_workflow_load(char *json_string, char *username, oph_workflow ** workflo
 				return OPH_WORKFLOW_EXIT_BAD_PARAM_ERROR;
 			}
 			(*workflow)->tasks[i].type = (char *) strdup((const char *) type);
+			if (!strcmp(type, "control")) {
+				char tmp[5 + strlen((*workflow)->tasks[i].operator)];
+				sprintf(tmp, "oph_%s", (*workflow)->tasks[i].operator);
+				if (strcmp(tmp, OPH_OPERATOR_FOR) && strcmp(tmp, OPH_OPERATOR_ENDFOR) && strcmp(tmp, OPH_OPERATOR_IF) && strcmp(tmp, OPH_OPERATOR_ELSEIF)
+				    && strcmp(tmp, OPH_OPERATOR_ELSE) && strcmp(tmp, OPH_OPERATOR_ENDIF)) {
+					oph_workflow_free(*workflow);
+					if (jansson)
+						json_decref(jansson);
+					(print_json) ? my_fprintf(stderr, "Error: task %d operation not allowed\\n\\n", i) : fprintf(stderr, "\e[1;31mError: task %d operation not allowed\e[0m\n\n",
+																     i);
+					return OPH_WORKFLOW_EXIT_BAD_PARAM_ERROR;
+				}
+			}
 		} else
 			(*workflow)->tasks[i].type = (char *) strdup("ophidia");
 		if (!((*workflow)->tasks[i].type)) {
