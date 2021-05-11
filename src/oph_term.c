@@ -4528,17 +4528,17 @@ int main(int argc, char **argv, char **envp)
 						tmp_status = NULL;
 						if (exit_status) {
 							tmp_status = exit_status[size - i - 1];
-							if (!strcmp(tmp_status, "OPH_STATUS_COMPLETED"))
+							if (!strcmp(tmp_status, OPH_ODB_STATUS_COMPLETED_STR))
 								format = 2;
-							else if (!strcmp(tmp_status, "OPH_STATUS_RUNNING") || !strcmp(tmp_status, "OPH_STATUS_SKIPPED"))
+							else if (!strcmp(tmp_status, OPH_ODB_STATUS_RUNNING_STR) || !strcmp(tmp_status, OPH_ODB_STATUS_SKIPPED_STR))
 								format = 3;
-							else if (!strcmp(tmp_status, "OPH_STATUS_WAITING"))
+							else if (!strcmp(tmp_status, OPH_ODB_STATUS_WAITING_STR))
 								format = 4;
-							else if (!strcmp(tmp_status, "OPH_STATUS_PENDING"))
+							else if (!strcmp(tmp_status, OPH_ODB_STATUS_PENDING_STR))
 								format = 5;
-							else if (!strcmp(tmp_status, "OPH_STATUS_RUNNING_ERROR")) {
+							else if (!strcmp(tmp_status, OPH_ODB_STATUS_RUNNING_ERROR_STR)) {
 								free(tmp_status);
-								tmp_status = exit_status[size - i - 1] = strdup("OPH_STATUS_RUNNING");
+								tmp_status = exit_status[size - i - 1] = strdup(OPH_ODB_STATUS_RUNNING_STR);
 							}
 						}
 

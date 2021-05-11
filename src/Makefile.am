@@ -24,7 +24,7 @@ LIBRARY += liboph_term_client.la
 if INTERFACE_TYPE_IS_SSL
 IFLAG += -DINTERFACE_TYPE_IS_SSL
 liboph_term_client_la_SOURCES = client/$(INTERFACE_TYPE)/oph_term_client.c client/stdsoap2.c client/soapClient.c client/soapC.c
-liboph_term_client_la_CFLAGS= -prefer-pic -I. -Iclient -Iclient/$(INTERFACE_TYPE) -Ienv ${lib_CFLAGS} $(OPT) -DWITH_DOM $(LIBXML_INCLUDE) $(LIBCURL_INCLUDE) -DWITH_OPENSSL -DHAVE_OPENSSL_SSL_H $(LIBSSL_INCLUDE) $(IFLAG)
+liboph_term_client_la_CFLAGS= -prefer-pic -I. -Iclient -Iclient/$(INTERFACE_TYPE) -Ienv -Iworkflow ${lib_CFLAGS} $(OPT) -DWITH_DOM $(LIBXML_INCLUDE) $(LIBCURL_INCLUDE) -DWITH_OPENSSL -DHAVE_OPENSSL_SSL_H $(LIBSSL_INCLUDE) $(IFLAG)
 liboph_term_client_la_LDFLAGS = -static
 liboph_term_client_la_LIBADD = $(LIBXML_LIB) $(LIBCURL_LIB) -lpthread $(LIBSSL_LIB) -lcrypto
 endif
@@ -49,7 +49,7 @@ MYLDFLAGS  = -L$(GLOBUS_LIB) $(GLOBUS_LIBS)
 MYGRAMLDFLAGS  = -L$(GLOBUS_LIB) $(GLOBUS_GRAM_LIBS)
 endif
 liboph_term_client_la_SOURCES = client/$(INTERFACE_TYPE)/oph_term_client.c client/stdsoap2.c client/$(INTERFACE_TYPE)/gsi.c client/soapClient.c client/soapC.c
-liboph_term_client_la_CFLAGS= -prefer-pic -I. -Iclient -Iclient/$(INTERFACE_TYPE) -Ienv ${lib_CFLAGS} $(OPT) -DWITH_DOM $(LIBXML_INCLUDE) $(LIBCURL_INCLUDE) $(MYCFLAGS) $(IFLAG)
+liboph_term_client_la_CFLAGS= -prefer-pic -I. -Iclient -Iclient/$(INTERFACE_TYPE) -Ienv -Iworkflow ${lib_CFLAGS} $(OPT) -DWITH_DOM $(LIBXML_INCLUDE) $(LIBCURL_INCLUDE) $(MYCFLAGS) $(IFLAG)
 liboph_term_client_la_LDFLAGS = -static $(MYLDFLAGS)
 liboph_term_client_la_LIBADD = $(LIBXML_LIB) $(LIBCURL_LIB) -lpthread
 endif
@@ -57,7 +57,7 @@ endif
 if INTERFACE_TYPE_IS_WPS
 IFLAG += -DINTERFACE_TYPE_IS_WPS
 liboph_term_client_la_SOURCES = client/$(INTERFACE_TYPE)/oph_term_client.c
-liboph_term_client_la_CFLAGS= -prefer-pic -I. -Iclient -Iclient/$(INTERFACE_TYPE) -Ienv ${lib_CFLAGS} $(OPT) -DWITH_DOM $(LIBXML_INCLUDE) $(LIBCURL_INCLUDE) $(IFLAG)
+liboph_term_client_la_CFLAGS= -prefer-pic -I. -Iclient -Iclient/$(INTERFACE_TYPE) -Ienv -Iworkflow ${lib_CFLAGS} $(OPT) -DWITH_DOM $(LIBXML_INCLUDE) $(LIBCURL_INCLUDE) $(IFLAG)
 liboph_term_client_la_LDFLAGS = -static
 liboph_term_client_la_LIBADD = $(LIBXML_LIB) $(LIBCURL_LIB) -lpthread
 endif
