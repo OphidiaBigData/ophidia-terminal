@@ -2483,19 +2483,19 @@ int main(int argc, char **argv, char **envp)
 					}
 					signal_raise = 0;
 					if (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1)) {
-						if (!strcmp((char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1), "black")) {
+						if (strstr((char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1), "black")) {
 							snprintf(tmp_prompt, OPH_TERM_MAX_LEN, OPH_TERM_BLACK_PROMPT, tmp_session_code2);
-						} else if (!strcmp((char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1), "green")) {
+						} else if (strstr((char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1), "green")) {
 							snprintf(tmp_prompt, OPH_TERM_MAX_LEN, OPH_TERM_GREEN_PROMPT, tmp_session_code2);
-						} else if (!strcmp((char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1), "yellow")) {
+						} else if (strstr((char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1), "yellow")) {
 							snprintf(tmp_prompt, OPH_TERM_MAX_LEN, OPH_TERM_YELLOW_PROMPT, tmp_session_code2);
-						} else if (!strcmp((char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1), "blue")) {
+						} else if (strstr((char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1), "blue")) {
 							snprintf(tmp_prompt, OPH_TERM_MAX_LEN, OPH_TERM_BLUE_PROMPT, tmp_session_code2);
-						} else if (!strcmp((char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1), "purple")) {
+						} else if (strstr((char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1), "purple")) {
 							snprintf(tmp_prompt, OPH_TERM_MAX_LEN, OPH_TERM_PURPLE_PROMPT, tmp_session_code2);
-						} else if (!strcmp((char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1), "cyan")) {
+						} else if (strstr((char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1), "cyan")) {
 							snprintf(tmp_prompt, OPH_TERM_MAX_LEN, OPH_TERM_CYAN_PROMPT, tmp_session_code2);
-						} else if (!strcmp((char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1), "white")) {
+						} else if (strstr((char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1), "white")) {
 							snprintf(tmp_prompt, OPH_TERM_MAX_LEN, OPH_TERM_WHITE_PROMPT, tmp_session_code2);
 						} else {
 							snprintf(tmp_prompt, OPH_TERM_MAX_LEN, OPH_TERM_RED_PROMPT, tmp_session_code2);
@@ -4528,15 +4528,15 @@ int main(int argc, char **argv, char **envp)
 						tmp_status = NULL;
 						if (exit_status) {
 							tmp_status = exit_status[size - i - 1];
-							if (!strcmp(tmp_status, OPH_ODB_STATUS_COMPLETED_STR))
+							if (strstr(tmp_status, OPH_ODB_STATUS_COMPLETED_STR))
 								format = 2;
-							else if (!strcmp(tmp_status, OPH_ODB_STATUS_RUNNING_STR) || !strcmp(tmp_status, OPH_ODB_STATUS_SKIPPED_STR))
+							else if (strstr(tmp_status, OPH_ODB_STATUS_RUNNING_STR) || strstr(tmp_status, OPH_ODB_STATUS_SKIPPED_STR))
 								format = 3;
-							else if (!strcmp(tmp_status, OPH_ODB_STATUS_WAITING_STR))
+							else if (strstr(tmp_status, OPH_ODB_STATUS_WAITING_STR))
 								format = 4;
-							else if (!strcmp(tmp_status, OPH_ODB_STATUS_PENDING_STR))
+							else if (strstr(tmp_status, OPH_ODB_STATUS_PENDING_STR))
 								format = 5;
-							else if (!strcmp(tmp_status, OPH_ODB_STATUS_RUNNING_ERROR_STR)) {
+							else if (strstr(tmp_status, OPH_ODB_STATUS_RUNNING_ERROR_STR)) {
 								free(tmp_status);
 								tmp_status = exit_status[size - i - 1] = strdup(OPH_ODB_STATUS_RUNNING_STR);
 							}

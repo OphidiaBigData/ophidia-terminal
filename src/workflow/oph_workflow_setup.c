@@ -756,10 +756,10 @@ int oph_workflow_print_status(oph_workflow * workflow, int save_img, int open_im
 						if (!strcmp(workflow->tasks[i].name, ((oph_json_obj_grid *) json->response[j].objcontent)[0].values[z][5 - offset])) {
 							if (!strcmp(((oph_json_obj_grid *) json->response[j].objcontent)[0].values[z][6 - offset], "MASSIVE"))
 								doublecircle = 1;
-							if (!strcmp(((oph_json_obj_grid *) json->response[j].objcontent)[0].values[z][7 - offset], OPH_ODB_STATUS_COMPLETED_STR)) {
+							if (strstr(((oph_json_obj_grid *) json->response[j].objcontent)[0].values[z][7 - offset], OPH_ODB_STATUS_COMPLETED_STR)) {
 								memset(color, 0, OPH_WORKFLOW_RANK_SIZE);
 								snprintf(color, OPH_WORKFLOW_RANK_SIZE, "%s", "palegreen");
-							} else if (!strcmp(((oph_json_obj_grid *) json->response[j].objcontent)[0].values[z][7 - offset], OPH_ODB_STATUS_RUNNING_STR)) {
+							} else if (strstr(((oph_json_obj_grid *) json->response[j].objcontent)[0].values[z][7 - offset], OPH_ODB_STATUS_RUNNING_STR)) {
 								memset(color, 0, OPH_WORKFLOW_RANK_SIZE);
 								snprintf(color, OPH_WORKFLOW_RANK_SIZE, "%s", "orange");
 							} else if (strstr(((oph_json_obj_grid *) json->response[j].objcontent)[0].values[z][7 - offset], "ERROR")

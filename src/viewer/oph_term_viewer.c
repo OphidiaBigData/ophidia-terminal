@@ -326,18 +326,17 @@ int adjusted_string_max_len(char *not_adjusted_string)
 
 const char *get_color_string_of(const char *value)
 {
-	if (!strcmp(value, OPH_ODB_STATUS_PENDING_STR))
+	if (strstr(value, OPH_ODB_STATUS_PENDING_STR))
 		return OPH_TERM_VIEWER_PURPLE_STRING;
-	else if (!strcmp(value, OPH_ODB_STATUS_WAITING_STR))
+	else if (strstr(value, OPH_ODB_STATUS_WAITING_STR))
 		return OPH_TERM_VIEWER_CYAN_STRING;
-	else if (!strcmp(value, OPH_ODB_STATUS_RUNNING_STR) || !strcmp(value, OPH_ODB_STATUS_SET_ENV_STR) || !strcmp(value, OPH_ODB_STATUS_INIT_STR) || !strcmp(value, OPH_ODB_STATUS_DISTRIBUTE_STR)
-		 || !strcmp(value, OPH_ODB_STATUS_EXECUTE_STR) || !strcmp(value, OPH_ODB_STATUS_REDUCE_STR) || !strcmp(value, OPH_ODB_STATUS_DESTROY_STR)
-		 || !strcmp(value, OPH_ODB_STATUS_UNSET_ENV_STR)
-		 || !strcmp(value, OPH_ODB_STATUS_SKIPPED_STR))
+	else if (strstr(value, OPH_ODB_STATUS_RUNNING_STR) || strstr(value, OPH_ODB_STATUS_SET_ENV_STR) || strstr(value, OPH_ODB_STATUS_INIT_STR) || strstr(value, OPH_ODB_STATUS_DISTRIBUTE_STR)
+		 || strstr(value, OPH_ODB_STATUS_EXECUTE_STR) || strstr(value, OPH_ODB_STATUS_REDUCE_STR) || strstr(value, OPH_ODB_STATUS_DESTROY_STR) || strstr(value, OPH_ODB_STATUS_UNSET_ENV_STR)
+		 || strstr(value, OPH_ODB_STATUS_SKIPPED_STR))
 		return OPH_TERM_VIEWER_YELLOW_STRING;
-	else if (!strcmp(value, OPH_ODB_STATUS_COMPLETED_STR) || !strcmp(value, OPH_ODB_STATUS_ACTIVE_STR))
+	else if (strstr(value, OPH_ODB_STATUS_COMPLETED_STR) || strstr(value, OPH_ODB_STATUS_ACTIVE_STR))
 		return OPH_TERM_VIEWER_GREEN_STRING;
-	else if (strstr(value, "_ERROR") || !strcmp(value, OPH_ODB_STATUS_ABORTED_STR) || !strcmp(value, OPH_ODB_STATUS_EXPIRED_STR) || !strcmp(value, OPH_ODB_STATUS_INACTIVE_STR))
+	else if (strstr(value, "_ERROR") || strstr(value, OPH_ODB_STATUS_ABORTED_STR) || strstr(value, OPH_ODB_STATUS_EXPIRED_STR) || strstr(value, OPH_ODB_STATUS_INACTIVE_STR))
 		return OPH_TERM_VIEWER_RED_STRING;
 	else
 		return OPH_TERM_VIEWER_NO_COLOR_STRING;
@@ -345,18 +344,17 @@ const char *get_color_string_of(const char *value)
 
 const char *get_color_char_of(const char *value)
 {
-	if (!strcmp(value, OPH_ODB_STATUS_PENDING_STR))
+	if (strstr(value, OPH_ODB_STATUS_PENDING_STR))
 		return OPH_TERM_VIEWER_PURPLE_CHAR;
-	else if (!strcmp(value, OPH_ODB_STATUS_WAITING_STR))
+	else if (strstr(value, OPH_ODB_STATUS_WAITING_STR))
 		return OPH_TERM_VIEWER_CYAN_CHAR;
-	else if (!strcmp(value, OPH_ODB_STATUS_RUNNING_STR) || !strcmp(value, OPH_ODB_STATUS_SET_ENV_STR) || !strcmp(value, OPH_ODB_STATUS_INIT_STR) || !strcmp(value, OPH_ODB_STATUS_DISTRIBUTE_STR)
-		 || !strcmp(value, OPH_ODB_STATUS_EXECUTE_STR) || !strcmp(value, OPH_ODB_STATUS_REDUCE_STR) || !strcmp(value, OPH_ODB_STATUS_DESTROY_STR)
-		 || !strcmp(value, OPH_ODB_STATUS_UNSET_ENV_STR)
-		 || !strcmp(value, OPH_ODB_STATUS_SKIPPED_STR))
+	else if (strstr(value, OPH_ODB_STATUS_RUNNING_STR) || strstr(value, OPH_ODB_STATUS_SET_ENV_STR) || strstr(value, OPH_ODB_STATUS_INIT_STR) || strstr(value, OPH_ODB_STATUS_DISTRIBUTE_STR)
+		 || strstr(value, OPH_ODB_STATUS_EXECUTE_STR) || strstr(value, OPH_ODB_STATUS_REDUCE_STR) || strstr(value, OPH_ODB_STATUS_DESTROY_STR) || strstr(value, OPH_ODB_STATUS_UNSET_ENV_STR)
+		 || strstr(value, OPH_ODB_STATUS_SKIPPED_STR))
 		return OPH_TERM_VIEWER_YELLOW_CHAR;
-	else if (!strcmp(value, OPH_ODB_STATUS_COMPLETED_STR) || !strcmp(value, OPH_ODB_STATUS_ACTIVE_STR))
+	else if (strstr(value, OPH_ODB_STATUS_COMPLETED_STR) || strstr(value, OPH_ODB_STATUS_ACTIVE_STR))
 		return OPH_TERM_VIEWER_GREEN_CHAR;
-	else if (strstr(value, "_ERROR") || !strcmp(value, OPH_ODB_STATUS_ABORTED_STR) || !strcmp(value, OPH_ODB_STATUS_EXPIRED_STR) || !strcmp(value, OPH_ODB_STATUS_INACTIVE_STR))
+	else if (strstr(value, "_ERROR") || strstr(value, OPH_ODB_STATUS_ABORTED_STR) || strstr(value, OPH_ODB_STATUS_EXPIRED_STR) || strstr(value, OPH_ODB_STATUS_INACTIVE_STR))
 		return OPH_TERM_VIEWER_RED_CHAR;
 	else
 		return OPH_TERM_VIEWER_NO_COLOR_CHAR;
@@ -2639,7 +2637,7 @@ int oph_term_viewer_check_workflow_ended(char *json_string)
 		size_t i;
 		for (i = 0; i < json->response_num; i++) {
 			if (!strcmp(json->response[i].objkey, "workflow_status")) {
-				if (!strcmp(((oph_json_obj_text *) json->response[i].objcontent)[0].message, OPH_ODB_STATUS_COMPLETED_STR)
+				if (strstr(((oph_json_obj_text *) json->response[i].objcontent)[0].message, OPH_ODB_STATUS_COMPLETED_STR)
 				    || strstr(((oph_json_obj_text *) json->response[i].objcontent)[0].message, "ERROR")) {
 					if (json)
 						oph_json_free(json);
