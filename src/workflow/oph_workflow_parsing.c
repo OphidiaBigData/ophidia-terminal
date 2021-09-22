@@ -83,11 +83,11 @@ int oph_workflow_load(char *json_string, char *username, oph_workflow ** workflo
 		    "run", &run, "output_format", &output_format, "host_partition", &host_partition, "url", &url, "nhost", &nhosts, "nthreads", &nthreads, "project", &project);
 
 	//add global vars
-	if (!name || !author || !abstract) {
+	if (!name) {
 		oph_workflow_free(*workflow);
 		if (jansson)
 			json_decref(jansson);
-		(print_json) ? my_fprintf(stderr, "Error: there is no name or author or abstract\\n\\n") : fprintf(stderr, "\e[1;31mError: there is no name or author or abstract\e[0m\n\n");
+		(print_json) ? my_fprintf(stderr, "Error: workflow has no name\\n\\n") : fprintf(stderr, "\e[1;31mError: workflow has no name\e[0m\n\n");
 		return OPH_WORKFLOW_EXIT_BAD_PARAM_ERROR;
 	}
 	(*workflow)->name = (char *) strdup((const char *) name);

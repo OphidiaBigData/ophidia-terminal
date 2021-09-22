@@ -5828,10 +5828,14 @@ int main(int argc, char **argv, char **envp)
 					char expanded_field[2 * OUTPUT_MAX_LEN] = "\0";
 					expand_escapes(expanded_field, tmp_workflow->name);
 					(print_json) ? my_printf("Name\\n----\\n%s\\n\\n", expanded_field) : printf("Name\n----\n%s\n\n", tmp_workflow->name);
-					expand_escapes(expanded_field, tmp_workflow->author);
-					(print_json) ? my_printf("Author\\n------\\n%s\\n\\n", expanded_field) : printf("Author\n------\n%s\n\n", tmp_workflow->author);
-					expand_escapes(expanded_field, tmp_workflow->abstract);
-					(print_json) ? my_printf("Abstract\\n--------\\n%s\\n\\n", expanded_field) : printf("Abstract\n--------\n%s\n\n", tmp_workflow->abstract);
+					if (tmp_workflow->author) {
+						expand_escapes(expanded_field, tmp_workflow->author);
+						(print_json) ? my_printf("Author\\n------\\n%s\\n\\n", expanded_field) : printf("Author\n------\n%s\n\n", tmp_workflow->author);
+					}
+					if (tmp_workflow->abstract) {
+						expand_escapes(expanded_field, tmp_workflow->abstract);
+						(print_json) ? my_printf("Abstract\\n--------\\n%s\\n\\n", expanded_field) : printf("Abstract\n--------\n%s\n\n", tmp_workflow->abstract);
+					}
 					if (tmp_workflow->url) {
 						expand_escapes(expanded_field, tmp_workflow->url);
 						(print_json) ? my_printf("URL\\n--------\\n%s\\n\\n", expanded_field) : printf("URL\n--------\n%s\n\n", tmp_workflow->url);
