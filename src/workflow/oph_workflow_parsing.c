@@ -98,21 +98,25 @@ int oph_workflow_load(char *json_string, char *username, oph_workflow ** workflo
 		(print_json) ? my_fprintf(stderr, "Error: name allocation\\n\\n") : fprintf(stderr, "\e[1;31mError: name allocation\e[0m\n\n");
 		return OPH_WORKFLOW_EXIT_MEMORY_ERROR;
 	}
-	(*workflow)->author = (char *) strdup((const char *) author);
-	if (!((*workflow)->author)) {
-		oph_workflow_free(*workflow);
-		if (jansson)
-			json_decref(jansson);
-		(print_json) ? my_fprintf(stderr, "Error: author allocation\\n\\n") : fprintf(stderr, "\e[1;31mError: author allocation\e[0m\n\n");
-		return OPH_WORKFLOW_EXIT_MEMORY_ERROR;
+	if (author && strlen(author)) {
+		(*workflow)->author = (char *) strdup((const char *) author);
+		if (!((*workflow)->author)) {
+			oph_workflow_free(*workflow);
+			if (jansson)
+				json_decref(jansson);
+			(print_json) ? my_fprintf(stderr, "Error: author allocation\\n\\n") : fprintf(stderr, "\e[1;31mError: author allocation\e[0m\n\n");
+			return OPH_WORKFLOW_EXIT_MEMORY_ERROR;
+		}
 	}
-	(*workflow)->abstract = (char *) strdup((const char *) abstract);
-	if (!((*workflow)->abstract)) {
-		oph_workflow_free(*workflow);
-		if (jansson)
-			json_decref(jansson);
-		(print_json) ? my_fprintf(stderr, "Error: abstract allocation\\n\\n") : fprintf(stderr, "\e[1;31mError: abstract allocation\e[0m\n\n");
-		return OPH_WORKFLOW_EXIT_MEMORY_ERROR;
+	if (abstract && strlen(abstract)) {
+		(*workflow)->abstract = (char *) strdup((const char *) abstract);
+		if (!((*workflow)->abstract)) {
+			oph_workflow_free(*workflow);
+			if (jansson)
+				json_decref(jansson);
+			(print_json) ? my_fprintf(stderr, "Error: abstract allocation\\n\\n") : fprintf(stderr, "\e[1;31mError: abstract allocation\e[0m\n\n");
+			return OPH_WORKFLOW_EXIT_MEMORY_ERROR;
+		}
 	}
 	if (url && strlen(url)) {
 		(*workflow)->url = (char *) strdup((const char *) url);
