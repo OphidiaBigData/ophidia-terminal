@@ -326,7 +326,9 @@ int adjusted_string_max_len(char *not_adjusted_string)
 
 const char *get_color_string_of(const char *value)
 {
-	if (strstr(value, OPH_ODB_STATUS_PENDING_STR))
+	if (strstr(value, "_ERROR") || strstr(value, OPH_ODB_STATUS_ABORTED_STR) || strstr(value, OPH_ODB_STATUS_EXPIRED_STR) || strstr(value, OPH_ODB_STATUS_INACTIVE_STR))
+		return OPH_TERM_VIEWER_RED_STRING;
+	else if (strstr(value, OPH_ODB_STATUS_PENDING_STR))
 		return OPH_TERM_VIEWER_PURPLE_STRING;
 	else if (strstr(value, OPH_ODB_STATUS_WAITING_STR))
 		return OPH_TERM_VIEWER_CYAN_STRING;
@@ -336,15 +338,15 @@ const char *get_color_string_of(const char *value)
 		return OPH_TERM_VIEWER_YELLOW_STRING;
 	else if (strstr(value, OPH_ODB_STATUS_COMPLETED_STR) || strstr(value, OPH_ODB_STATUS_ACTIVE_STR))
 		return OPH_TERM_VIEWER_GREEN_STRING;
-	else if (strstr(value, "_ERROR") || strstr(value, OPH_ODB_STATUS_ABORTED_STR) || strstr(value, OPH_ODB_STATUS_EXPIRED_STR) || strstr(value, OPH_ODB_STATUS_INACTIVE_STR))
-		return OPH_TERM_VIEWER_RED_STRING;
 	else
 		return OPH_TERM_VIEWER_NO_COLOR_STRING;
 }
 
 const char *get_color_char_of(const char *value)
 {
-	if (strstr(value, OPH_ODB_STATUS_PENDING_STR))
+	if (strstr(value, "_ERROR") || strstr(value, OPH_ODB_STATUS_ABORTED_STR) || strstr(value, OPH_ODB_STATUS_EXPIRED_STR) || strstr(value, OPH_ODB_STATUS_INACTIVE_STR))
+		return OPH_TERM_VIEWER_RED_CHAR;
+	else if (strstr(value, OPH_ODB_STATUS_PENDING_STR))
 		return OPH_TERM_VIEWER_PURPLE_CHAR;
 	else if (strstr(value, OPH_ODB_STATUS_WAITING_STR))
 		return OPH_TERM_VIEWER_CYAN_CHAR;
@@ -354,8 +356,6 @@ const char *get_color_char_of(const char *value)
 		return OPH_TERM_VIEWER_YELLOW_CHAR;
 	else if (strstr(value, OPH_ODB_STATUS_COMPLETED_STR) || strstr(value, OPH_ODB_STATUS_ACTIVE_STR))
 		return OPH_TERM_VIEWER_GREEN_CHAR;
-	else if (strstr(value, "_ERROR") || strstr(value, OPH_ODB_STATUS_ABORTED_STR) || strstr(value, OPH_ODB_STATUS_EXPIRED_STR) || strstr(value, OPH_ODB_STATUS_INACTIVE_STR))
-		return OPH_TERM_VIEWER_RED_CHAR;
 	else
 		return OPH_TERM_VIEWER_NO_COLOR_CHAR;
 }
