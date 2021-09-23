@@ -54,6 +54,8 @@
 #define OPH_OPERATOR_ELSEIF		"oph_elseif"
 #define OPH_OPERATOR_ELSE		"oph_else"
 #define OPH_OPERATOR_ENDIF		"oph_endif"
+#define OPH_OPERATOR_WAIT		"oph_wait"
+#define OPH_OPERATOR_SET		"oph_set"
 
 // Job status
 #define OPH_ODB_STATUS_PREFIX ""	// "OPH_STATUS_"
