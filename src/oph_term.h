@@ -161,6 +161,7 @@ extern int oph_term_error_cur;
 #define OPH_TERM_DEFAULT_ALIAS_KEY_26 	"mvd"
 #define OPH_TERM_DEFAULT_ALIAS_KEY_27 	"rmd"
 #define OPH_TERM_DEFAULT_ALIAS_KEY_28 	"rmr"
+#define OPH_TERM_DEFAULT_ALIAS_KEY_29 	"pav_worker"
 
 #define OPH_TERM_DEFAULT_ALIAS_VAL_1 	"oph_list path=$1;"
 #define OPH_TERM_DEFAULT_ALIAS_VAL_2 	"oph_folder command=cd;path=$1;"
@@ -190,8 +191,9 @@ extern int oph_term_error_cur;
 #define OPH_TERM_DEFAULT_ALIAS_VAL_26 	"oph_fs command=mv;dpath=$1|$2;"
 #define OPH_TERM_DEFAULT_ALIAS_VAL_27 	"oph_fs command=rm;dpath=$1;"
 #define OPH_TERM_DEFAULT_ALIAS_VAL_28 	"oph_deletecontainer container=$1;force=yes;"
+#define OPH_TERM_DEFAULT_ALIAS_VAL_29 	"oph_pav_worker action=$1;number=$2;"
 
-#define OPH_TERM_DEFAULT_ALIAS_NUM 28
+#define OPH_TERM_DEFAULT_ALIAS_NUM 29
 
 extern const char *pre_defined_aliases_keys[OPH_TERM_DEFAULT_ALIAS_NUM];
 extern const char *pre_defined_aliases_values[OPH_TERM_DEFAULT_ALIAS_NUM];
