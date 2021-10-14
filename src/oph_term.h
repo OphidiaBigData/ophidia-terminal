@@ -193,7 +193,7 @@ extern int oph_term_error_cur;
 #define OPH_TERM_DEFAULT_ALIAS_VAL_27 	"oph_fs command=rm;dpath=$1;"
 #define OPH_TERM_DEFAULT_ALIAS_VAL_28 	"oph_deletecontainer container=$1;force=yes;"
 #define OPH_TERM_DEFAULT_ALIAS_VAL_29 	"oph_pav_worker action=$1;number=$2;"
-#define OPH_TERM_DEFAULT_ALIAS_VAL_30 	"oph_resume id=$1;document_type=request;execute=$2;"
+#define OPH_TERM_DEFAULT_ALIAS_VAL_30 	"oph_resume id=$1;document_type=request;execute=yes;checkpoint=$2;"
 
 #define OPH_TERM_DEFAULT_ALIAS_NUM 30
 
