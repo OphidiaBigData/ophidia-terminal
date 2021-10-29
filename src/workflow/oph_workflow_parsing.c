@@ -598,7 +598,7 @@ int oph_workflow_load(char *json_string, char *username, oph_workflow ** workflo
 				(*workflow)->tasks[i].retry_num = -1;
 			else if (!strcmp(on_error_task, OPH_WORKFLOW_CONTINUE))
 				(*workflow)->tasks[i].retry_num = 0;
-			else if (!strcmp(on_error_task, OPH_WORKFLOW_BREAK))
+			else if (!strcmp(on_error_task, OPH_WORKFLOW_BREAK) || !strcmp(on_error_task, OPH_WORKFLOW_ABORT))
 				(*workflow)->tasks[i].retry_num = 1;
 			else if (!strncmp(on_error_task, OPH_WORKFLOW_REPEAT, strlen(OPH_WORKFLOW_REPEAT))) {
 				on_error_task += strlen(OPH_WORKFLOW_REPEAT);
