@@ -76,15 +76,15 @@ liboph_term_help_la_LIBADD = -lm -lz
 
 LIBRARY += liboph_term_viewer.la
 liboph_term_viewer_la_SOURCES = viewer/oph_json/oph_json_common.c viewer/oph_json/oph_json_graph.c viewer/oph_json/oph_json_grid.c viewer/oph_json/oph_json_multigrid.c viewer/oph_json/oph_json_text.c viewer/oph_json/oph_json_tree.c viewer/oph_term_viewer.c
-liboph_term_viewer_la_CFLAGS= -prefer-pic -I. -Iviewer/oph_json -Iviewer $(JANSSON_CFLAGS) ${lib_CFLAGS} $(OPT) $(LIBGVC_INCLUDE) $(IFLAG)
+liboph_term_viewer_la_CFLAGS= -prefer-pic -I. -Iviewer/oph_json -Iviewer $(JANSSON_INCLUDE) ${lib_CFLAGS} $(OPT) $(LIBGVC_INCLUDE) $(IFLAG)
 liboph_term_viewer_la_LDFLAGS = -static -Wl,-rpath -Wl,$(JANSSON_LIBDIR)
-liboph_term_viewer_la_LIBADD = $(JANSSON_LIBS) $(LIBGVC_LIB)
+liboph_term_viewer_la_LIBADD = $(JANSSON_LIB) $(LIBGVC_LIB)
 
 LIBRARY += liboph_term_workflow.la
 liboph_term_workflow_la_SOURCES = workflow/oph_workflow_parsing.c workflow/oph_workflow_setup.c workflow/oph_workflow_structs.c
-liboph_term_workflow_la_CFLAGS= -prefer-pic -I. -Iclient -Iworkflow -Iviewer/oph_json -Iviewer -Ienv $(JANSSON_CFLAGS) ${lib_CFLAGS} $(OPT) $(LIBGVC_INCLUDE) $(GTK2_INCLUDE) $(LIBXML_INCLUDE) $(LIBCURL_INCLUDE) $(IFLAG)
+liboph_term_workflow_la_CFLAGS= -prefer-pic -I. -Iclient -Iworkflow -Iviewer/oph_json -Iviewer -Ienv $(JANSSON_INCLUDE) ${lib_CFLAGS} $(OPT) $(LIBGVC_INCLUDE) $(GTK2_INCLUDE) $(LIBXML_INCLUDE) $(LIBCURL_INCLUDE) $(IFLAG)
 liboph_term_workflow_la_LDFLAGS = -static -Wl,-rpath -Wl,$(JANSSON_LIBDIR)
-liboph_term_workflow_la_LIBADD = $(LIBXML_LIB) $(LIBCURL_LIB) $(JANSSON_LIBS) $(LIBGVC_LIB) $(GTK2_LIB) -lpthread -loph_term_client
+liboph_term_workflow_la_LIBADD = $(LIBXML_LIB) $(LIBCURL_LIB) $(JANSSON_LIB) $(LIBGVC_LIB) $(GTK2_LIB) -lpthread -loph_term_client
 
 noinst_LTLIBRARIES = $(LIBRARY)
 

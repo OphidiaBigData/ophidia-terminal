@@ -61,7 +61,7 @@ PKG_CHECK_MODULES(ZLIB, zlib >= 1.2.3)
 AC_ARG_WITH(libz_header_path,
 	   [  --with-libz-header-path=PATH 		Location of zlib includes directory],
 	   [
-		libz_header_path="$withval"
+		libz_header_path="-I$withval"
 	   ],
      [
     libz_header_path="$ZLIB_CFLAGS"
@@ -69,7 +69,7 @@ AC_ARG_WITH(libz_header_path,
 AC_ARG_WITH(libz_lib_path,
 	   [  --with-libz-lib-path=PATH 		Location of libz.a],
 	   [
-		libz_lib_path="$withval"
+		libz_lib_path="-L$withval"
 	   ],
      [
     libz_lib_path="$ZLIB_LIBS"
@@ -84,7 +84,7 @@ PKG_CHECK_MODULES(XML, libxml-2.0 >= 2.4)
 AC_ARG_WITH(libxml_header_path,
 	   [  --with-libxml-header-path=PATH 		Location of libxml2 includes directory],
 	   [
-		libxml_header_path="$withval"
+		libxml_header_path="-I$withval"
 	   ],
      [
     libxml_header_path="$XML_CFLAGS"
@@ -92,7 +92,7 @@ AC_ARG_WITH(libxml_header_path,
 AC_ARG_WITH(libxml_lib_path,
 	   [  --with-libxml-lib-path=PATH 		Location of libxml2.a],
 	   [
-		libxml_lib_path="$withval"
+		libxml_lib_path="-L$withval"
 	   ],
      [
     libxml_lib_path="$XML_LIBS"
@@ -107,7 +107,7 @@ PKG_CHECK_MODULES(CURL, libcurl >= 0.23)
 AC_ARG_WITH(libcurl_header_path,
 	   [  --with-libcurl-header-path=PATH 		Location of libcurl includes directory],
 	   [
-		libcurl_header_path="$withval"
+		libcurl_header_path="-I$withval"
 	   ],
      [
     libcurl_header_path="$CURL_CFLAGS"
@@ -115,7 +115,7 @@ AC_ARG_WITH(libcurl_header_path,
 AC_ARG_WITH(libcurl_lib_path,
 	   [  --with-libcurl-lib-path=PATH 		Location of libcurl.a],
 	   [
-		libcurl_lib_path="$withval"
+		libcurl_lib_path="-L$withval"
 	   ],
      [
     libcurl_lib_path="$CURL_LIBS"
@@ -130,7 +130,7 @@ PKG_CHECK_MODULES(OPENSSL, openssl >= 1.0.0)
 AC_ARG_WITH(libopenssl_header_path,
 	   [  --with-libopenssl-header-path=PATH 		Location of openssl includes directory],
 	   [
-		libopenssl_header_path="$withval"
+		libopenssl_header_path="-I$withval"
 	   ],
      [
     libopenssl_header_path="$OPENSSL_CFLAGS"
@@ -138,7 +138,7 @@ AC_ARG_WITH(libopenssl_header_path,
 AC_ARG_WITH(libopenssl_lib_path,
 	   [  --with-libopenssl-lib-path=PATH 		Location of openssl],
 	   [
-		libopenssl_lib_path="$withval"
+		libopenssl_lib_path="-L$withval"
 	   ],
      [
     libopenssl_lib_path="$OPENSSL_LIBS"
@@ -152,7 +152,7 @@ PKG_CHECK_MODULES(LIBGVC, libgvc >= 2.26.0)
 AC_ARG_WITH(libgvc_header_path,
 	   [  --with-libgvc-header-path=PATH 		Location of libgvc (graphviz) includes directory],
 	   [
-		libgvc_header_path="$withval"
+		libgvc_header_path="-I$withval"
 	   ],
      [
     libgvc_header_path="$LIBGVC_CFLAGS"
@@ -160,7 +160,7 @@ AC_ARG_WITH(libgvc_header_path,
 AC_ARG_WITH(libgvc_lib_path,
 	   [  --with-libgvc-lib-path=PATH 		Location of libgvc (graphviz)],
 	   [
-		libgvc_lib_path="$withval"
+		libgvc_lib_path="-L$withval"
 	   ],
      [
     libgvc_lib_path="$LIBGVC_LIBS"
@@ -174,7 +174,7 @@ PKG_CHECK_MODULES(GTK, gtk+-2.0 >= 2.0)
 AC_ARG_WITH(gtk2_header_path,
        [  --with-gtk2-header-path=PATH        Location of GTK+-2.0 includes directory],
        [
-        gtk2_header_path="$withval"
+        gtk2_header_path="-I$withval"
        ],
      [
     gtk2_header_path="$GTK_CFLAGS"
@@ -182,7 +182,7 @@ AC_ARG_WITH(gtk2_header_path,
 AC_ARG_WITH(gtk2_lib_path,
        [  --with-gtk2-lib-path=PATH       Location of GTK+-2.0],
        [
-        gtk2_lib_path="$withval"
+        gtk2_lib_path="-L$withval"
        ],
      [
     gtk2_lib_path="$GTK_LIBS"
@@ -198,7 +198,7 @@ PKG_CHECK_MODULES(JANSSON, jansson >= 2.3)
 AC_ARG_WITH(jansson_header_path,
        [  --with-jansson-header-path=PATH        Location of Jansson includes directory],
        [
-        jansson_header_path="$withval"
+        jansson_header_path="-I$withval"
        ],
      [
     jansson_header_path="$JANSSON_CFLAGS"
@@ -206,15 +206,15 @@ AC_ARG_WITH(jansson_header_path,
 AC_ARG_WITH(jansson_lib_path,
        [  --with-jansson-lib-path=PATH       Location of jansson lib],
        [
-        jansson_lib_path="$withval"
+        jansson_lib_path="-L$withval"
        ],
      [
     jansson_lib_path="$JANSSON_LIBS"
      ])
-JANSON_CFLAGS="$jansson_header_path"
-AC_SUBST(JANSON_CFLAGS)
-JANSON_LIBS="$jansson_lib_path"
-AC_SUBST(JANSON_LIBS)
+JANSSON_INCLUDE="$jansson_header_path"
+AC_SUBST(JANSSON_INCLUDE)
+JANSSON_LIB="$jansson_lib_path"
+AC_SUBST(JANSSON_LIB)
 JANSSON_LIBDIR=`pkg-config --variable=libdir jansson`
 AC_SUBST(JANSSON_LIBDIR)
 
