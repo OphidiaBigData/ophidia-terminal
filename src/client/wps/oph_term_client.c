@@ -19,6 +19,7 @@
 #define _GNU_SOURCE
 
 #include "oph_term_client.h"
+#include "oph_workflow_define.h"
 #include "oph_term_defs.h"
 
 #include <unistd.h>		/* defines _POSIX_THREADS if pthreads are available */
@@ -989,7 +990,8 @@ void oph_execute(char *query, char **newsession, int *return_value, char **out_r
 							break;
 						}
 						if (strstr(response_global.response, "\"title\": \"ERROR\"")
-						    || (strstr(response_global.response, "\"title\": \"Workflow Status\"") && strstr(response_global.response, "\"message\": \"OPH_STATUS_ERROR\"")))
+						    || (strstr(response_global.response, "\"title\": \"Workflow Status\"")
+							&& strstr(response_global.response, "\"message\": \"" OPH_ODB_STATUS_ERROR_STR "\"")))
 							*return_value = OPH_TERM_GENERIC_ERROR;
 					}
 				} else {
@@ -1035,7 +1037,8 @@ void oph_execute(char *query, char **newsession, int *return_value, char **out_r
 						if (!print_json)
 							printf("\e[1;34m[Response]:\e[0m\n");
 						if (strstr(response_global.response, "\"title\": \"ERROR\"")
-						    || (strstr(response_global.response, "\"title\": \"Workflow Status\"") && strstr(response_global.response, "\"message\": \"OPH_STATUS_ERROR\"")))
+						    || (strstr(response_global.response, "\"title\": \"Workflow Status\"")
+							&& strstr(response_global.response, "\"message\": \"" OPH_ODB_STATUS_ERROR_STR "\"")))
 							*return_value = OPH_TERM_GENERIC_ERROR;
 					}
 

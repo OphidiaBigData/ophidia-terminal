@@ -120,7 +120,10 @@ const char *pre_defined_aliases_keys[OPH_TERM_DEFAULT_ALIAS_NUM] = {
 	OPH_TERM_DEFAULT_ALIAS_KEY_25,
 	OPH_TERM_DEFAULT_ALIAS_KEY_26,
 	OPH_TERM_DEFAULT_ALIAS_KEY_27,
-	OPH_TERM_DEFAULT_ALIAS_KEY_28
+	OPH_TERM_DEFAULT_ALIAS_KEY_28,
+	OPH_TERM_DEFAULT_ALIAS_KEY_29,
+	OPH_TERM_DEFAULT_ALIAS_KEY_30,
+	OPH_TERM_DEFAULT_ALIAS_KEY_31
 };
 
 const char *pre_defined_aliases_values[OPH_TERM_DEFAULT_ALIAS_NUM] = {
@@ -151,7 +154,10 @@ const char *pre_defined_aliases_values[OPH_TERM_DEFAULT_ALIAS_NUM] = {
 	OPH_TERM_DEFAULT_ALIAS_VAL_25,
 	OPH_TERM_DEFAULT_ALIAS_VAL_26,
 	OPH_TERM_DEFAULT_ALIAS_VAL_27,
-	OPH_TERM_DEFAULT_ALIAS_VAL_28
+	OPH_TERM_DEFAULT_ALIAS_VAL_28,
+	OPH_TERM_DEFAULT_ALIAS_VAL_29,
+	OPH_TERM_DEFAULT_ALIAS_VAL_30,
+	OPH_TERM_DEFAULT_ALIAS_VAL_31
 };
 
 const int pre_defined_aliases_num = OPH_TERM_DEFAULT_ALIAS_NUM;
@@ -2483,19 +2489,19 @@ int main(int argc, char **argv, char **envp)
 					}
 					signal_raise = 0;
 					if (hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1)) {
-						if (!strcmp((char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1), "black")) {
+						if (strstr((char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1), "black")) {
 							snprintf(tmp_prompt, OPH_TERM_MAX_LEN, OPH_TERM_BLACK_PROMPT, tmp_session_code2);
-						} else if (!strcmp((char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1), "green")) {
+						} else if (strstr((char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1), "green")) {
 							snprintf(tmp_prompt, OPH_TERM_MAX_LEN, OPH_TERM_GREEN_PROMPT, tmp_session_code2);
-						} else if (!strcmp((char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1), "yellow")) {
+						} else if (strstr((char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1), "yellow")) {
 							snprintf(tmp_prompt, OPH_TERM_MAX_LEN, OPH_TERM_YELLOW_PROMPT, tmp_session_code2);
-						} else if (!strcmp((char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1), "blue")) {
+						} else if (strstr((char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1), "blue")) {
 							snprintf(tmp_prompt, OPH_TERM_MAX_LEN, OPH_TERM_BLUE_PROMPT, tmp_session_code2);
-						} else if (!strcmp((char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1), "purple")) {
+						} else if (strstr((char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1), "purple")) {
 							snprintf(tmp_prompt, OPH_TERM_MAX_LEN, OPH_TERM_PURPLE_PROMPT, tmp_session_code2);
-						} else if (!strcmp((char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1), "cyan")) {
+						} else if (strstr((char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1), "cyan")) {
 							snprintf(tmp_prompt, OPH_TERM_MAX_LEN, OPH_TERM_CYAN_PROMPT, tmp_session_code2);
-						} else if (!strcmp((char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1), "white")) {
+						} else if (strstr((char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_PS1), "white")) {
 							snprintf(tmp_prompt, OPH_TERM_MAX_LEN, OPH_TERM_WHITE_PROMPT, tmp_session_code2);
 						} else {
 							snprintf(tmp_prompt, OPH_TERM_MAX_LEN, OPH_TERM_RED_PROMPT, tmp_session_code2);
@@ -4528,17 +4534,17 @@ int main(int argc, char **argv, char **envp)
 						tmp_status = NULL;
 						if (exit_status) {
 							tmp_status = exit_status[size - i - 1];
-							if (!strcmp(tmp_status, "OPH_STATUS_COMPLETED"))
+							if (strstr(tmp_status, OPH_ODB_STATUS_COMPLETED_STR))
 								format = 2;
-							else if (!strcmp(tmp_status, "OPH_STATUS_RUNNING") || !strcmp(tmp_status, "OPH_STATUS_SKIPPED"))
+							else if (strstr(tmp_status, OPH_ODB_STATUS_RUNNING_STR) || strstr(tmp_status, OPH_ODB_STATUS_SKIPPED_STR))
 								format = 3;
-							else if (!strcmp(tmp_status, "OPH_STATUS_WAITING"))
+							else if (strstr(tmp_status, OPH_ODB_STATUS_WAITING_STR))
 								format = 4;
-							else if (!strcmp(tmp_status, "OPH_STATUS_PENDING"))
+							else if (strstr(tmp_status, OPH_ODB_STATUS_PENDING_STR))
 								format = 5;
-							else if (!strcmp(tmp_status, "OPH_STATUS_RUNNING_ERROR")) {
+							else if (strstr(tmp_status, OPH_ODB_STATUS_RUNNING_ERROR_STR)) {
 								free(tmp_status);
-								tmp_status = exit_status[size - i - 1] = strdup("OPH_STATUS_RUNNING");
+								tmp_status = exit_status[size - i - 1] = strdup(OPH_ODB_STATUS_RUNNING_STR);
 							}
 						}
 
@@ -5828,10 +5834,14 @@ int main(int argc, char **argv, char **envp)
 					char expanded_field[2 * OUTPUT_MAX_LEN] = "\0";
 					expand_escapes(expanded_field, tmp_workflow->name);
 					(print_json) ? my_printf("Name\\n----\\n%s\\n\\n", expanded_field) : printf("Name\n----\n%s\n\n", tmp_workflow->name);
-					expand_escapes(expanded_field, tmp_workflow->author);
-					(print_json) ? my_printf("Author\\n------\\n%s\\n\\n", expanded_field) : printf("Author\n------\n%s\n\n", tmp_workflow->author);
-					expand_escapes(expanded_field, tmp_workflow->abstract);
-					(print_json) ? my_printf("Abstract\\n--------\\n%s\\n\\n", expanded_field) : printf("Abstract\n--------\n%s\n\n", tmp_workflow->abstract);
+					if (tmp_workflow->author) {
+						expand_escapes(expanded_field, tmp_workflow->author);
+						(print_json) ? my_printf("Author\\n------\\n%s\\n\\n", expanded_field) : printf("Author\n------\n%s\n\n", tmp_workflow->author);
+					}
+					if (tmp_workflow->abstract) {
+						expand_escapes(expanded_field, tmp_workflow->abstract);
+						(print_json) ? my_printf("Abstract\\n--------\\n%s\\n\\n", expanded_field) : printf("Abstract\n--------\n%s\n\n", tmp_workflow->abstract);
+					}
 					if (tmp_workflow->url) {
 						expand_escapes(expanded_field, tmp_workflow->url);
 						(print_json) ? my_printf("URL\\n--------\\n%s\\n\\n", expanded_field) : printf("URL\n--------\n%s\n\n", tmp_workflow->url);

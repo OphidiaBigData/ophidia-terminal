@@ -83,11 +83,11 @@ int oph_workflow_load(char *json_string, char *username, oph_workflow ** workflo
 		    "run", &run, "output_format", &output_format, "host_partition", &host_partition, "url", &url, "nhost", &nhosts, "nthreads", &nthreads, "project", &project);
 
 	//add global vars
-	if (!name || !author || !abstract) {
+	if (!name) {
 		oph_workflow_free(*workflow);
 		if (jansson)
 			json_decref(jansson);
-		(print_json) ? my_fprintf(stderr, "Error: there is no name or author or abstract\\n\\n") : fprintf(stderr, "\e[1;31mError: there is no name or author or abstract\e[0m\n\n");
+		(print_json) ? my_fprintf(stderr, "Error: workflow has no name\\n\\n") : fprintf(stderr, "\e[1;31mError: workflow has no name\e[0m\n\n");
 		return OPH_WORKFLOW_EXIT_BAD_PARAM_ERROR;
 	}
 	(*workflow)->name = (char *) strdup((const char *) name);
@@ -98,21 +98,25 @@ int oph_workflow_load(char *json_string, char *username, oph_workflow ** workflo
 		(print_json) ? my_fprintf(stderr, "Error: name allocation\\n\\n") : fprintf(stderr, "\e[1;31mError: name allocation\e[0m\n\n");
 		return OPH_WORKFLOW_EXIT_MEMORY_ERROR;
 	}
-	(*workflow)->author = (char *) strdup((const char *) author);
-	if (!((*workflow)->author)) {
-		oph_workflow_free(*workflow);
-		if (jansson)
-			json_decref(jansson);
-		(print_json) ? my_fprintf(stderr, "Error: author allocation\\n\\n") : fprintf(stderr, "\e[1;31mError: author allocation\e[0m\n\n");
-		return OPH_WORKFLOW_EXIT_MEMORY_ERROR;
+	if (author && strlen(author)) {
+		(*workflow)->author = (char *) strdup((const char *) author);
+		if (!((*workflow)->author)) {
+			oph_workflow_free(*workflow);
+			if (jansson)
+				json_decref(jansson);
+			(print_json) ? my_fprintf(stderr, "Error: author allocation\\n\\n") : fprintf(stderr, "\e[1;31mError: author allocation\e[0m\n\n");
+			return OPH_WORKFLOW_EXIT_MEMORY_ERROR;
+		}
 	}
-	(*workflow)->abstract = (char *) strdup((const char *) abstract);
-	if (!((*workflow)->abstract)) {
-		oph_workflow_free(*workflow);
-		if (jansson)
-			json_decref(jansson);
-		(print_json) ? my_fprintf(stderr, "Error: abstract allocation\\n\\n") : fprintf(stderr, "\e[1;31mError: abstract allocation\e[0m\n\n");
-		return OPH_WORKFLOW_EXIT_MEMORY_ERROR;
+	if (abstract && strlen(abstract)) {
+		(*workflow)->abstract = (char *) strdup((const char *) abstract);
+		if (!((*workflow)->abstract)) {
+			oph_workflow_free(*workflow);
+			if (jansson)
+				json_decref(jansson);
+			(print_json) ? my_fprintf(stderr, "Error: abstract allocation\\n\\n") : fprintf(stderr, "\e[1;31mError: abstract allocation\e[0m\n\n");
+			return OPH_WORKFLOW_EXIT_MEMORY_ERROR;
+		}
 	}
 	if (url && strlen(url)) {
 		(*workflow)->url = (char *) strdup((const char *) url);
@@ -303,8 +307,8 @@ int oph_workflow_load(char *json_string, char *username, oph_workflow ** workflo
 			return OPH_WORKFLOW_EXIT_GENERIC_ERROR;
 		}
 		//unpack name and operator
-		char *name = NULL, *operator= NULL, *on_error_task = NULL, *on_exit_task = NULL, *run_task = NULL;
-		json_unpack(task, "{s?s,s?s,s?s,s?s,s?s}", "name", &name, "operator", &operator, "on_error", &on_error_task, "on_exit", &on_exit_task, "run", &run_task);
+		char *name = NULL, *operator= NULL, *on_error_task = NULL, *on_exit_task = NULL, *run_task = NULL, *type = NULL;
+		json_unpack(task, "{s?s,s?s,s?s,s?s,s?s,s?s}", "name", &name, "operator", &operator, "on_error", &on_error_task, "on_exit", &on_exit_task, "run", &run_task, "type", &type);
 
 		//add name and operator
 		if (!name || !operator) {
@@ -328,6 +332,37 @@ int oph_workflow_load(char *json_string, char *username, oph_workflow ** workflo
 			if (jansson)
 				json_decref(jansson);
 			(print_json) ? my_fprintf(stderr, "Error: task %d operator allocation\\n\\n", i) : fprintf(stderr, "\e[1;31mError: task %d operator allocation\e[0m\n\n", i);
+			return OPH_WORKFLOW_EXIT_MEMORY_ERROR;
+		}
+		if (type) {
+			if (strcmp(type, "ophidia") && strcmp(type, "cdo") && strcmp(type, "generic") && strcmp(type, "control")) {
+				oph_workflow_free(*workflow);
+				if (jansson)
+					json_decref(jansson);
+				(print_json) ? my_fprintf(stderr, "Error: task %d type not allowed\\n\\n", i) : fprintf(stderr, "\e[1;31mError: task %d type not allowed\e[0m\n\n", i);
+				return OPH_WORKFLOW_EXIT_BAD_PARAM_ERROR;
+			}
+			(*workflow)->tasks[i].type = (char *) strdup((const char *) type);
+			if (!strcmp(type, "control")) {
+				char tmp[5 + strlen((*workflow)->tasks[i].operator)];
+				sprintf(tmp, "oph_%s", (*workflow)->tasks[i].operator);
+				if (strcmp(tmp, OPH_OPERATOR_FOR) && strcmp(tmp, OPH_OPERATOR_ENDFOR) && strcmp(tmp, OPH_OPERATOR_IF) && strcmp(tmp, OPH_OPERATOR_ELSEIF)
+				    && strcmp(tmp, OPH_OPERATOR_ELSE) && strcmp(tmp, OPH_OPERATOR_ENDIF) && strcmp(tmp, OPH_OPERATOR_WAIT) && strcmp(tmp, OPH_OPERATOR_SET)) {
+					oph_workflow_free(*workflow);
+					if (jansson)
+						json_decref(jansson);
+					(print_json) ? my_fprintf(stderr, "Error: task %d operation not allowed\\n\\n", i) : fprintf(stderr, "\e[1;31mError: task %d operation not allowed\e[0m\n\n",
+																     i);
+					return OPH_WORKFLOW_EXIT_BAD_PARAM_ERROR;
+				}
+			}
+		} else
+			(*workflow)->tasks[i].type = (char *) strdup("ophidia");
+		if (!((*workflow)->tasks[i].type)) {
+			oph_workflow_free(*workflow);
+			if (jansson)
+				json_decref(jansson);
+			(print_json) ? my_fprintf(stderr, "Error: task %d type allocation\\n\\n", i) : fprintf(stderr, "\e[1;31mError: task %d type allocation\e[0m\n\n", i);
 			return OPH_WORKFLOW_EXIT_MEMORY_ERROR;
 		}
 		//unpack arguments
@@ -493,9 +528,10 @@ int oph_workflow_load(char *json_string, char *username, oph_workflow ** workflo
 								return OPH_WORKFLOW_EXIT_BAD_PARAM_ERROR;
 							}
 							(*workflow)->tasks[i].deps[j].type = (char *) strdup((const char *) type);
-						} else {
+						} else if (argument)
+							(*workflow)->tasks[i].deps[j].type = (char *) strdup((const char *) "all");
+						else
 							(*workflow)->tasks[i].deps[j].type = (char *) strdup((const char *) "embedded");
-						}
 						if (!((*workflow)->tasks[i].deps[j].type)) {
 							oph_workflow_free(*workflow);
 							if (jansson)
@@ -562,7 +598,7 @@ int oph_workflow_load(char *json_string, char *username, oph_workflow ** workflo
 				(*workflow)->tasks[i].retry_num = -1;
 			else if (!strcmp(on_error_task, OPH_WORKFLOW_CONTINUE))
 				(*workflow)->tasks[i].retry_num = 0;
-			else if (!strcmp(on_error_task, OPH_WORKFLOW_BREAK))
+			else if (!strcmp(on_error_task, OPH_WORKFLOW_BREAK) || !strcmp(on_error_task, OPH_WORKFLOW_ABORT))
 				(*workflow)->tasks[i].retry_num = 1;
 			else if (!strncmp(on_error_task, OPH_WORKFLOW_REPEAT, strlen(OPH_WORKFLOW_REPEAT))) {
 				on_error_task += strlen(OPH_WORKFLOW_REPEAT);

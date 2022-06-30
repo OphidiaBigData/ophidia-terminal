@@ -17,6 +17,7 @@
 */
 
 #include "oph_term_client.h"
+#include "oph_workflow_define.h"
 #include "soapH.h"
 #include "oph.nsmap"
 #include "gsi.h"
@@ -306,7 +307,7 @@ void oph_execute(struct soap *soap, xsd__string query, char *wps, char **newsess
 							}
 							if (strstr(response_global.response, "\"title\": \"ERROR\"")
 							    || (strstr(response_global.response, "\"title\": \"Workflow Status\"")
-								&& strstr(response_global.response, "\"message\": \"OPH_STATUS_ERROR\"")))
+								&& strstr(response_global.response, "\"message\": \"" OPH_ODB_STATUS_ERROR_STR "\"")))
 								*return_value = OPH_TERM_GENERIC_ERROR;
 						}
 					} else {
@@ -337,7 +338,7 @@ void oph_execute(struct soap *soap, xsd__string query, char *wps, char **newsess
 							}
 							if (strstr(response_global.response, "\"title\": \"ERROR\"")
 							    || (strstr(response_global.response, "\"title\": \"Workflow Status\"")
-								&& strstr(response_global.response, "\"message\": \"OPH_STATUS_ERROR\"")))
+								&& strstr(response_global.response, "\"message\": \"" OPH_ODB_STATUS_ERROR_STR "\"")))
 								*return_value = OPH_TERM_GENERIC_ERROR;
 						}
 
