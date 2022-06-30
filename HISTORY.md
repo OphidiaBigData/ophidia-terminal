@@ -6,6 +6,10 @@
 - Bug in job status colours in OPH_RESUME  
 - Bugs in configuration script for code building
 
+### Changed:
+
+- Improve JSON Request handler [#22](https://github.com/OphidiaBigData/ophidia-terminal/pull/22/)
+
 ## v1.6.0 - 2021-03-05
 
 ### Added:
