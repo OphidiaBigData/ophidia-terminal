@@ -1,4 +1,11 @@
 
+## Next release
+
+### Fixed:
+
+- Bug in job status colours in OPH_RESUME  
+- Bugs in configuration script for code building
+
 ## v1.6.0 - 2021-03-05
 
 ### Added:
