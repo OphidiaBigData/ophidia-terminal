@@ -333,17 +333,17 @@ int startup_opt_setup(int argc, char *argv[], char *envp[], HASHTBL * hashtbl, c
 	int opt = 0;
 	int long_index = 0;
 	static struct option long_options[] = {
-		{"username", required_argument, 0, 'u'},
-		{"password", required_argument, 0, 'p'},
-		{"hostname", required_argument, 0, 'H'},
-		{"port", required_argument, 0, 'P'},
-		{"help", no_argument, 0, 'h'},
-		{"version", no_argument, 0, 'v'},
-		{"execute", required_argument, 0, 'e'},
-		{"workflow", required_argument, 0, 'w'},
-		{"args", required_argument, 0, 'a'},
-		{"json", no_argument, 0, 'j'},
-		{0, 0, 0, 0}
+		{ "username", required_argument, 0, 'u' },
+		{ "password", required_argument, 0, 'p' },
+		{ "hostname", required_argument, 0, 'H' },
+		{ "port", required_argument, 0, 'P' },
+		{ "help", no_argument, 0, 'h' },
+		{ "version", no_argument, 0, 'v' },
+		{ "execute", required_argument, 0, 'e' },
+		{ "workflow", required_argument, 0, 'w' },
+		{ "args", required_argument, 0, 'a' },
+		{ "json", no_argument, 0, 'j' },
+		{ 0, 0, 0, 0 }
 	};
 
 	//preset viewer-related variables OPH_TERM_VIEWER and OPH_TERM_IMGS
