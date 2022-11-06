@@ -1,4 +1,10 @@
 
+## Next release
+
+### Changed:
+
+- Enable the possibility to use '=' in parameter values
+
 ## v1.7.0 - 2022-07-01
 
 ### Fixed:

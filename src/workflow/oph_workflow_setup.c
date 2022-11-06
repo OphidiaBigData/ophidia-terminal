@@ -235,13 +235,12 @@ int oph_workflow_validate(oph_workflow * workflow)
 						return OPH_WORKFLOW_EXIT_BAD_PARAM_ERROR;
 					}
 					if (workflow->tasks[i].arguments_values[j][k] == OPH_WORKFLOW_KV_SEPARATOR2[0]) {
-						(print_json) ? my_fprintf(stderr, "Wrong value '%s' for key '%s': '%s' is reserved\\n", workflow->tasks[i].arguments_values[j],
+						(print_json) ? my_fprintf(stderr, "Value '%s' for key '%s' is not recommended: '%s' was reserved\\n", workflow->tasks[i].arguments_values[j],
 									  workflow->tasks[i].arguments_keys[j], OPH_WORKFLOW_KV_SEPARATOR2) : fprintf(stderr,
-																		      "\e[1;31mWrong value '%s' for key '%s': '%s' is reserved\e[0m\n",
+																		      "\e[2mValue '%s' for key '%s' is not recommended: '%s' was reserved\e[0m\n",
 																		      workflow->tasks[i].arguments_values[j],
 																		      workflow->tasks[i].arguments_keys[j],
 																		      OPH_WORKFLOW_KV_SEPARATOR2);
-						return OPH_WORKFLOW_EXIT_BAD_PARAM_ERROR;
 					}
 				}
 			}
