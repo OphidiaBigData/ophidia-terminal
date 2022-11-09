@@ -1,6 +1,10 @@
 
 ## Next release
 
+### Fixed:
+
+- Bug in parsing for comments in JSON Requests
+
 ### Changed:
 
 - Enable the possibility to use '=' in parameter values
@@ -9,7 +13,7 @@
 
 ### Fixed:
 
-- Bug in job status colours in OPH_RESUME  
+- Bug in job status colours in OPH_RESUME
 - Bugs in configuration script for code building
 
 ### Changed:
