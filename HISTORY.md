@@ -1,9 +1,13 @@
 
-## v1.7.1 - 2022-12-22
+## v1.7.1 - 2023-01-05
 
 ### Fixed:
 
 - Bug in parsing for comments in JSON Requests
+
+### Added:
+
+- Support for CentOS 9
 
 ### Changed:
 
