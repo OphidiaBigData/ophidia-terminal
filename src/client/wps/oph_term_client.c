@@ -759,7 +759,7 @@ void oph_execute(char *query, char **newsession, int *return_value, char **out_r
 			n += snprintf(wrapped_query + n, max_size - n, WRAPPING_WORKFLOW4_1);
 		}
 
-		n += snprintf(wrapped_query + n, max_size - n, WRAPPING_WORKFLOW5);
+	      n += snprintf(wrapped_query + n, max_size - n, WRAPPING_WORKFLOW5, operator? operator:"Task 0");
 	      n += snprintf(wrapped_query + n, max_size - n, "%s", operator? operator:"");
 		n += snprintf(wrapped_query + n, max_size - n, WRAPPING_WORKFLOW5_1);
 
