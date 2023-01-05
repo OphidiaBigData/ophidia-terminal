@@ -133,7 +133,7 @@ void oph_execute(struct soap *soap, xsd__string query, char *wps, char **newsess
 			n += snprintf(wrapped_query + n, max_size - n, WRAPPING_WORKFLOW4_1);
 		}
 
-		n += snprintf(wrapped_query + n, max_size - n, WRAPPING_WORKFLOW5);
+	      n += snprintf(wrapped_query + n, max_size - n, WRAPPING_WORKFLOW5, operator? operator:"Task 0");
 	      n += snprintf(wrapped_query + n, max_size - n, "%s", operator? operator:"");
 		n += snprintf(wrapped_query + n, max_size - n, WRAPPING_WORKFLOW5_1);
 
