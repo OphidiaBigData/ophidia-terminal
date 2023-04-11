@@ -1,4 +1,10 @@
 
+## Next release
+
+### Fixed:
+
+- Bug in plotting the tasks describing selections and loops in JSON Requests
+
 ## v1.7.1 - 2023-01-20
 
 ### Fixed:

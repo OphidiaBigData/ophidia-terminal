@@ -586,6 +586,7 @@ int oph_workflow_print(oph_workflow * workflow, int save_img, int open_img, char
 		char dot_string[2 * OPH_WORKFLOW_DOT_MAX_LEN];
 		size_t cc = 0, i, j;
 		int k, kk;
+		char offset, is_for, is_if;
 
 		// name
 		for (i = 0; i < strlen(workflow->name); i++)
@@ -597,14 +598,11 @@ int oph_workflow_print(oph_workflow * workflow, int save_img, int open_img, char
 		for (i = 0; i < (size_t) workflow->tasks_num; i++) {
 			cc += snprintf(dot_string + cc, OPH_WORKFLOW_DOT_MAX_LEN - cc, "%d [label=\"", (int) i);
 			cc += snprintf(dot_string + cc, OPH_WORKFLOW_DOT_MAX_LEN - cc, "%.20s\\n%.20s", workflow->tasks[i].name, workflow->tasks[i].operator);
-			if (!strcasecmp(workflow->tasks[i].operator, OPH_OPERATOR_FOR) || !strcasecmp(workflow->tasks[i].operator, OPH_OPERATOR_ENDFOR)) {
-				cc += snprintf(dot_string + cc, OPH_WORKFLOW_DOT_MAX_LEN - cc, "\",shape=hexagon] ");
-			} else if (!strcasecmp(workflow->tasks[i].operator, OPH_OPERATOR_IF) || !strcasecmp(workflow->tasks[i].operator, OPH_OPERATOR_ELSEIF)
-				   || !strcasecmp(workflow->tasks[i].operator, OPH_OPERATOR_ELSE) || !strcasecmp(workflow->tasks[i].operator, OPH_OPERATOR_ENDIF)) {
-				cc += snprintf(dot_string + cc, OPH_WORKFLOW_DOT_MAX_LEN - cc, "\",shape=diamond] ");
-			} else {
-				cc += snprintf(dot_string + cc, OPH_WORKFLOW_DOT_MAX_LEN - cc, "\"] ");
-			}
+			offset = strcmp(workflow->tasks[i].type, "control") ? 0 : 4;
+			is_for = !strcasecmp(workflow->tasks[i].operator, OPH_OPERATOR_FOR + offset) || !strcasecmp(workflow->tasks[i].operator, OPH_OPERATOR_ENDFOR + offset);
+			is_if = !strcasecmp(workflow->tasks[i].operator, OPH_OPERATOR_IF + offset) || !strcasecmp(workflow->tasks[i].operator, OPH_OPERATOR_ELSEIF + offset)
+			    || !strcasecmp(workflow->tasks[i].operator, OPH_OPERATOR_ELSE + offset) || !strcasecmp(workflow->tasks[i].operator, OPH_OPERATOR_ENDIF + offset);
+			cc += snprintf(dot_string + cc, OPH_WORKFLOW_DOT_MAX_LEN - cc, is_for ? "\",shape=hexagon] " : (is_if ? "\",shape=diamond] " : "\",shape=circle] "));
 		}
 
 		// edges
@@ -739,6 +737,7 @@ int oph_workflow_print_status(oph_workflow * workflow, int save_img, int open_im
 				workflow->name[i] = '_';
 		cc += snprintf(dot_string + cc, OPH_WORKFLOW_DOT_MAX_LEN - cc, "digraph %s {style=rounded; node [style=filled,width=2.3,penwidth=3] ", workflow->name);
 
+		char offset2, is_for, is_if;
 		char color[OPH_WORKFLOW_RANK_SIZE], doublecircle;
 
 		// nodes
@@ -785,14 +784,11 @@ int oph_workflow_print_status(oph_workflow * workflow, int save_img, int open_im
 			if (doublecircle)
 				cc += snprintf(dot_string + cc, OPH_WORKFLOW_DOT_MAX_LEN - cc, " shape=doublecircle");
 			else {
-				if (!strcasecmp(workflow->tasks[i].operator, OPH_OPERATOR_FOR) || !strcasecmp(workflow->tasks[i].operator, OPH_OPERATOR_ENDFOR)) {
-					cc += snprintf(dot_string + cc, OPH_WORKFLOW_DOT_MAX_LEN - cc, " shape=hexagon");
-				} else if (!strcasecmp(workflow->tasks[i].operator, OPH_OPERATOR_IF) || !strcasecmp(workflow->tasks[i].operator, OPH_OPERATOR_ELSEIF)
-					   || !strcasecmp(workflow->tasks[i].operator, OPH_OPERATOR_ELSE) || !strcasecmp(workflow->tasks[i].operator, OPH_OPERATOR_ENDIF)) {
-					cc += snprintf(dot_string + cc, OPH_WORKFLOW_DOT_MAX_LEN - cc, " shape=diamond");
-				} else {
-					cc += snprintf(dot_string + cc, OPH_WORKFLOW_DOT_MAX_LEN - cc, " shape=circle");
-				}
+				offset2 = strcmp(workflow->tasks[i].type, "control") ? 0 : 4;
+				is_for = !strcasecmp(workflow->tasks[i].operator, OPH_OPERATOR_FOR + offset2) || !strcasecmp(workflow->tasks[i].operator, OPH_OPERATOR_ENDFOR + offset2);
+				is_if = !strcasecmp(workflow->tasks[i].operator, OPH_OPERATOR_IF + offset2) || !strcasecmp(workflow->tasks[i].operator, OPH_OPERATOR_ELSEIF + offset2)
+				    || !strcasecmp(workflow->tasks[i].operator, OPH_OPERATOR_ELSE + offset2) || !strcasecmp(workflow->tasks[i].operator, OPH_OPERATOR_ENDIF + offset2);
+				cc += snprintf(dot_string + cc, OPH_WORKFLOW_DOT_MAX_LEN - cc, is_for ? " shape=hexagon" : (is_if ? " shape=diamond" : " shape=circle"));
 			}
 			cc += snprintf(dot_string + cc, OPH_WORKFLOW_DOT_MAX_LEN - cc, "] ");
 		}
