@@ -793,7 +793,7 @@ int oph_term_env_strtolower(char **string)
 }
 
 // Load operator arguments from XML
-int oph_term_env_load_xml(const char *xmlfilename, char **operator_name, operator_argument ** operator_args, size_t *operator_args_size)
+int oph_term_env_load_xml(const char *xmlfilename, char **operator_name, operator_argument ** operator_args, size_t * operator_args_size)
 {
 	if (!xmlfilename || !operator_args || !operator_args_size) {
 		(print_json) ? my_fprintf(stderr, "Null parameters\\n") : fprintf(stderr, "\e[1;31mNull parameters\e[0m\n");
