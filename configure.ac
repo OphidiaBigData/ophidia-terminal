@@ -17,7 +17,7 @@
 #
 
 AC_PREREQ([2.60])
-AC_INIT([ophidia-terminal], [1.11.0], [ophidia-info@cmcc.it])
+AC_INIT([ophidia-terminal], [1.8.0], [ophidia-info@cmcc.it])
 AC_CONFIG_SRCDIR([src])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_AUX_DIR([config])
@@ -361,7 +361,7 @@ fi
 
 xml_ssl_check=
 AC_ARG_ENABLE(xml_ssl_check,
-       [  --disable-xml-ssl-check    [Disable verification of SSL certificates when 
+       [  --disable-xml-ssl-check    [Disable verification of SSL certificates when
 				downloading operators XML. (Enabled by default)]],
        [
             if test "x$enableval" = "xno"; then
@@ -399,7 +399,7 @@ case "${host}" in
                         SAMPLE_EXTRA_LIBS="-lsocket"
                         ;;
         *-*-linux*)     PLATFORM=LINUX
-                        
+
 			            ;;
                 *-*-cygwin*)    PLATFORM=CYGWIN
                         ;;

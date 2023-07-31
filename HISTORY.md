@@ -1,5 +1,5 @@
 
-## v1.11.0 - 2023-07-28
+## v1.8.0 - 2023-07-31
 
 ### Fixed:
 
@@ -50,7 +50,7 @@
 
 ### Changed:
 
-- Update 'deploy_status' command to be compliant with IM interface [#19](https://github.com/OphidiaBigData/ophidia-terminal/pull/19/) 
+- Update 'deploy_status' command to be compliant with IM interface [#19](https://github.com/OphidiaBigData/ophidia-terminal/pull/19/)
 - Name of parameter 'return' and mimeType of WPS interface
 - Color associated with status 'OPH_STATUS_SKIPPED'
 - Default host partition to 'auto'
@@ -110,7 +110,7 @@
 
 ### Fixed:
 
-- Bug in buffer overflow check during creation of dot string 
+- Bug in buffer overflow check during creation of dot string
 - Bug [#4](https://github.com/OphidiaBigData/ophidia-terminal/issues/4)
 - Memory leaks when loading XML files
 - Bug in handling oph_base_src_path in case of workflows
@@ -120,7 +120,7 @@
 - URL to workflow header [#5](https://github.com/OphidiaBigData/ophidia-terminal/pull/5)
 - Control for known errors in WPS client
 - 'creation time' to history when calling 'resume' command
-- Print execution time of commands 
+- Print execution time of commands
 - OPH_CDD in submitted workflows
 - 3 new aliases: mkdird, rmd, mvd
 - Single call to get all configuration parameters from server
@@ -182,7 +182,7 @@
 
 ### Changed:
 
-- Output of resume command to also show the current workflow status 
+- Output of resume command to also show the current workflow status
 
 ## v0.10.5 - 2016-08-24
 
@@ -206,7 +206,7 @@
 ## v0.10.1 - 2016-06-27
 
 ### Fixed:
- 
+
 - Version number in files
 
 ## v0.10.0 - 2016-06-23
@@ -217,4 +217,4 @@
 
 ## v0.9.0 - 2016-02-01
 
- - Initial public release 
+ - Initial public release
