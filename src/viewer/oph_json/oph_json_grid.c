@@ -31,7 +31,7 @@
 /***********OPH_JSON_OBJ_GRID INTERNAL FUNCTIONS***********/
 
 // Free a grid object contents
-int oph_json_free_grid(oph_json_obj_grid * obj)
+int oph_json_free_grid(oph_json_obj_grid *obj)
 {
 	if (obj) {
 		if (obj->description) {
@@ -92,7 +92,7 @@ int oph_json_free_grid(oph_json_obj_grid * obj)
 
 /***********OPH_JSON_OBJ_GRID FUNCTIONS***********/
 
-int oph_json_add_grid(oph_json * json, const char *objkey, const char *title, const char *description, const char **keys, int keys_num, const char **fieldtypes, int fieldtypes_num)
+int oph_json_add_grid(oph_json *json, const char *objkey, const char *title, const char *description, const char **keys, int keys_num, const char **fieldtypes, int fieldtypes_num)
 {
 	if (!json || !objkey || !title || !keys || keys_num < 1 || !fieldtypes || fieldtypes_num < 1) {
 		return OPH_JSON_BAD_PARAM_ERROR;
@@ -377,7 +377,7 @@ int oph_json_add_grid(oph_json * json, const char *objkey, const char *title, co
 	return OPH_JSON_SUCCESS;
 }
 
-int oph_json_add_grid_row(oph_json * json, const char *objkey, const char **values)
+int oph_json_add_grid_row(oph_json *json, const char *objkey, const char **values)
 {
 	if (!json || !objkey || !values) {
 		return OPH_JSON_BAD_PARAM_ERROR;

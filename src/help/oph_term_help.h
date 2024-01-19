@@ -859,13 +859,15 @@ int oph_term_help(const char *cmd);
 \tOutput format of the command 'view'.\n\
 \tPossible values are:\n\
 \t\t- classic : print all the data in JSON Response;\n\
-\t\t- compact : print the JSON Response without the Workflow Task List.\n"
+\t\t- compact : print the JSON Response without the Workflow Task List;\n\
+\t\t- extended : print all the data in JSON Response, including extensions.\n"
 #define OPH_TERM_HELP_OPH_TERM_FORMAT_LONG2 \
 "OPH_TERM_FORMAT\\n\
 \\tOutput format of the command 'view'.\\n\
 \\tPossible values are:\\n\
 \\t\\t- classic : print all the data in JSON Response;\\n\
-\\t\\t- compact : print the JSON Response without the Workflow Task List.\\n"
+\\t\\t- compact : print the JSON Response without the Workflow Task List;\\n\
+\\t\\t- extended : print all the data in JSON Response, including extensions.\\n"
 
 #ifndef NO_WORKFLOW
 #define OPH_TERM_HELP_OPH_TERM_IMGS_SHORT "\"save and/or auto-open images\"\n"

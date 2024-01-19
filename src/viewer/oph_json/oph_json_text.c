@@ -31,7 +31,7 @@
 /***********OPH_JSON_OBJ_TEXT INTERNAL FUNCTIONS***********/
 
 // Free a text object contents
-int oph_json_free_text(oph_json_obj_text * obj)
+int oph_json_free_text(oph_json_obj_text *obj)
 {
 	if (obj) {
 		if (obj->title) {
@@ -48,7 +48,7 @@ int oph_json_free_text(oph_json_obj_text * obj)
 
 /***********OPH_JSON_OBJ_TEXT FUNCTIONS***********/
 
-int oph_json_add_text(oph_json * json, const char *objkey, const char *title, const char *message)
+int oph_json_add_text(oph_json *json, const char *objkey, const char *title, const char *message)
 {
 	if (!json || !objkey || !title) {
 		return OPH_JSON_BAD_PARAM_ERROR;
