@@ -46,9 +46,10 @@
 #define OPH_WORKFLOW_EXIT_ACTION_DELETE				1
 #define OPH_WORKFLOW_EXIT_ACTION_DELETECONTAINER	2
 
-#define OPH_WORKFLOW_CLASSIC	"classic"
-#define OPH_WORKFLOW_COMPACT	"compact"
-#define OPH_WORKFLOW_EXTENDED	"extended"
+#define OPH_WORKFLOW_CLASSIC			"classic"
+#define OPH_WORKFLOW_COMPACT			"compact"
+#define OPH_WORKFLOW_EXTENDED			"extended"
+#define OPH_WORKFLOW_EXTENDED_COMPACT	"extended_compact"
 
 #define OPH_OPERATOR_FOR		"oph_for"
 #define OPH_OPERATOR_ENDFOR		"oph_endfor"

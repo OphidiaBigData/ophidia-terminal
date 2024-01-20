@@ -729,7 +729,7 @@ int oph_workflow_print_status(oph_workflow *workflow, int save_img, int open_img
 		// create dot string for dag
 		char dot_string[2 * OPH_WORKFLOW_DOT_MAX_LEN];
 		size_t cc = 0, i, j;
-		int k, kk, offset = workflow->output_format ? 4 : 0;
+		int k, kk, offset = workflow->output_format % 2 ? 0 : 4;
 
 		// name
 		for (i = 0; i < strlen(workflow->name); i++)

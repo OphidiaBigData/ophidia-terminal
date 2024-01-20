@@ -2807,9 +2807,10 @@ int main(int argc, char **argv, char **envp)
 				}
 				continue;
 			}
-			if (!hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_FORMAT) ||
-			    (strcmp((char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_FORMAT), "classic") && strcmp((char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_FORMAT), "compact")
-			     && strcmp((char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_FORMAT), "extended"))
+			if (!hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_FORMAT) || (strcmp((char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_FORMAT), OPH_WORKFLOW_CLASSIC)
+										    && strcmp((char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_FORMAT), OPH_WORKFLOW_COMPACT)
+										    && strcmp((char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_FORMAT), OPH_WORKFLOW_EXTENDED)
+										    && strcmp((char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_TERM_FORMAT), OPH_WORKFLOW_EXTENDED_COMPACT))
 			    ) {
 				(print_json) ? my_fprintf(stderr, "OPH_TERM_FORMAT not set or incorrect [CODE %d]\\n", OPH_TERM_INVALID_PARAM_VALUE) : fprintf(stderr,
 																			       "\e[1;31mOPH_TERM_FORMAT not set or incorrect [CODE %d]\e[0m\n",
