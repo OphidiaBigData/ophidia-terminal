@@ -359,10 +359,9 @@ if test "x${base_src_path}" = "xyes"; then
     OPT+=" -DCHDDIR"
 fi
 
-xml_ssl_check=
+xml_ssl_check="yes"
 AC_ARG_ENABLE(xml_ssl_check,
-       [  --disable-xml-ssl-check    [Disable verification of SSL certificates when
-				downloading operators XML. (Enabled by default)]],
+       [  --disable-xml-ssl-check [Disable verification of SSL certificates when downloading operators XML. (Enabled by default)]],
        [
             if test "x$enableval" = "xno"; then
                 xml_ssl_check="no"
@@ -375,6 +374,23 @@ AC_ARG_ENABLE(xml_ssl_check,
 if test "x${xml_ssl_check}" = "xno"; then
     AC_MSG_NOTICE("Disabled XML SSL certificate check")
     OPT+=" -DNO_XML_SSL_CHECK"
+fi
+
+xml_removal="yes"
+AC_ARG_ENABLE(xml_removal,
+        [  --disable-xml-removal [Disable auto-removal of XML files. (Enabled by default)]],
+        [
+            if test "x$enableval" = "xno"; then
+                xml_removal="no"
+            else
+                xml_removal="yes"
+            fi
+        ],
+        [xml_removal="yes" ]
+        )
+if test "x${xml_removal}" = "xno"; then
+    AC_MSG_NOTICE("Disabled XML auto-removal")
+    OPT+=" -DNO_XML_REMOVAL"
 fi
 
 auth_bearer="no"

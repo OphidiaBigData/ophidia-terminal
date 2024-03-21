@@ -2341,12 +2341,14 @@ int main(int argc, char **argv, char **envp)
 			if (oph_term_env_oph_get_config
 			    (OPH_TERM_XML_URL_KEY, hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST), hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT), &oph_term_return, &tmpurl, _user, _passwd, 1,
 			     hashtbl)) {
-				(print_json) ? my_fprintf(stderr, "Warning: Unable to get XML folder\\n") : fprintf(stderr, "\e[2mWarning: Unable to get XML folder\e[0m\n");
+				(print_json) ? my_fprintf(stderr, "Warning: Unable to get XML folder, trying the default\\n") : fprintf(stderr,
+																	"\e[2mWarning: Unable to get XML folder, trying the default\e[0m\n");
 				oph_term_return = OPH_TERM_SUCCESS;
 				if (tmpurl) {
 					free(tmpurl);
 					tmpurl = NULL;
 				}
+				tmpurl = strdup(OPH_TERM_XML_URL_DEFAULT);
 			}
 			if (tmpurl) {
 				snprintf(xml_path_extended, OPH_TERM_MAX_LEN, "%s/%s", xml_path, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST));
@@ -4905,14 +4907,17 @@ int main(int argc, char **argv, char **envp)
 					if (oph_term_env_oph_get_config
 					    (OPH_TERM_XML_URL_KEY, hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST), hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT), &oph_term_return, &tmpurl,
 					     _user, _passwd, 1, hashtbl)) {
-						(print_json) ? my_fprintf(stderr, "Unable to get XML folder [CODE %d]\\n", OPH_TERM_GENERIC_ERROR) : fprintf(stderr,
-																			     "\e[1;31mUnable to get XML folder [CODE %d]\e[0m\n",
-																			     OPH_TERM_GENERIC_ERROR);
-						if (print_json)
-							print_oph_term_output_json(hashtbl);
-						if (exec_one_statement)
-							break;
-						continue;
+						(print_json) ? my_fprintf(stderr, "Unable to get XML folder [CODE %d], trying the default\\n", OPH_TERM_GENERIC_ERROR) : fprintf(stderr,
+																						 "\e[1;31mUnable to get XML folder [CODE %d], trying the default\e[0m\n",
+																						 OPH_TERM_GENERIC_ERROR);
+						tmpurl = strdup(OPH_TERM_XML_URL_DEFAULT);
+						if (!tmpurl) {
+							if (print_json)
+								print_oph_term_output_json(hashtbl);
+							if (exec_one_statement)
+								break;
+							continue;
+						}
 					}
 
 					snprintf(xml_path_extended, OPH_TERM_MAX_LEN, "%s/%s", xml_path, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST));
@@ -4996,14 +5001,17 @@ int main(int argc, char **argv, char **envp)
 					if (oph_term_env_oph_get_config
 					    (OPH_TERM_XML_URL_KEY, hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST), hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_PORT), &oph_term_return, &tmpurl,
 					     _user, _passwd, 1, hashtbl)) {
-						(print_json) ? my_fprintf(stderr, "Unable to get XML folder [CODE %d]\\n", OPH_TERM_GENERIC_ERROR) : fprintf(stderr,
-																			     "\e[1;31mUnable to get XML folder [CODE %d]\e[0m\n",
-																			     OPH_TERM_GENERIC_ERROR);
-						if (print_json)
-							print_oph_term_output_json(hashtbl);
-						if (exec_one_statement)
-							break;
-						continue;
+						(print_json) ? my_fprintf(stderr, "Unable to get XML folder [CODE %d], trying the default\\n", OPH_TERM_GENERIC_ERROR) : fprintf(stderr,
+																						 "\e[1;31mUnable to get XML folder [CODE %d], trying the default\e[0m\n",
+																						 OPH_TERM_GENERIC_ERROR);
+						tmpurl = strdup(OPH_TERM_XML_URL_DEFAULT);
+						if (!tmpurl) {
+							if (print_json)
+								print_oph_term_output_json(hashtbl);
+							if (exec_one_statement)
+								break;
+							continue;
+						}
 					}
 
 					snprintf(xml_path_extended, OPH_TERM_MAX_LEN, "%s/%s", xml_path, (char *) hashtbl_get(hashtbl, OPH_TERM_ENV_OPH_SERVER_HOST));

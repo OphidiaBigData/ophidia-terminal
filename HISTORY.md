@@ -1,4 +1,11 @@
 
+## Next release
+
+### Added:
+
+- Option to disable auto-removal of XML files
+- Default value for XML URL to GitHub in case the files cannot be downloaded
+
 ## v1.8.0 - 2023-07-31
 
 ### Fixed:

@@ -41,6 +41,9 @@
 //Other defs
 #include "../oph_term.h"
 
+#define OPH_TERM_XML_URL_DEFAULT	"https://api.github.com/repos/OphidiaBigData/ophidia-analytics-framework/contents/etc/operators_xml"
+#define OPH_TERM_XML_FILE_DEFAULT	"https://raw.githubusercontent.com/OphidiaBigData/ophidia-analytics-framework/master/etc/operators_xml/"
+
 #define OPH_TERM_ENV_OPH_PREFIX			"oph_"
 #define OPH_TERM_ENV_OPH_PREFIX_LEN		4
 #define OPH_TERM_ENV_OPH_MASSIVE		"oph_massive"

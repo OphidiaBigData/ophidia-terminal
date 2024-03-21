@@ -334,6 +334,7 @@ int oph_term_env_update_xml(const char *repoURL, const char *userpwd, const char
 	curl_easy_setopt(curl1, CURLOPT_FOLLOWLOCATION, 1L);
 	curl_easy_setopt(curl1, CURLOPT_WRITEDATA, file);
 	curl_easy_setopt(curl1, CURLOPT_CONNECTTIMEOUT, 10);
+	curl_easy_setopt(curl1, CURLOPT_USERAGENT, "Ophidia Terminal");
 #ifdef NO_XML_SSL_CHECK
 	curl_easy_setopt(curl1, CURLOPT_SSL_VERIFYPEER, 0L);
 #endif
@@ -385,6 +386,7 @@ int oph_term_env_update_xml(const char *repoURL, const char *userpwd, const char
 	curl_easy_setopt(curl1, CURLOPT_NOBODY, 1);
 	curl_easy_setopt(curl1, CURLOPT_FILETIME, 1);
 	curl_easy_setopt(curl1, CURLOPT_CONNECTTIMEOUT, 10);
+	curl_easy_setopt(curl1, CURLOPT_USERAGENT, "Ophidia Terminal");
 #ifdef NO_XML_SSL_CHECK
 	curl_easy_setopt(curl1, CURLOPT_SSL_VERIFYPEER, 0L);
 #endif
@@ -404,6 +406,7 @@ int oph_term_env_update_xml(const char *repoURL, const char *userpwd, const char
 	}
 	curl_easy_setopt(curl2, CURLOPT_FOLLOWLOCATION, 1L);
 	curl_easy_setopt(curl2, CURLOPT_CONNECTTIMEOUT, 10);
+	curl_easy_setopt(curl2, CURLOPT_USERAGENT, "Ophidia Terminal");
 #ifdef NO_XML_SSL_CHECK
 	curl_easy_setopt(curl2, CURLOPT_SSL_VERIFYPEER, 0L);
 #endif
@@ -414,22 +417,35 @@ int oph_term_env_update_xml(const char *repoURL, const char *userpwd, const char
 	(print_json) ? my_printf("Downloading necessary files... ") : printf("Downloading necessary files... ");
 	fflush(stdout);
 	fprintf(log, "Downloading necessary files... \n");
-	while (getline(&line, &n, file) != -1) {
-		ptr = strstr(line, "<a href=\"OPH_");
-		if (!ptr)
-			continue;
+	char github = 0, *next = NULL;
+	while (next || (getline(&line, &n, file) != -1)) {
+		ptr = next ? NULL : strstr(line, "<a href=\"OPH_");
+		if (!ptr) {	// Check for github
+			ptr = strstr(next ? next : line, "{\"name\":\"OPH_");
+			if (!ptr) {
+				if (next)
+					next = NULL;
+				continue;
+			}
+			github = 1;
+		} else
+			github = 0;
 		ptr += 9;
-		ptr2 = strstr(ptr, ".xml\">");
+
+		ptr2 = strstr(ptr, github ? ".xml\"," : ".xml\">");
 		if (!ptr2)
 			continue;
 		ptr2 += 4;
 		size = strlen(ptr) - strlen(ptr2);
+		next = github ? ptr2 : NULL;
+
 		memset(filename, 0, 100);
 		memcpy(filename, ptr, size);
 		filename[size] = '\0';
+		fprintf(log, "%s\n", filename);
 		remote_file_count++;
 		memset(fileURL, 0, OPH_TERM_MAX_LEN);
-		snprintf(fileURL, OPH_TERM_MAX_LEN, "%s%s", fixed_repoURL, filename);
+		snprintf(fileURL, OPH_TERM_MAX_LEN, "%s%s", github ? OPH_TERM_XML_FILE_DEFAULT : fixed_repoURL, filename);
 
 		// ADD TO FILE LIST
 		if (filelist_num == 0) {
@@ -540,6 +556,7 @@ int oph_term_env_update_xml(const char *repoURL, const char *userpwd, const char
 	fclose(file);
 	remove(tmp_file_list);
 
+#ifndef NO_XML_REMOVAL
 	// Remove other local files
 	dirp = opendir(local_dir);
 	if (!dirp) {
@@ -580,6 +597,7 @@ int oph_term_env_update_xml(const char *repoURL, const char *userpwd, const char
 		}
 	}
 	closedir(dirp);
+#endif
 
 	// Print summary
 	(print_json) ? my_printf("Remote XML files: %d - Downloaded XML files: %d - Removed XML files: %d\\n", remote_file_count, downloaded_count,
