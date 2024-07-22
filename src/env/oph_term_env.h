@@ -137,7 +137,7 @@ int oph_term_env_start_xml_parser();
 // Close XML parser
 int oph_term_env_end_xml_parser();
 // Load operator arguments from XML (operator_name[OPH_TERM_MAX_LEN])
-int oph_term_env_load_xml(const char *xmlfilename, char **operator_name, operator_argument ** operator_args, size_t *operator_args_size);
+int oph_term_env_load_xml(const char *xmlfilename, char **operator_name, operator_argument ** operator_args, size_t * operator_args_size);
 
 // Get a property from server
 int oph_term_env_oph_get_config(const char *key, const char *host, const char *port, int *return_value, char **property, const char *user, const char *passwd, int workflow_wrap, HASHTBL * hashtbl);

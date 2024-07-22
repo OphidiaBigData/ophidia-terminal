@@ -62,7 +62,7 @@ extern char *submission_string;
 extern char *command_line;
 
 //Alloc hashtable
-int _oph_term_env_init(HASHTBL **hashtbl, int hashtbl_size)
+int _oph_term_env_init(HASHTBL ** hashtbl, int hashtbl_size)
 {
 	if (!(*hashtbl = hashtbl_create(hashtbl_size, NULL))) {
 		(print_json) ? my_fprintf(stderr, "Error: env_init failed\\n") : fprintf(stderr, "\e[1;31mError: env_init failed\e[0m\n");
@@ -71,13 +71,13 @@ int _oph_term_env_init(HASHTBL **hashtbl, int hashtbl_size)
 	return OPH_TERM_SUCCESS;
 }
 
-int oph_term_env_init(HASHTBL **hashtbl)
+int oph_term_env_init(HASHTBL ** hashtbl)
 {
 	return _oph_term_env_init(hashtbl, env_vars_num * 2);
 }
 
 //Free hashtable
-int oph_term_env_clear(HASHTBL *hashtbl)
+int oph_term_env_clear(HASHTBL * hashtbl)
 {
 	hashtbl_destroy(hashtbl);
 	if (conf_hashtbl) {
@@ -119,7 +119,7 @@ int is_env_var_ok(const char *key)
 }
 
 // Get the list of user-defined variables
-int oph_term_get_user_vars(HASHTBL *hashtbl, char ***user_vars, int *user_vars_num)
+int oph_term_get_user_vars(HASHTBL * hashtbl, char ***user_vars, int *user_vars_num)
 {
 	hash_size n;
 	struct hashnode_s *node;
@@ -169,7 +169,7 @@ int oph_term_get_user_vars(HASHTBL *hashtbl, char ***user_vars, int *user_vars_n
 }
 
 //Print all environment variables
-int oph_term_env(HASHTBL *hashtbl)
+int oph_term_env(HASHTBL * hashtbl)
 {
 	char *value;
 	hash_size n;
@@ -203,7 +203,7 @@ int oph_term_env(HASHTBL *hashtbl)
 }
 
 //Set value for variable key (insert new variable if not present)
-int oph_term_setenv(HASHTBL *hashtbl, const char *key, const char *value)
+int oph_term_setenv(HASHTBL * hashtbl, const char *key, const char *value)
 {
 	if (!is_env_var_ok(key)) {
 		(print_json) ? my_fprintf(stderr, "A variable does not have to start with \\\"oph_\\\",\\\"/\\\" or \\\".\\\" and it does not have to be a number.\\n") : fprintf(stderr,
@@ -238,7 +238,7 @@ int oph_term_setenv(HASHTBL *hashtbl, const char *key, const char *value)
 }
 
 //Clear variable key if present or do nothing
-int oph_term_unsetenv(HASHTBL *hashtbl, const char *key)
+int oph_term_unsetenv(HASHTBL * hashtbl, const char *key)
 {
 	if (hashtbl_remove(hashtbl, key)) {
 		(print_json) ? my_fprintf(stderr, "Warning: variable %s not found\\n", key) : fprintf(stderr, "\e[1;31mWarning: variable %s not found\e[0m\n", key);
@@ -247,7 +247,7 @@ int oph_term_unsetenv(HASHTBL *hashtbl, const char *key)
 }
 
 //Print value for variable key
-int oph_term_getenv(HASHTBL *hashtbl, const char *key)
+int oph_term_getenv(HASHTBL * hashtbl, const char *key)
 {
 	char *value;
 	value = (char *) hashtbl_get(hashtbl, key);
@@ -625,7 +625,7 @@ int oph_term_env_update_xml(const char *repoURL, const char *userpwd, const char
 /* XML autocompletion management */
 
 //Alloc hashtable
-int oph_term_env_xmlauto_init(HASHTBL **hashtbl, const char *local_dir)
+int oph_term_env_xmlauto_init(HASHTBL ** hashtbl, const char *local_dir)
 {
 
 	if (!local_dir) {
@@ -688,7 +688,7 @@ int oph_term_env_xmlauto_init(HASHTBL **hashtbl, const char *local_dir)
 }
 
 //Free hashtable
-int oph_term_env_xmlauto_clear(HASHTBL *hashtbl, char **oplist, int oplist_size)
+int oph_term_env_xmlauto_clear(HASHTBL * hashtbl, char **oplist, int oplist_size)
 {
 	if (hashtbl)
 		hashtbl_destroy(hashtbl);
@@ -707,7 +707,7 @@ int oph_term_env_xmlauto_clear(HASHTBL *hashtbl, char **oplist, int oplist_size)
 }
 
 //Get all operators names
-int oph_term_env_xmlauto_get_operators(HASHTBL *hashtbl, char ***list, int *list_size)
+int oph_term_env_xmlauto_get_operators(HASHTBL * hashtbl, char ***list, int *list_size)
 {
 
 	if (!hashtbl) {
@@ -760,7 +760,7 @@ int oph_term_env_xmlauto_get_operators(HASHTBL *hashtbl, char ***list, int *list
 }
 
 //Get an operator parameter list
-int oph_term_env_xmlauto_get_parameters(HASHTBL *hashtbl, const char *key, operator_argument **args, int *args_size)
+int oph_term_env_xmlauto_get_parameters(HASHTBL * hashtbl, const char *key, operator_argument ** args, int *args_size)
 {
 
 	if (!hashtbl || !key) {
@@ -811,7 +811,7 @@ int oph_term_env_strtolower(char **string)
 }
 
 // Load operator arguments from XML
-int oph_term_env_load_xml(const char *xmlfilename, char **operator_name, operator_argument **operator_args, size_t *operator_args_size)
+int oph_term_env_load_xml(const char *xmlfilename, char **operator_name, operator_argument ** operator_args, size_t * operator_args_size)
 {
 	if (!xmlfilename || !operator_args || !operator_args_size) {
 		(print_json) ? my_fprintf(stderr, "Null parameters\\n") : fprintf(stderr, "\e[1;31mNull parameters\e[0m\n");
@@ -1079,7 +1079,7 @@ int oph_term_env_rmdir(const char *local_dir)
 	return OPH_TERM_SUCCESS;
 }
 
-int oph_term_env_oph_get_config(const char *key, const char *host, const char *port, int *return_value, char **property, const char *user, const char *passwd, int workflow_wrap, HASHTBL *hashtbl)
+int oph_term_env_oph_get_config(const char *key, const char *host, const char *port, int *return_value, char **property, const char *user, const char *passwd, int workflow_wrap, HASHTBL * hashtbl)
 {
 	if (!key || !property || !host || !port) {
 		fprintf(stderr, "NULL parameters.\n");
@@ -1380,7 +1380,7 @@ int oph_term_view_filters_parsing(char *filters, int end, int **jobs, int *jobs_
 	return OPH_TERM_SUCCESS;
 }
 
-int oph_term_get_session_size(char *session, char *user, char *passwd, char *host, char *port, int *return_value, int *begin, int *end, int workflow_wrap, HASHTBL *hashtbl, char ***exit_status,
+int oph_term_get_session_size(char *session, char *user, char *passwd, char *host, char *port, int *return_value, int *begin, int *end, int workflow_wrap, HASHTBL * hashtbl, char ***exit_status,
 			      int *size)
 {
 	if (!session || !host || !port || !return_value || !begin || !end) {
@@ -1419,7 +1419,7 @@ int oph_term_get_session_size(char *session, char *user, char *passwd, char *hos
 	return OPH_TERM_SUCCESS;
 }
 
-int oph_term_switch_remote_session(char *session, char *user, char *passwd, char *host, char *port, int *return_value, int workflow_wrap, HASHTBL *hashtbl)
+int oph_term_switch_remote_session(char *session, char *user, char *passwd, char *host, char *port, int *return_value, int workflow_wrap, HASHTBL * hashtbl)
 {
 	if (!session || !host || !port || !return_value) {
 		(print_json) ? my_fprintf(stderr, "NULL parameters.\\n") : fprintf(stderr, "\e[1;31mNULL parameters.\e[0m\n");
@@ -1528,7 +1528,7 @@ int oph_term_var_expansion(char *param_string, char *variable, char *value, char
 	return OPH_TERM_SUCCESS;
 }
 
-int oph_term_full_var_expansion(char *param_string, HASHTBL *hashtbl, char **expanded_string)
+int oph_term_full_var_expansion(char *param_string, HASHTBL * hashtbl, char **expanded_string)
 {
 	if (!param_string || !hashtbl || !expanded_string) {
 		(print_json) ? my_fprintf(stderr, "NULL parameters.\\n") : fprintf(stderr, "NULL parameters.\n");
@@ -1658,7 +1658,7 @@ int oph_term_get_session_code(char *sessionid, char *code)
 	return OPH_TERM_SUCCESS;
 }
 
-int oph_term_get_request(char *session, char *wid, char *user, char *passwd, char *host, char *port, int *return_value, char **command, char **jobid, char **request_time, HASHTBL *hashtbl)
+int oph_term_get_request(char *session, char *wid, char *user, char *passwd, char *host, char *port, int *return_value, char **command, char **jobid, char **request_time, HASHTBL * hashtbl)
 {
 	if (!session || !wid || !host || !port || !return_value) {
 		(print_json) ? my_fprintf(stderr, "NULL parameters.\\n") : fprintf(stderr, "\e[1;31mNULL parameters.\e[0m\n");
@@ -1696,7 +1696,7 @@ int oph_term_get_request(char *session, char *wid, char *user, char *passwd, cha
 	return OPH_TERM_SUCCESS;
 }
 
-int oph_term_get_request_with_marker(char *session, char *mkid, char *user, char *passwd, char *host, char *port, int *return_value, char **command, char **jobid, HASHTBL *hashtbl)
+int oph_term_get_request_with_marker(char *session, char *mkid, char *user, char *passwd, char *host, char *port, int *return_value, char **command, char **jobid, HASHTBL * hashtbl)
 {
 	if (!session || !mkid || !host || !port || !return_value) {
 		(print_json) ? my_fprintf(stderr, "NULL parameters.\\n") : fprintf(stderr, "\e[1;31mNULL parameters.\e[0m\n");
@@ -1734,7 +1734,7 @@ int oph_term_get_request_with_marker(char *session, char *mkid, char *user, char
 	return OPH_TERM_SUCCESS;
 }
 
-int oph_term_get_full_request(char *session, char *wid, char *user, char *passwd, char *host, char *port, int *return_value, char **command, char **jobid, HASHTBL *hashtbl)
+int oph_term_get_full_request(char *session, char *wid, char *user, char *passwd, char *host, char *port, int *return_value, char **command, char **jobid, HASHTBL * hashtbl)
 {
 	if (!session || !wid || !host || !port || !return_value) {
 		(print_json) ? my_fprintf(stderr, "NULL parameters.\\n") : fprintf(stderr, "\e[1;31mNULL parameters.\e[0m\n");
@@ -1766,7 +1766,7 @@ int oph_term_get_full_request(char *session, char *wid, char *user, char *passwd
 	return OPH_TERM_SUCCESS;
 }
 
-int oph_term_check_wid_mkid(char *session, char *wid, char *mkid, char *user, char *passwd, char *host, char *port, int *return_value, HASHTBL *hashtbl)
+int oph_term_check_wid_mkid(char *session, char *wid, char *mkid, char *user, char *passwd, char *host, char *port, int *return_value, HASHTBL * hashtbl)
 {
 	if (!session || !wid || !mkid || !host || !port || !return_value) {
 		(print_json) ? my_fprintf(stderr, "NULL parameters.\\n") : fprintf(stderr, "\e[1;31mNULL parameters.\e[0m\n");
@@ -1810,7 +1810,7 @@ int oph_term_check_wid_mkid(char *session, char *wid, char *mkid, char *user, ch
 /* ALIAS */
 
 //Alloc hashtable
-int oph_term_alias_init(HASHTBL **hashtbl)
+int oph_term_alias_init(HASHTBL ** hashtbl)
 {
 	if (!(*hashtbl = hashtbl_create(20, NULL))) {
 		(print_json) ? my_fprintf(stderr, "Error: alias_init failed\\n") : fprintf(stderr, "\e[1;31mError: alias_init failed\e[0m\n");
@@ -1820,14 +1820,14 @@ int oph_term_alias_init(HASHTBL **hashtbl)
 }
 
 //Free hashtable
-int oph_term_alias_clear(HASHTBL *hashtbl)
+int oph_term_alias_clear(HASHTBL * hashtbl)
 {
 	hashtbl_destroy(hashtbl);
 	return OPH_TERM_SUCCESS;
 }
 
 //Print all aliases
-int oph_term_alias(HASHTBL *hashtbl)
+int oph_term_alias(HASHTBL * hashtbl)
 {
 	hash_size n;
 	struct hashnode_s *node;
@@ -1845,7 +1845,7 @@ int oph_term_alias(HASHTBL *hashtbl)
 }
 
 //Set value for alias key (insert new variable if not present)
-int oph_term_setalias(HASHTBL *hashtbl, const char *key, const char *value)
+int oph_term_setalias(HASHTBL * hashtbl, const char *key, const char *value)
 {
 	if (!is_alias_ok(key)) {
 		(print_json) ? my_fprintf(stderr,
@@ -1861,7 +1861,7 @@ int oph_term_setalias(HASHTBL *hashtbl, const char *key, const char *value)
 }
 
 //Clear alias key if present or do nothing
-int oph_term_unsetalias(HASHTBL *hashtbl, const char *key)
+int oph_term_unsetalias(HASHTBL * hashtbl, const char *key)
 {
 	if (hashtbl_remove(hashtbl, key)) {
 		(print_json) ? my_fprintf(stderr, "Warning: alias %s not found\\n", key) : fprintf(stderr, "\e[1;31mWarning: alias %s not found\e[0m\n", key);
@@ -1870,7 +1870,7 @@ int oph_term_unsetalias(HASHTBL *hashtbl, const char *key)
 }
 
 //Print value for alias key
-int oph_term_getalias(HASHTBL *hashtbl, const char *key)
+int oph_term_getalias(HASHTBL * hashtbl, const char *key)
 {
 	char *value;
 	value = (char *) hashtbl_get(hashtbl, key);
@@ -1883,7 +1883,7 @@ int oph_term_getalias(HASHTBL *hashtbl, const char *key)
 }
 
 // Get the list of aliases
-int oph_term_get_aliases(HASHTBL *hashtbl, char ***aliases, int *aliases_num)
+int oph_term_get_aliases(HASHTBL * hashtbl, char ***aliases, int *aliases_num)
 {
 	hash_size n;
 	struct hashnode_s *node;
@@ -1957,7 +1957,7 @@ int is_alias_ok(const char *key)
 }
 
 // Check if key is an alias
-int is_alias(HASHTBL *hashtbl, const char *key)
+int is_alias(HASHTBL * hashtbl, const char *key)
 {
 	hash_size n;
 	struct hashnode_s *node;
@@ -1997,7 +1997,7 @@ size_t _write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
 	return realsize;
 }
 
-int oph_term_env_deploy(const char *auth_header, const char *infrastructure_url, const char *radl_filename, HASHTBL *hashtbl)
+int oph_term_env_deploy(const char *auth_header, const char *infrastructure_url, const char *radl_filename, HASHTBL * hashtbl)
 {
 	if (!auth_header || !infrastructure_url || !radl_filename || !hashtbl) {
 		(print_json) ? my_fprintf(stderr, "Null parameters\\n") : fprintf(stderr, "\e[1;31mNull parameters\e[0m\n");
@@ -2081,7 +2081,7 @@ int oph_term_env_deploy(const char *auth_header, const char *infrastructure_url,
 	return OPH_TERM_SUCCESS;
 }
 
-int oph_term_env_undeploy(const char *auth_header, const char *infrastructure_url, HASHTBL *hashtbl)
+int oph_term_env_undeploy(const char *auth_header, const char *infrastructure_url, HASHTBL * hashtbl)
 {
 	if (!auth_header || !infrastructure_url || !hashtbl) {
 		(print_json) ? my_fprintf(stderr, "Null parameters\\n") : fprintf(stderr, "\e[1;31mNull parameters\e[0m\n");
@@ -2198,7 +2198,7 @@ int oph_term_env_deploy_status(const char *auth_header, const char *infrastructu
 	return OPH_TERM_SUCCESS;
 }
 
-int oph_term_env_get_server(const char *auth_header, const char *infrastructure_url, HASHTBL *hashtbl)
+int oph_term_env_get_server(const char *auth_header, const char *infrastructure_url, HASHTBL * hashtbl)
 {
 	if (!auth_header || !infrastructure_url || !hashtbl) {
 		(print_json) ? my_fprintf(stderr, "Null parameters\\n") : fprintf(stderr, "\e[1;31mNull parameters\e[0m\n");

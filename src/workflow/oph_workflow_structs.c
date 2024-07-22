@@ -23,7 +23,7 @@
 
 #include "oph_workflow_structs.h"
 
-int oph_workflow_free(oph_workflow *workflow)
+int oph_workflow_free(oph_workflow * workflow)
 {
 	if (!workflow)
 		return OPH_WORKFLOW_EXIT_SUCCESS;
@@ -116,7 +116,7 @@ int oph_workflow_free(oph_workflow *workflow)
 	return OPH_WORKFLOW_EXIT_SUCCESS;
 }
 
-int oph_workflow_task_free(oph_workflow_task *task)
+int oph_workflow_task_free(oph_workflow_task * task)
 {
 	if (!task)
 		return OPH_WORKFLOW_EXIT_SUCCESS;
@@ -190,7 +190,7 @@ int oph_workflow_task_free(oph_workflow_task *task)
 	return OPH_WORKFLOW_EXIT_SUCCESS;
 }
 
-int oph_workflow_dep_free(oph_workflow_dep *dep)
+int oph_workflow_dep_free(oph_workflow_dep * dep)
 {
 	if (!dep)
 		return OPH_WORKFLOW_EXIT_SUCCESS;
@@ -225,7 +225,7 @@ int oph_workflow_dep_free(oph_workflow_dep *dep)
 	return OPH_WORKFLOW_EXIT_SUCCESS;
 }
 
-int oph_workflow_light_task_free(oph_workflow_light_task *light_task)
+int oph_workflow_light_task_free(oph_workflow_light_task * light_task)
 {
 	if (!light_task)
 		return OPH_WORKFLOW_EXIT_SUCCESS;

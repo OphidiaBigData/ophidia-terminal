@@ -241,7 +241,7 @@ static const unsigned char d[] = {
 	66, 66, 66, 66, 66, 66
 };
 
-int base64decode(const char *in, size_t inLen, char *out, size_t *outLen)
+int base64decode(const char *in, size_t inLen, char *out, size_t * outLen)
 {
 	const char *end = in + inLen;
 	char iter = 0;
@@ -687,7 +687,7 @@ void *wpsthread(void *query)
 	return NULL;
 }
 
-void oph_execute(char *query, char **newsession, int *return_value, char **out_response, char **out_response_for_viewer, int workflow_wrap, char *username, char *password, HASHTBL *hashtbl,
+void oph_execute(char *query, char **newsession, int *return_value, char **out_response, char **out_response_for_viewer, int workflow_wrap, char *username, char *password, HASHTBL * hashtbl,
 		 char *cmd_line)
 {
 	if (max_size <= 0) {
@@ -1204,7 +1204,7 @@ void oph_execute(char *query, char **newsession, int *return_value, char **out_r
 }
 
 int oph_term_client(char *cmd_line, char *command, char **newsession, char *user, char *password, char *host, char *port, int *return_value, char **out_response, char **out_response_for_viewer,
-		    int workflow_wrap, HASHTBL *hashtbl)
+		    int workflow_wrap, HASHTBL * hashtbl)
 {
 	if (max_size <= 0)
 		return 2;

@@ -31,7 +31,7 @@
 /***********OPH_JSON_OBJ_TREE INTERNAL FUNCTIONS***********/
 
 // Free a tree object contents
-int oph_json_free_tree(oph_json_obj_tree *obj)
+int oph_json_free_tree(oph_json_obj_tree * obj)
 {
 	if (obj) {
 		if (obj->description) {
@@ -108,7 +108,7 @@ int oph_json_free_tree(oph_json_obj_tree *obj)
 
 /***********OPH_JSON_OBJ_TREE FUNCTIONS***********/
 
-int oph_json_add_tree(oph_json *json, const char *objkey, const char *title, const char *description, const char **nodekeys, int nodekeys_num)
+int oph_json_add_tree(oph_json * json, const char *objkey, const char *title, const char *description, const char **nodekeys, int nodekeys_num)
 {
 	if (!json || !objkey || !title || nodekeys_num < 0) {
 		return OPH_JSON_BAD_PARAM_ERROR;
@@ -342,7 +342,7 @@ int oph_json_add_tree(oph_json *json, const char *objkey, const char *title, con
 	return OPH_JSON_SUCCESS;
 }
 
-int oph_json_add_tree_node(oph_json *json, const char *objkey, const char **nodevalues)
+int oph_json_add_tree_node(oph_json * json, const char *objkey, const char **nodevalues)
 {
 	if (!json || !objkey) {
 		return OPH_JSON_BAD_PARAM_ERROR;
@@ -444,7 +444,7 @@ int oph_json_add_tree_node(oph_json *json, const char *objkey, const char **node
 	return OPH_JSON_SUCCESS;
 }
 
-int oph_json_set_tree_root(oph_json *json, const char *objkey, int rootnode)
+int oph_json_set_tree_root(oph_json * json, const char *objkey, int rootnode)
 {
 	if (!json || !objkey || rootnode < 0) {
 		return OPH_JSON_BAD_PARAM_ERROR;
@@ -488,7 +488,7 @@ int oph_json_set_tree_root(oph_json *json, const char *objkey, int rootnode)
 	return OPH_JSON_SUCCESS;
 }
 
-int oph_json_add_tree_link(oph_json *json, const char *objkey, int sourcenode, int targetnode, const char *description)
+int oph_json_add_tree_link(oph_json * json, const char *objkey, int sourcenode, int targetnode, const char *description)
 {
 	if (!json || !objkey || sourcenode < 0 || targetnode < 0) {
 		return OPH_JSON_BAD_PARAM_ERROR;

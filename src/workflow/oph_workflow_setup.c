@@ -126,7 +126,7 @@ char *oph_print_exectime(char **exectime)
 	return *exectime;
 }
 
-int oph_workflow_indexing(oph_workflow_task *tasks, int tasks_num)
+int oph_workflow_indexing(oph_workflow_task * tasks, int tasks_num)
 {
 	if (!tasks || tasks_num < 1) {
 		(print_json) ? my_fprintf(stderr, "No task found.\\n") : fprintf(stderr, "No task found.\n");
@@ -181,7 +181,7 @@ int oph_workflow_indexing(oph_workflow_task *tasks, int tasks_num)
 	return OPH_WORKFLOW_EXIT_SUCCESS;
 }
 
-int oph_workflow_validate(oph_workflow *workflow)
+int oph_workflow_validate(oph_workflow * workflow)
 {
 	if (!workflow || !(workflow->tasks)) {
 		return OPH_WORKFLOW_EXIT_BAD_PARAM_ERROR;
@@ -386,7 +386,7 @@ int oph_workflow_validate(oph_workflow *workflow)
 	return OPH_WORKFLOW_EXIT_SUCCESS;
 }
 
-int oph_workflow_init(oph_workflow_task *tasks, int tasks_num, int **initial_tasks_indexes, int *initial_tasks_indexes_num)
+int oph_workflow_init(oph_workflow_task * tasks, int tasks_num, int **initial_tasks_indexes, int *initial_tasks_indexes_num)
 {
 	if (!tasks || tasks_num < 1 || !initial_tasks_indexes || !initial_tasks_indexes_num) {
 		return OPH_WORKFLOW_EXIT_BAD_PARAM_ERROR;
@@ -423,7 +423,7 @@ int oph_workflow_init(oph_workflow_task *tasks, int tasks_num, int **initial_tas
 	return OPH_WORKFLOW_EXIT_SUCCESS;
 }
 
-int oph_workflow_get_subgraphs_string(oph_workflow *workflow, char **subgraphs_string, int count, int k, int *subgraphs, int *visited, int flag, int openfor)
+int oph_workflow_get_subgraphs_string(oph_workflow * workflow, char **subgraphs_string, int count, int k, int *subgraphs, int *visited, int flag, int openfor)
 {
 	if (!workflow || !subgraphs_string)
 		return OPH_WORKFLOW_EXIT_BAD_PARAM_ERROR;
@@ -574,7 +574,7 @@ int oph_workflow_get_subgraphs_string(oph_workflow *workflow, char **subgraphs_s
 	}
 }
 
-int oph_workflow_print(oph_workflow *workflow, int save_img, int open_img, char *layout)
+int oph_workflow_print(oph_workflow * workflow, int save_img, int open_img, char *layout)
 {
 	if (!workflow || (save_img != 0 && save_img != 1) || (open_img != 0 && open_img != 1)) {
 		(print_json) ? my_fprintf(stderr, "Unable to create the image.\\n") : fprintf(stderr, "\n\e[1;31mUnable to create the image.\e[0m\n");
@@ -704,7 +704,7 @@ int oph_workflow_print(oph_workflow *workflow, int save_img, int open_img, char 
 	return OPH_WORKFLOW_EXIT_SUCCESS;
 }
 
-int oph_workflow_print_status(oph_workflow *workflow, int save_img, int open_img, char *json_string_with_status, char *layout)
+int oph_workflow_print_status(oph_workflow * workflow, int save_img, int open_img, char *json_string_with_status, char *layout)
 {
 	if (!workflow || (save_img != 0 && save_img != 1) || (open_img != 0 && open_img != 1) || !json_string_with_status) {
 		(print_json) ? my_fprintf(stderr, "Unable to create the image.\\n") : fprintf(stderr, "\n\e[1;31mUnable to create the image.\e[0m\n");
@@ -902,14 +902,14 @@ int oph_workflow_print_status(oph_workflow *workflow, int save_img, int open_img
 	return OPH_WORKFLOW_EXIT_SUCCESS;
 }
 
-void destroy(GtkWidget *window, GtkWidget *widget)
+void destroy(GtkWidget * window, GtkWidget * widget)
 {
 	UNUSED(window);
 	UNUSED(widget);
 	gtk_main_quit();
 }
 
-gboolean resize_image(GtkWidget *window, GdkEvent *event, GtkWidget *widget)
+gboolean resize_image(GtkWidget * window, GdkEvent * event, GtkWidget * widget)
 {
 	UNUSED(event);
 	GError *error = NULL;
@@ -929,12 +929,12 @@ gboolean resize_image(GtkWidget *window, GdkEvent *event, GtkWidget *widget)
 	return 0;
 }
 
-void set_image(GtkWidget *widget, gpointer pixbuf)
+void set_image(GtkWidget * widget, gpointer pixbuf)
 {
 	gtk_image_set_from_pixbuf(GTK_IMAGE(widget), (GdkPixbuf *) pixbuf);
 }
 
-void resize_image2(GtkWidget *window, GtkWidget *widget)
+void resize_image2(GtkWidget * window, GtkWidget * widget)
 {
 	UNUSED(widget);
 	GError *error = NULL;
@@ -1245,8 +1245,8 @@ void *main_loop(void *ptr)
 	return NULL;
 }
 
-int view_status(int iterations_num, char *command_line, char *tmp_submission_string, HASHTBL *hashtbl, int *oph_term_return, char *tmp_session, char *tmp_workflow, int save_img, int open_img,
-		int show_list, int time_interval, oph_workflow *wf)
+int view_status(int iterations_num, char *command_line, char *tmp_submission_string, HASHTBL * hashtbl, int *oph_term_return, char *tmp_session, char *tmp_workflow, int save_img, int open_img,
+		int show_list, int time_interval, oph_workflow * wf)
 {
 	GThread *Thread2 = NULL;
 	GError *err2 = NULL;
@@ -1293,7 +1293,7 @@ int view_status(int iterations_num, char *command_line, char *tmp_submission_str
 
 // Other internal functions
 
-int gparent_of(oph_workflow *wf, int k)
+int gparent_of(oph_workflow * wf, int k)
 {
 	if (k < 0)
 		return -2;
@@ -1308,7 +1308,7 @@ int gparent_of(oph_workflow *wf, int k)
 	return k;
 }
 
-int workflow_s_add(workflow_s_nodes *s, workflow_node *node)
+int workflow_s_add(workflow_s_nodes * s, workflow_node * node)
 {
 	if (!s || !node) {
 		return OPH_WORKFLOW_EXIT_BAD_PARAM_ERROR;
@@ -1339,7 +1339,7 @@ int workflow_s_add(workflow_s_nodes *s, workflow_node *node)
 	return OPH_WORKFLOW_EXIT_SUCCESS;
 }
 
-int workflow_s_remove(workflow_s_nodes *s, workflow_node **node)
+int workflow_s_remove(workflow_s_nodes * s, workflow_node ** node)
 {
 	if (!s || !node) {
 		return OPH_WORKFLOW_EXIT_BAD_PARAM_ERROR;
@@ -1362,7 +1362,7 @@ int workflow_s_remove(workflow_s_nodes *s, workflow_node **node)
 	return OPH_WORKFLOW_EXIT_SUCCESS;
 }
 
-int workflow_s_nodes_free(workflow_s_nodes *s)
+int workflow_s_nodes_free(workflow_s_nodes * s)
 {
 	if (!s)
 		return OPH_WORKFLOW_EXIT_SUCCESS;
@@ -1379,7 +1379,7 @@ int workflow_s_nodes_free(workflow_s_nodes *s)
 	return OPH_WORKFLOW_EXIT_SUCCESS;
 }
 
-int workflow_node_free(workflow_node *node)
+int workflow_node_free(workflow_node * node)
 {
 	if (!node)
 		return OPH_WORKFLOW_EXIT_SUCCESS;
@@ -1398,7 +1398,7 @@ int workflow_node_free(workflow_node *node)
 	return OPH_WORKFLOW_EXIT_SUCCESS;
 }
 
-int oph_workflow_get_ranks_string(oph_workflow_task *tasks, int tasks_num, char **ranks_string)
+int oph_workflow_get_ranks_string(oph_workflow_task * tasks, int tasks_num, char **ranks_string)
 {
 	if (!tasks || tasks_num < 1 || !ranks_string) {
 		return OPH_WORKFLOW_EXIT_BAD_PARAM_ERROR;
@@ -1536,7 +1536,7 @@ int oph_workflow_get_ranks_string(oph_workflow_task *tasks, int tasks_num, char 
 	return OPH_WORKFLOW_EXIT_SUCCESS;
 }
 
-int workflow_is_child_of(oph_workflow *wf, int p, int c)
+int workflow_is_child_of(oph_workflow * wf, int p, int c)
 {
 	if (!wf || (p < 0) || (p >= wf->tasks_num) || (c < 0) || (c >= wf->tasks_num))
 		return 0;
@@ -1551,7 +1551,7 @@ int workflow_is_child_of(oph_workflow *wf, int p, int c)
 	return 0;
 }
 
-unsigned int workflow_number_of(oph_workflow *wf, int k, int p, int gp, const char *op, const char *nop, char *flag, char *level, int bracket_number, int *child)
+unsigned int workflow_number_of(oph_workflow * wf, int k, int p, int gp, const char *op, const char *nop, char *flag, char *level, int bracket_number, int *child)
 {
 	if (!wf || (k < 0) || (k >= wf->tasks_num))
 		return 0;
@@ -1601,7 +1601,7 @@ unsigned int workflow_number_of(oph_workflow *wf, int k, int p, int gp, const ch
 	return res;
 }
 
-int workflow_validate_fco(oph_workflow *wf)
+int workflow_validate_fco(oph_workflow * wf)
 {
 	if (!wf)
 		return OPH_WORKFLOW_EXIT_BAD_PARAM_ERROR;

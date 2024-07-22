@@ -50,7 +50,7 @@
 #define OPH_TERM_EXEC_TIME_JSON	"execution_time"
 #define OPH_TERM_TOKEN_JSON		"access_token"
 
-int oph_viewer_get_ranks_string(oph_json_links *nodelinks, unsigned int nodelinks_num, char **ranks_string)
+int oph_viewer_get_ranks_string(oph_json_links * nodelinks, unsigned int nodelinks_num, char **ranks_string)
 {
 	if (!nodelinks || nodelinks_num < 1 || !ranks_string) {
 		return OPH_TERM_INVALID_PARAM_VALUE;
@@ -360,7 +360,7 @@ const char *get_color_char_of(const char *value)
 		return OPH_TERM_VIEWER_NO_COLOR_CHAR;
 }
 
-void print_text(oph_json_obj_text *obj, const char *color_string, int check_for_status)
+void print_text(oph_json_obj_text * obj, const char *color_string, int check_for_status)
 {
 	// print title
 	if (obj->title && strlen(obj->title)) {
@@ -385,7 +385,7 @@ void print_text(oph_json_obj_text *obj, const char *color_string, int check_for_
 	return;
 }
 
-void print_grid(oph_json_obj_grid *obj, const char *color_string, int show_list, int check_for_status)
+void print_grid(oph_json_obj_grid * obj, const char *color_string, int show_list, int check_for_status)
 {
 
 	// print title
@@ -616,7 +616,7 @@ void print_grid(oph_json_obj_grid *obj, const char *color_string, int show_list,
 	return;
 }
 
-void print_multigrid(oph_json_obj_multigrid *obj, const char *color_string)
+void print_multigrid(oph_json_obj_multigrid * obj, const char *color_string)
 {
 	// print title
 	if (obj->title && strlen(obj->title)) {
@@ -1130,7 +1130,7 @@ void print_multigrid(oph_json_obj_multigrid *obj, const char *color_string)
 	return;
 }
 
-void print_tree(oph_json_obj_tree *obj, const char *color_string, int save_img, int open_img, char *session_code, char *markerid, char *layout)
+void print_tree(oph_json_obj_tree * obj, const char *color_string, int save_img, int open_img, char *session_code, char *markerid, char *layout)
 {
 	// print title
 	if (obj->title && strlen(obj->title)) {
@@ -1261,7 +1261,7 @@ void print_tree(oph_json_obj_tree *obj, const char *color_string, int save_img, 
 	return;
 }
 
-void print_digraph(oph_json_obj_graph *obj, const char *color_string, int save_img, int open_img, char *session_code, char *markerid, char *layout)
+void print_digraph(oph_json_obj_graph * obj, const char *color_string, int save_img, int open_img, char *session_code, char *markerid, char *layout)
 {
 	// print title
 	if (obj->title && strlen(obj->title)) {
@@ -1392,7 +1392,7 @@ void print_digraph(oph_json_obj_graph *obj, const char *color_string, int save_i
 	return;
 }
 
-void print_graph(oph_json_obj_graph *obj, const char *color_string, int save_img, int open_img, char *session_code, char *markerid, char *layout)
+void print_graph(oph_json_obj_graph * obj, const char *color_string, int save_img, int open_img, char *session_code, char *markerid, char *layout)
 {
 	// print title
 	if (obj->title && strlen(obj->title)) {
@@ -1523,7 +1523,7 @@ void print_graph(oph_json_obj_graph *obj, const char *color_string, int save_img
 	return;
 }
 
-void oph_term_viewer_retrieve_info(oph_json *json, char *txtstring, char **newdatacube, char **newcwd, char **newcdd, char **newtoken, char **exectime)
+void oph_term_viewer_retrieve_info(oph_json * json, char *txtstring, char **newdatacube, char **newcwd, char **newcdd, char **newtoken, char **exectime)
 {
 	if (!json && !txtstring) {
 		if (newdatacube)
