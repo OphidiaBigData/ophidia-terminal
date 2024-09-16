@@ -36,7 +36,7 @@ int _oph_workflow_substitute_cube(char *pid, oph_workflow_task * tasks, int task
 /* Skip comments from input JSON file */
 int _oph_workflow_skip_comments(const char *json_string, char **clean_json_string);
 
-int oph_workflow_load(char *json_string, char *username, oph_workflow ** workflow)
+int oph_workflow_load(char *json_string, char *username, oph_workflow **workflow)
 {
 	if (!json_string || !username || !workflow) {
 		(print_json) ? my_fprintf(stderr, "Error: null input parameters\\n\\n") : fprintf(stderr, "\e[1;31mError: null input parameters\e[0m\n\n");
@@ -781,7 +781,7 @@ int oph_workflow_load(char *json_string, char *username, oph_workflow ** workflo
 
 // OTHER INTERNAL FUNCTIONS
 
-int _oph_workflow_alloc(oph_workflow ** workflow)
+int _oph_workflow_alloc(oph_workflow **workflow)
 {
 	if (!workflow) {
 		return OPH_WORKFLOW_EXIT_BAD_PARAM_ERROR;
@@ -824,7 +824,7 @@ int _oph_workflow_alloc(oph_workflow ** workflow)
 	return OPH_WORKFLOW_EXIT_SUCCESS;
 }
 
-int _oph_workflow_substitute_var(char *key, char *value, oph_workflow_task * tasks, int tasks_num)
+int _oph_workflow_substitute_var(char *key, char *value, oph_workflow_task *tasks, int tasks_num)
 {
 	if (!key || !value || !tasks || tasks_num < 1) {
 		return OPH_WORKFLOW_EXIT_BAD_PARAM_ERROR;
@@ -941,7 +941,7 @@ int _oph_workflow_substitute_var(char *key, char *value, oph_workflow_task * tas
 	return OPH_WORKFLOW_EXIT_SUCCESS;
 }
 
-int _oph_workflow_substitute_cube(char *pid, oph_workflow_task * tasks, int tasks_num)
+int _oph_workflow_substitute_cube(char *pid, oph_workflow_task *tasks, int tasks_num)
 {
 	if (!pid || !tasks || tasks_num < 1) {
 		return OPH_WORKFLOW_EXIT_BAD_PARAM_ERROR;

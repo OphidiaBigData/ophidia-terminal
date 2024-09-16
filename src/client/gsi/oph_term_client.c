@@ -68,7 +68,7 @@ void *soapthread(void *query)
 }
 
 void oph_execute(struct soap *soap, xsd__string query, char *wps, char **newsession, int *return_value, char **out_response, char **out_response_for_viewer, int workflow_wrap, char *username,
-		 HASHTBL * hashtbl, char *cmd_line)
+		 HASHTBL *hashtbl, char *cmd_line)
 {
 	if (max_size <= 0) {
 		*return_value = OPH_TERM_GENERIC_ERROR;
@@ -496,7 +496,7 @@ void oph_execute(struct soap *soap, xsd__string query, char *wps, char **newsess
 }
 
 int oph_term_client(char *cmd_line, char *command, char **newsession, char *user, char *password, char *host, char *port, int *return_value, char **out_response, char **out_response_for_viewer,
-		    int workflow_wrap, HASHTBL * hashtbl)
+		    int workflow_wrap, HASHTBL *hashtbl)
 {
 	UNUSED(user);
 	UNUSED(password);

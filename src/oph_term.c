@@ -188,7 +188,7 @@ void print_welcome()
 }
 
 /* Print Oph_Term usage at startup */
-void print_startup_usage(char *arg0, FILE * stream)
+void print_startup_usage(char *arg0, FILE *stream)
 {
 	(print_json) ? my_fprintf(stream, "\\n") : fprintf(stream, "\n");
 
@@ -328,22 +328,22 @@ int oph_get_winterval(char **cursor, char **saveptr, int *watching)
 }
 
 /* Startup options parsing */
-int startup_opt_setup(int argc, char *argv[], char *envp[], HASHTBL * hashtbl, char **exec_statement)
+int startup_opt_setup(int argc, char *argv[], char *envp[], HASHTBL *hashtbl, char **exec_statement)
 {
 	int opt = 0;
 	int long_index = 0;
 	static struct option long_options[] = {
-		{"username", required_argument, 0, 'u'},
-		{"password", required_argument, 0, 'p'},
-		{"hostname", required_argument, 0, 'H'},
-		{"port", required_argument, 0, 'P'},
-		{"help", no_argument, 0, 'h'},
-		{"version", no_argument, 0, 'v'},
-		{"execute", required_argument, 0, 'e'},
-		{"workflow", required_argument, 0, 'w'},
-		{"args", required_argument, 0, 'a'},
-		{"json", no_argument, 0, 'j'},
-		{0, 0, 0, 0}
+		{ "username", required_argument, 0, 'u' },
+		{ "password", required_argument, 0, 'p' },
+		{ "hostname", required_argument, 0, 'H' },
+		{ "port", required_argument, 0, 'P' },
+		{ "help", no_argument, 0, 'h' },
+		{ "version", no_argument, 0, 'v' },
+		{ "execute", required_argument, 0, 'e' },
+		{ "workflow", required_argument, 0, 'w' },
+		{ "args", required_argument, 0, 'a' },
+		{ "json", no_argument, 0, 'j' },
+		{ 0, 0, 0, 0 }
 	};
 
 	//preset viewer-related variables OPH_TERM_VIEWER and OPH_TERM_IMGS
@@ -1486,7 +1486,7 @@ void expand_escapes(char *dest, char *src)
 }
 
 /* Print output as JSON */
-void print_oph_term_output_json(HASHTBL * hashtbl)
+void print_oph_term_output_json(HASHTBL *hashtbl)
 {
 	char oph_term_request_exp[2 * OUTPUT_MAX_LEN] = "\0";
 	char oph_term_jobid_exp[2 * OUTPUT_MAX_LEN] = "\0";
