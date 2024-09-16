@@ -1,10 +1,11 @@
 
-## Next release
+## v1.9.0 - 2024-09-23
 
 ### Added:
 
 - Option to disable auto-removal of XML files
 - Default value for XML URL to GitHub in case the files cannot be downloaded
+- Options 'extended' and 'extended_compact' to the list of possible values for OPH_TERM_FORMAT
 
 ## v1.8.0 - 2023-07-31
 
