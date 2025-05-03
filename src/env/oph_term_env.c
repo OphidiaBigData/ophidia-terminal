@@ -1178,6 +1178,10 @@ int oph_term_read_file(char *filename, char **buffer)
 	else
 		snprintf(_filename, OPH_TERM_MAX_LEN, "%s", filename);
 
+	int last = strlen(_filename) - 1;
+	if ((last > 0) && (_filename[last] == ';'))
+		_filename[last] = 0;
+
 	FILE *file;
 	file = fopen(_filename, "rb");
 	if (!file) {
