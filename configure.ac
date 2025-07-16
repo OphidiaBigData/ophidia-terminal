@@ -404,6 +404,23 @@ if test "x${auth_bearer}" = "xyes"; then
     OPT+=" -DAUTH_BEARER"
 fi
 
+xml_download="no"
+AC_ARG_ENABLE(xml_download,
+       [  --enable-xml-download Enable download of XML descriptions from GitHub if the Ophidia Server is not available. (Disabled by default)],
+       [
+            if test "x$enableval" = "xno"; then
+                xml_download="no"
+            else
+                xml_download="yes"
+            fi
+       ],
+       [ xml_download="no"]
+       )
+if test "x${xml_download}" = "xyes"; then
+    AC_MSG_NOTICE("Enabled download of XML descriptions from GitHub")
+    OPT+=" -DXML_DOWNLOAD_FROM_GITHUB"
+fi
+
 case "${host}" in
         *-*-solaris*)   PLATFORM=SUN_OS
                         SAMPLE_EXTRA_LIBS="-lxnet -lsocket -lnsl"

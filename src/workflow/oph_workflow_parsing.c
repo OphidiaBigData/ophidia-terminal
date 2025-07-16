@@ -635,6 +635,8 @@ int oph_workflow_load(char *json_string, char *username, oph_workflow **workflow
 				(*workflow)->tasks[i].exit_action = OPH_WORKFLOW_EXIT_ACTION_DELETE;
 			else if (!strcmp(on_exit_task, OPH_WORKFLOW_DELETECONTAINER))
 				(*workflow)->tasks[i].exit_action = OPH_WORKFLOW_EXIT_ACTION_DELETECONTAINER;
+			else if (!strcmp(on_exit_task, OPH_WORKFLOW_FASTDELETE))
+				(*workflow)->tasks[i].exit_action = OPH_WORKFLOW_EXIT_ACTION_FASTDELETE;
 			else {
 				oph_workflow_free(*workflow);
 				if (jansson)
