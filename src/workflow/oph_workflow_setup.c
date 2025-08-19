@@ -1611,15 +1611,15 @@ int workflow_validate_fco(oph_workflow *wf)
 	char level[wf->tasks_num];
 	unsigned int number;
 
-	for (k = 0; k < wf->tasks_num; k++) {
+	for (k = 0; k < wf->tasks_num; k++)
 		wf->tasks[k].parent = -1;
-		level[k] = 0;
-	}
 
 	for (k = 0; k < wf->tasks_num; k++) {
 		if (!strncasecmp(wf->tasks[k].operator, OPH_OPERATOR_FOR, OPH_WORKFLOW_MAX_STRING)) {
-			for (i = 0; i < wf->tasks_num; ++i)
+			for (i = 0; i < wf->tasks_num; ++i) {
+				level[i] = 0;
 				flag[i] = 1;
+			}
 			number = workflow_number_of(wf, k, k, k, OPH_OPERATOR_ENDFOR, OPH_OPERATOR_FOR, flag, level, 0, &child);
 			if (!number || (number > 1)) {
 				(print_json) ? my_fprintf(stderr, "Found %s%d ways to reach '%s' corresponding to '%s'.\\n", number ? "at least " : "", number, OPH_OPERATOR_ENDFOR,
@@ -1638,8 +1638,10 @@ int workflow_validate_fco(oph_workflow *wf)
 				break;
 			}
 		} else if (!strncasecmp(wf->tasks[k].operator, OPH_OPERATOR_IF, OPH_WORKFLOW_MAX_STRING)) {
-			for (i = 0; i < wf->tasks_num; ++i)
+			for (i = 0; i < wf->tasks_num; ++i) {
+				level[i] = 0;
 				flag[i] = 1;
+			}
 			child = -1;
 			number = workflow_number_of(wf, k, k, k, OPH_OPERATOR_ELSEIF, OPH_OPERATOR_IF, flag, level, 0, &child);
 			if (number > 1) {
@@ -1705,8 +1707,10 @@ int workflow_validate_fco(oph_workflow *wf)
 			}
 		} else if (!strncasecmp(wf->tasks[k].operator, OPH_OPERATOR_ELSEIF, OPH_WORKFLOW_MAX_STRING)) {
 			kk = gparent_of(wf, k);
-			for (i = 0; i < wf->tasks_num; ++i)
+			for (i = 0; i < wf->tasks_num; ++i) {
+				level[i] = 0;
 				flag[i] = 1;
+			}
 			child = -1;
 			number = workflow_number_of(wf, k, k, kk, OPH_OPERATOR_ELSEIF, OPH_OPERATOR_IF, flag, level, 0, &child);
 			if (number > 1) {
@@ -1775,8 +1779,10 @@ int workflow_validate_fco(oph_workflow *wf)
 			}
 		} else if (!strncasecmp(wf->tasks[k].operator, OPH_OPERATOR_ELSE, OPH_WORKFLOW_MAX_STRING)) {
 			kk = gparent_of(wf, k);
-			for (i = 0; i < wf->tasks_num; ++i)
+			for (i = 0; i < wf->tasks_num; ++i) {
+				level[i] = 0;
 				flag[i] = 1;
+			}
 			number = workflow_number_of(wf, k, k, kk, OPH_OPERATOR_ENDIF, OPH_OPERATOR_IF, flag, level, 0, &child);
 			if (!number || (number > 1)) {
 				(print_json) ? my_fprintf(stderr, "Found %s%d ways to reach '%s' corresponding to '%s'.\\n", number ? "at least " : "", number, OPH_OPERATOR_ENDIF,
