@@ -339,7 +339,7 @@ int oph_workflow_load(char *json_string, char *username, oph_workflow **workflow
 			return OPH_WORKFLOW_EXIT_MEMORY_ERROR;
 		}
 		if (type) {
-			if (strcmp(type, "ophidia") && strcmp(type, "cdo") && strcmp(type, "generic") && strcmp(type, "control")) {
+			if (strcmp(type, "ophidia") && strcmp(type, "cdo") && strcmp(type, "generic") && strcmp(type, "control") && strcmp(type, "discovery")) {
 				oph_workflow_free(*workflow);
 				if (jansson)
 					json_decref(jansson);
